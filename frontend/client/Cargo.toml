@@ -1,0 +1,37 @@
+[package]
+name = "client"
+version = "2.0.0"
+authors = [
+    "Nguyễn Tri Phương <triph@teamfalco.xyz>",
+    "Nguyễn Thế Việt <duchiru@teamfalco.xyz>",
+]
+license = "GPL-3.0"
+repository = "https://github.com/teamfalco/owl"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+
+[dependencies]
+engine = { path = "../../engine", features = [
+    "api",
+    "wasm",
+], default-features = false }
+console_error_panic_hook = "0.1.7"
+gloo-net = "0.5.0"
+log = "0.4.17"
+wasm-bindgen-futures = "0.4.33"
+wasm-logger = "0.2.0"
+wasm-bindgen = "0.2.92"
+web-sys = "0.3.69"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6.5"
+js-sys = "0.3.69"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.42"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"

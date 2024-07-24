@@ -1,0 +1,14 @@
+{
+  "listenOn": "localhost:6942",
+  "serveDir": "dist",
+  "staticDir": "static",
+  "credentials": [
+    {
+      "fullName": "MrBeast",
+      "info": {
+        "username": "mrbeast",
+        "accessKey": "joebiden"
+      }
+    }
+  ]
+}

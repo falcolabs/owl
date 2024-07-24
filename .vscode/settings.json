@@ -1,0 +1,7 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "C_Cpp.default.compilerPath": "cl.exe",
+    "rust-analyzer.files.excludeDirs": [
+        "engine/src/logic"
+    ]
+}

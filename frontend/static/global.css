@@ -1,0 +1,214 @@
+@font-face {
+    font-family: "Plus Jakarta Sans";
+    src: url("./fonts/plujarvar.ttf") format("truetype");
+}
+
+:root {
+    --bg-dark-1: #222442;
+    --bg-dark-2: #363d79;
+    --slate-1: #373d6d;
+    --slate-2: #2a3164;
+    --accent: #3e9fff;
+    --text: #ffffff;
+    --text-2: #9c9ec1;
+    --border: solid 1px #6a72b4;
+    --radius-1: 18px;
+    --radius-2: 32px;
+    --bg-gradient: linear-gradient(119deg, #222441 0%, #363d7a 101%);
+    --shadow-s: 0 4px 4px 4px #00000040;
+    --shadow-l: 0 4px 20px 4px #00000040;
+    --font: "Plus Jakarta Sans", "SF Pro Text", "SF Pro Display", "Segoe UI Variable", "Arial",
+        sans-serif;
+}
+
+.box {
+    border-radius: var(--radius-2);
+    box-shadow: var(--shadow-l);
+    border: var(--border);
+    background-color: var(--slate-1);
+}
+
+.pill {
+    border-radius: 99px;
+    /* box-shadow: var(--shadow-s); */
+    background-color: var(--accent);
+    font-family: var(--font);
+}
+
+.prompt {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: left;
+    color: var(--text);
+}
+
+.tag {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: left;
+    color: #fff;
+    width: -moz-fit-content;
+    width: fit-content;
+}
+
+.inp {
+    border-radius: 18px;
+    border: solid 1px #6a72b4;
+    background-color: #434a82;
+    padding: 20px 27px;
+    color: var(--text);
+    font-family: var(--font);
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.inp:focus {
+    outline: none;
+    border: solid 1px var(--accent);
+}
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+body {
+    line-height: 1;
+    font-family: var(--font);
+    color: var(--text);
+    font-size: 1.5rem;
+}
+
+ol,
+ul {
+    list-style: none;
+}
+
+blockquote,
+q {
+    quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+    content: "";
+    content: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+input {
+    box-sizing: border-box;
+}
+
+button {
+    border: none;
+}
+
+button:focus {
+    outline: 0;
+}

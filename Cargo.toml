@@ -1,0 +1,4 @@
+[workspace]
+resolver = "2"
+members = ["frontend/client", "engine"]
+default-members = ["engine"]
