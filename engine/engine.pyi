@@ -1,4 +1,4 @@
-from typing import Any, Optional, Callable, Awaitable, Union
+from typing import Any, Optional, Callable, Literal, Union
 from abc import abstractmethod, ABC
 
 PacketData = Union[
@@ -58,6 +58,22 @@ class Packet(ABC):
         data: Timer
         def __init__(self, data: Timer): ...
 
+    class ProcedureList(Packet):
+        data: list[Procedure]
+        def __init__(self, data: list[Procedure]): ...
+
+    class CallProcedure(Packet):
+        data: ProcedureCall
+        def __init__(self, data: ProcedureCall): ...
+
+    class GameState(Packet):
+        data: GameStateValue
+        def __init__(self, data: GameStateValue): ...
+
+    class UpdateGameState(Packet):
+        data: GameStateUpdate
+        def __init__(self, data: GameStateUpdate): ...
+
     class Unknown(Packet):
         data: str
         def __init__(self, data: str): ...
@@ -68,6 +84,34 @@ class Packet(ABC):
     def __init__(self, data: PacketData): ...
     def __str__(self) -> str: ...
     def pack(self) -> str: ...
+
+PortableValue = (
+    Literal["array"]
+    | Literal["null"]
+    | Literal["number"]
+    | Literal["string"]
+    | Literal["object"]
+)
+
+class Procedure:
+    def __init__(
+        self, name: str, hidden: bool, args: list[tuple[str, PortableValue]]
+    ): ...
+    def name(self) -> str: ...
+    def hidden(self) -> bool: ...
+
+class ProcedureCall:
+    def name(self) -> str: ...
+    def args(self) -> list[tuple[str, PortableValue]]: ...
+
+class GameStateValue:
+    def __init__(self, name: str, hidden: bool, data_type: PortableValue): ...
+    def name(self) -> str: ...
+    def hidden(self) -> bool: ...
+
+class GameStateUpdate:
+    def name(self) -> str: ...
+    def data(self) -> str: ...
 
 class Show:
     """The name of the show."""
@@ -253,6 +297,8 @@ class AuthenticationStatus:
     success: bool
     message: str
 
+    def __init__(self, success: bool, message: str): ...
+
 # = Union[
 #     ResourceRequest.Player,
 #     ResourceRequest.Question,
@@ -293,6 +339,12 @@ class ResourceRequest(ABC):
         pass
 
     class CurrentPart(ResourceRequest):
+        pass
+
+    class AvailableProcedures(ResourceRequest):
+        pass
+
+    class GameState(ResourceRequest):
         pass
 
 class Color:

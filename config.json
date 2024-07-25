@@ -5,10 +5,8 @@
   "credentials": [
     {
       "fullName": "MrBeast",
-      "info": {
-        "username": "mrbeast",
-        "accessKey": "joebiden"
-      }
+      "username": "mrbeast",
+      "accessKey": "joebiden"
     }
   ]
 }
