@@ -32,7 +32,7 @@ impl Auth {
 
     pub fn login(&self, c: Context, username: String, access_key: String) {
         c.ws.send_with_str(
-            Packet::Register {
+            Packet::CommenceSession {
                 data: Credentials {
                     username,
                     access_key,
@@ -46,7 +46,7 @@ impl Auth {
 
     pub fn on_message(data: js_sys::Object, msg: Message) {
         let instance = Auth { obj: data };
-        if let Packet::AuthStatus{data: authstatus} = msg.content() {
+        if let Packet::AuthStatus { data: authstatus } = msg.content() {
             if authstatus.success {
                 instance
                     .on_success()

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Callable, Literal, Union
+from typing import Any, Optional, Callable, Literal, Union, Iterable, Mapping
 from abc import abstractmethod, ABC
 
 PacketData = Union[
@@ -13,6 +13,10 @@ PacketData = Union[
     Ticker,
     Timer,
     str,
+    list[Procedure],
+    ProcedureCall,
+    GameStateUpdate,
+    GameStateValue,
 ]
 
 class Packet(ABC):
@@ -30,7 +34,7 @@ class Packet(ABC):
         data: Player
         def __init__(self, data: Player): ...
 
-    class Register(Packet):
+    class CommenceSession(Packet):
         data: Credentials
         def __init__(self, data: Credentials): ...
 
@@ -85,7 +89,7 @@ class Packet(ABC):
     def __str__(self) -> str: ...
     def pack(self) -> str: ...
 
-PortableValue = (
+PortableValueName = (
     Literal["array"]
     | Literal["null"]
     | Literal["number"]
@@ -93,9 +97,25 @@ PortableValue = (
     | Literal["object"]
 )
 
+class PortableValueType:
+    ARRAY = 0
+    NUMBER = 1
+    STRING = 2
+    NULL = 3
+    OBJECT = 4
+    BOOLEAN = 5
+
+class PortableValue:
+    def __init__(self, data: str, type: PortableValueType): ...
+    def as_str(self) -> str: ...
+    def as_int(self) -> int: ...
+    def as_float(self) -> float: ...
+    def data(self) -> str: ...
+    def data_type(self) -> PortableValueType: ...
+
 class Procedure:
     def __init__(
-        self, name: str, hidden: bool, args: list[tuple[str, PortableValue]]
+        self, name: str, hidden: bool, args: list[tuple[str, PortableValueType]]
     ): ...
     def name(self) -> str: ...
     def hidden(self) -> bool: ...
@@ -111,7 +131,7 @@ class GameStateValue:
 
 class GameStateUpdate:
     def name(self) -> str: ...
-    def data(self) -> str: ...
+    def data(self) -> PortableValue: ...
 
 class Show:
     """The name of the show."""
@@ -220,6 +240,8 @@ class Player:
 
     def __init__(self, identifier: str, name: str, score: int) -> None: ...
     def add_score(self, additional_score: int) -> int: ...
+    def handle(self) -> IOHandle: ...
+    def set_handle(self, handle: IOHandle) -> None: ...
 
 class Question:
     prompt: str
@@ -228,6 +250,16 @@ class Question:
     choices: Optional[list[str]]
     score_false: Optional[int]
     explaination: Optional[str]
+
+    def __init__(
+        self,
+        prompt: str,
+        key: str,
+        score: int,
+        choices: list[str],
+        score_false: int,
+        explaination: str,
+    ): ...
 
 class QuestionBank:
     question_storage: list[Question]

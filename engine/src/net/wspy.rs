@@ -103,7 +103,7 @@ pub struct RawRequest {
 }
 
 #[pyclass]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 #[allow(dead_code)]
 pub struct IOHandle {
     sender: Arc<Mutex<futures::stream::SplitSink<WebSocket, axum::extract::ws::Message>>>,

@@ -5,6 +5,8 @@ pub mod logging;
 #[cfg(feature = "logic")]
 pub mod logic;
 
+pub mod json;
+
 #[cfg(feature = "net")]
 pub mod net;
 
@@ -19,8 +21,12 @@ mod engine {
     #[pymodule_export]
     use crate::extract::{
         AuthenticationStatus, Credentials, Packet, Part, PartProperties, Player, Question,
-        QuestionBank, ResourceRequest, Show, Status, Ticker, Timer,
+        QuestionBank, ResourceRequest, Show, Status, Ticker, Timer, GameStateUpdate, GameStateValue, Procedure, ProcedureCall
     };
+
+    #[pymodule_export]
+    use crate::json::{PortableValue, PortableValueType};
+    
 
     #[pymodule_export]
     use crate::net::wspy::{IOHandle, RawRequest};

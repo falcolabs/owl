@@ -10,9 +10,9 @@ pub struct Question {
     pub prompt: String,
     pub key: String,
     pub score: i32,
-    pub choices: Option<Vec<String>>,
-    pub score_false: Option<i32>,
-    pub explaination: Option<String>,
+    pub choices: Vec<String>,
+    pub score_false: i32,
+    pub explaination: String,
 }
 
 impl crate::api::Resource for Question {}

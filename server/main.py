@@ -1,11 +1,11 @@
 import engine
 import logic.auth
-import pengin
+import utils
 
 qbank = engine.QuestionBank()
 qbank.load("../assets/question_test.json")
 
-show = pengin.Show(
+show = utils.ShowBootstrap(
     "Đáy xã hội 2",
     [engine.Part(logic.auth.Auth(), "auth")],
     [

@@ -5,6 +5,28 @@ use rand::{seq::SliceRandom, thread_rng};
 use std::fs;
 
 #[pymethods]
+impl Question {
+    #[new]
+    pub fn new(
+        prompt: String,
+        key: String,
+        score: i32,
+        choices: Vec<String>,
+        score_false: i32,
+        explaination: String,
+    ) -> Question {
+        Question {
+            prompt,
+            key,
+            score,
+            choices,
+            score_false,
+            explaination,
+        }
+    }
+}
+
+#[pymethods]
 impl QuestionBank {
     #[new]
     pub fn new() -> QuestionBank {
