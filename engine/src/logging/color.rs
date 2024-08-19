@@ -2,7 +2,8 @@
 use pyo3::prelude::*;
 
 #[allow(dead_code, non_camel_case_types)]
-#[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "logic", pyclass(eq, eq_int))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Color {
     BLACK,
     RED,

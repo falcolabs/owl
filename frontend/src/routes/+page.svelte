@@ -3,10 +3,10 @@
     import { SHOW_NAME, ORG_NAME } from "$lib";
     import { onMount } from "svelte";
     import TitleBar from "../components/TitleBar.svelte";
-    import { redirect } from "@sveltejs/kit";
+    import { goto } from "$app/navigation";
 
     let peeker: typeof import("client");
-    let ctx: import("client").Context;
+    let ctx: import("client").WalkieTalkie;
     let res: string;
     let username: HTMLInputElement;
     let accessKey: HTMLInputElement;
@@ -16,17 +16,24 @@
         peeker.panic_bait();
         auth = new peeker.Auth((success: boolean) => {
             console.log("yes. 3 days of work: ", success);
-            redirect(303, `/game/khoidong?uuid=${username.value}`);
+            if (success) {
+                console.log("redirecting: ", success);
+                goto(`/game/khoidong?uuid=${username.value}`).then(() => {
+                    console.error("Failed to redirect to target.");
+                });
+            }
         });
-        ctx = await peeker.Context.create((pname: string) => {
-            if (pname == "auth") return auth;
-        });
+        ctx = await peeker.WalkieTalkie.create(
+            (pname: string) => {
+                if (pname == "auth") return auth;
+            },
+            () => {}
+        );
         console.log(ctx);
     });
 
     const click = async () => {
-        console.log("hi");
-        auth.login(ctx, username.value, accessKey.value);
+        await auth.login(ctx.handle, username.value, accessKey.value);
     };
 </script>
 

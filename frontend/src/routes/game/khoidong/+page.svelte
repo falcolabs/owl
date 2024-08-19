@@ -1,11 +1,24 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import PillTag from "../../../components/PillTag.svelte";
     import ScoreBar from "../../../components/ScoreBar.svelte";
     import TitleBar from "../../../components/TitleBar.svelte";
-
+    import { goto } from "$app/navigation";
     const current_question = {
         prompt: "Nguyên liệu để sản xuất bromine (Br) trong công nghiệp là gì?"
     };
+    let ctx: import("client").WalkieTalkie;
+    onMount(async () => {
+        let peeker: typeof import("client") = await import("client");
+        peeker.panic_bait();
+        let khoidong = new peeker.KhoiDong();
+        ctx = await peeker.WalkieTalkie.create(
+            (pname: string) => {
+                if (pname == "khoidong") return khoidong;
+            },
+            (_: any) => {}
+        );
+    });
 </script>
 
 <title>Khởi động - Đường đua xanh</title>
@@ -37,6 +50,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: space-between;
     }
 
     .center-box {
@@ -49,6 +63,6 @@
     }
 
     .sbar {
-        transform: translateY(12rem);
+        transform: translateY(3rem);
     }
 </style>

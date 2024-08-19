@@ -1,5 +1,5 @@
 import engine
-import server.utils as utils
+import utils
 from config import config
 
 

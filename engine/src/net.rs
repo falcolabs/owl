@@ -4,4 +4,4 @@
 pub mod webservice_ws;
 pub mod wspy;
 
-pub use self::webservice_ws::{MessageHandler, Callback};
+pub use self::webservice_ws::{Callback, MessageHandler};

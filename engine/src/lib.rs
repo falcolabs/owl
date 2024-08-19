@@ -5,13 +5,13 @@ pub mod logging;
 #[cfg(feature = "logic")]
 pub mod logic;
 
-pub mod json;
+pub mod universal;
 
 #[cfg(feature = "net")]
 pub mod net;
 
-pub mod extract;
-pub use extract::*;
+pub mod prelude;
+pub use prelude::*;
 #[cfg(feature = "logic")]
 use pyo3::prelude::*;
 
@@ -19,14 +19,14 @@ use pyo3::prelude::*;
 #[pymodule]
 mod engine {
     #[pymodule_export]
-    use crate::extract::{
-        AuthenticationStatus, Credentials, Packet, Part, PartProperties, Player, Question,
-        QuestionBank, ResourceRequest, Show, Status, Ticker, Timer, GameStateUpdate, GameStateValue, Procedure, ProcedureCall
+    use crate::prelude::{
+        AuthenticationStatus, Credentials, GameStatePrototype, GameStateUpdate, Packet, Part,
+        PartProperties, Player, ProcedureCall, ProcedureSignature, Query, Question, QuestionBank,
+        Show, Status, Ticker, Timer,
     };
 
     #[pymodule_export]
-    use crate::json::{PortableValue, PortableValueType};
-    
+    use crate::universal::{PortableType, PortableValue};
 
     #[pymodule_export]
     use crate::net::wspy::{IOHandle, RawRequest};
@@ -34,6 +34,6 @@ mod engine {
     #[pymodule_export]
     use crate::logging::{
         color::{mccolor, mccolor_esc, Color},
-        logger::{py_debug, py_error, py_info, py_warning, Level},
+        logger::{py_debug, py_error, py_info, py_warning, Level, set_log_level},
     };
 }

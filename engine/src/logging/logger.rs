@@ -5,7 +5,8 @@ use chrono::prelude::Local;
 #[cfg(feature = "logic")]
 use pyo3::prelude::*;
 
-#[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "logic", pyclass(eq, eq_int))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Level {
     DEBUG,
     SUCCESS,
@@ -49,6 +50,7 @@ impl Level {
 
 static mut MINIMUM_LEVEL: Level = Level::INFO;
 
+#[cfg_attr(feature = "logic", pyfunction)]
 pub fn set_log_level(min_level: Level) {
     unsafe {
         MINIMUM_LEVEL = min_level;

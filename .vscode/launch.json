@@ -5,18 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "name": "skibidi",
+            "type": "debugpy",
             "request": "launch",
-            "name": "skibidy lldb",
-            "cargo": {
-                "args": [
-                    "build",
-                ]
-            },
-            "program": "${cargo:program}",
-            "args": [
-                "--nocapture"
-            ],
+            "program": "${workspaceFolder}/server/main.py",
+            "consoleName": "Skibidi Agent",
+            "preLaunchTask": "Construct",
+            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/server"
         }
     ]

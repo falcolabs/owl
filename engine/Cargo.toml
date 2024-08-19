@@ -4,8 +4,8 @@ version = "2.0.0"
 edition = "2021"
 resolver = "2"
 authors = [
-    "Nguyễn Tri Phương <triph@teamfalco.xyz>",
-    "Nguyễn Thế Việt <duchiru@teamfalco.xyz>",
+    "Nguyễn Tri Phương <triph@teamfalco.org>",
+    "Nguyễn Thế Việt <duchiru@teamfalco.org>",
 ]
 license = "GPL-3.0"
 repository = "https://github.com/teamfalco/owl"
@@ -24,6 +24,8 @@ wasm = [
     "dep:js-sys",
     "dep:wasm-logger",
     "dep:wasm-bindgen",
+    "dep:ws_stream_wasm",
+    "dep:futures",
 ]
 default = ["logic"]
 api = ["dep:tokio", "tokio/sync", "dep:futures"]
@@ -35,7 +37,7 @@ logic = [
     "logging",
     "dep:rand",
     "dep:pyo3",
-    "dep:pyo3-asyncio-0-21",
+    "dep:paste",
 ]
 net = [
     "dep:axum",
@@ -45,38 +47,34 @@ net = [
     "dep:futures",
     "dep:tokio",
     "dep:pyo3",
-    "dep:pyo3-asyncio-0-21",
     "tokio/full",
 ]
 logging = ["dep:chrono"]
 all = ["api", "logic", "net", "logging"]
 
 [dependencies]
-pyo3 = { version = "0.21.0", features = [
+paste = { version = "1.0.15", optional = true }
+pyo3 = { version = "0.22.2", features = [
     "serde",
     "experimental-async",
-    "experimental-declarative-modules",
-], optional = true }
-pyo3-asyncio-0-21 = { version = "0.21.0", features = [
-    "attributes",
-    "tokio-runtime",
+    "multiple-pymethods",
 ], optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 rand = { version = "0.8.5", optional = true }
-
 serde_json = { version = "1.0", optional = true }
 axum = { version = "0.7.5", features = ["ws"], optional = true }
 axum-extra = { version = "0.9.3", features = ["typed-header"], optional = true }
-tower = { version = "0.4.13", optional = true }
+tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5.2", features = [
     "cors",
     "fs",
     "trace",
 ], optional = true }
-chrono = { version = "0.4.31", optional = true }
+chrono = { version = "0.4.38", optional = true }
 futures = { version = "0.3.30", optional = true }
 tokio = { version = "1", default-features = false, optional = true }
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
-js-sys = { version = "0.3.69", optional = true }
+js-sys = { version = "0.3.70", optional = true }
 wasm-logger = { version = "0.2.0", optional = true }
-wasm-bindgen = { version = "0.2.92", optional = true }
+wasm-bindgen = { version = "0.2.93", optional = true }
+ws_stream_wasm = { version = "0.7.4", optional = true }

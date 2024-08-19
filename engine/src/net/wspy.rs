@@ -110,6 +110,14 @@ pub struct IOHandle {
     receiver: Arc<Mutex<futures::stream::SplitStream<WebSocket>>>,
 }
 
+impl PartialEq for IOHandle {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.sender, &other.sender)
+    }
+}
+
+impl Eq for IOHandle {}
+
 #[pymethods]
 impl IOHandle {
     pub async fn send(&mut self, msg: String) {
@@ -131,7 +139,6 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
     let receiver = Arc::new(Mutex::new(r));
 
     while let Some(Ok(msg)) = receiver.lock().await.next().await {
-        logging::info(format!("From {}: {:#?}", who, msg));
         let content = msg.to_text().expect("Error extracting text from Message");
         if let Err(_) = call_hook.send(RawRequest {
             handle: IOHandle {

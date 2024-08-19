@@ -1,8 +1,9 @@
 import engine
-import uvloop
 import abc
 import inspect
 import typing
+import json
+import platform
 
 from config import config
 
@@ -18,61 +19,69 @@ class PartImplementation(abc.ABC):
     ): ...
 
 
-LOOP = uvloop.new_event_loop()
+if platform.python_implementation() == "CPython":
+    import uvloop  # type: ignore
+
+    LOOP = uvloop.new_event_loop()
+else:
+    import asyncio  # type: ignore
+
+    LOOP = asyncio.new_event_loop()
 
 
 class ShowBootstrap(engine.Show):
     async def handle_webreq(self, req: engine.RawRequest):
-        print(f"we've got something {req.handle} {req.sender} {req.content.data}")
-        if not isinstance(req.content, engine.Packet.RequestResource):
+        response: engine.Packet | None = None
+        engine.log_debug(
+            engine.mccolor(f"-> FROM {req.sender}: {req.content.pack()}&r")
+        )
+        if not isinstance(req.content, engine.Packet.Query):
             if isinstance(req.content, engine.Packet.CommenceSession):
                 for detail in config().credentials:
                     if (detail.username, detail.accessKey) != (
                         req.content.data.username,
                         req.content.data.access_key,
                     ):
-                        await req.handle.send(
-                            engine.Packet.AuthStatus(
-                                engine.AuthenticationStatus(
-                                    False, "Authentication failed: invalid credentials."
-                                )
-                            ).pack()
+                        response = engine.Packet.AuthStatus(
+                            engine.AuthenticationStatus(
+                                False, "Authentication failed: invalid credentials."
+                            )
                         )
                         return
-                await req.handle.send(
-                    engine.Packet.AuthStatus(
-                        engine.AuthenticationStatus(True, "Authenticated.")
-                    ).pack()
+                response = engine.Packet.AuthStatus(
+                    engine.AuthenticationStatus(True, "Authenticated.")
                 )
         res_req = req.content.data
-        response: engine.Packet | None = None
         match res_req:
-            case engine.ResourceRequest.Player():
+            case engine.Query.Player():
                 for p in self.players:
                     if p.identifier == res_req.index:
                         response = engine.Packet.Player(p)
-            case engine.ResourceRequest.Question():
+                else:
+                    engine.log_warning(
+                        f"Player '{res_req.index}' not found. All registered players are {[i.identifier for i in self.players]}. Ignoring request."
+                    )
+            case engine.Query.Question():
                 response = engine.Packet.Question(
                     self.qbank.get_question(res_req.index)
                 )
-            case engine.ResourceRequest.QuestionBank():
+            case engine.Query.QuestionBank():
                 response = engine.Packet.QuestionBank(self.qbank)
-            case engine.ResourceRequest.Show():
+            case engine.Query.Show():
                 response = engine.Packet.Show(self)
-            case engine.ResourceRequest.Ticker():
+            case engine.Query.Ticker():
                 response = engine.Packet.Ticker(self.ticker)
-            case engine.ResourceRequest.Timer():
+            case engine.Query.Timer():
                 response = engine.Packet.Timer(self.timer)
-            case engine.ResourceRequest.CurrentPart():
+            case engine.Query.CurrentPart():
                 response = engine.Packet.Part(self.parts[self.current_part].props)
             case _:
                 await self.parts[self.current_part].implementation.on_request(
                     self, req.content, req.handle, req.sender
                 )
-        print(response)
         if response is not None:
             str_content = response.pack()
-            print(f"Trying to send {str_content}")
+            engine.log_info(engine.mccolor(f"&a<- TO {req.sender}: {str_content}&r"))
             await req.handle.send(str_content)
 
     def on_req(self, req: engine.RawRequest):
@@ -131,17 +140,32 @@ class ShowBootstrap(engine.Show):
         self.timer = engine.Timer()
 
 
-def _to_portable_value(inp: str) -> engine.PortableValueName:
+def str_portable_type(inp: str) -> engine.PortableType:
     if inp.startswith("list"):
-        return "array"
+        return engine.PortableType.ARRAY
     if inp.startswith("None"):
-        return "null"
+        return engine.PortableType.NULL
     if inp.startswith("int") or inp.startswith("float"):
-        return "number"
+        return engine.PortableType.NUMBER
     if inp.startswith("str"):
-        return "string"
+        return engine.PortableType.STRING
     if inp.startswith("dict") or inp.startswith("map"):
-        return "object"
+        return engine.PortableType.OBJECT
+    else:
+        raise TypeError(f"Unsupported argument type: `{inp}`")
+
+
+def portable_type(inp: object) -> engine.PortableType:
+    if isinstance(inp, list):
+        return engine.PortableType.ARRAY
+    if inp is None:
+        return engine.PortableType.NULL
+    if isinstance(inp, int) or isinstance(inp, float):
+        return engine.PortableType.NUMBER
+    if isinstance(inp, str):
+        return engine.PortableType.STRING
+    if isinstance(inp, dict) or isinstance(inp, map):
+        return engine.PortableType.OBJECT
     else:
         raise TypeError(f"Unsupported argument type: `{inp}`")
 
@@ -151,7 +175,28 @@ ProcedureHandler = typing.Callable[
     None,
 ]
 
-T = typing.TypeVar("T")
+T = typing.TypeVar("T", list, int, float, str, dict)
+Signature = list[tuple[str, engine.PortableType]]
+
+
+class Is:
+    """Basic typechecking class"""
+
+    @staticmethod
+    def proc(v: typing.Any):
+        return isinstance(v, typing.Callable)
+
+    @staticmethod
+    def str(v: typing.Any):
+        return isinstance(v, str)
+
+    @staticmethod
+    def signature(v: typing.Any):
+        return isinstance(v, typing.Iterable) and not isinstance(v, str)
+
+    @staticmethod
+    def bool(v: typing.Any):
+        return isinstance(v, bool)
 
 
 class WalkieTalkie:
@@ -159,78 +204,81 @@ class WalkieTalkie:
 
     def __init__(self, prefix: str = "") -> None:
         self.prefix = prefix
-        self.procedures: list[engine.Procedure] = []
+        self.procedures: list[engine.ProcedureSignature] = []
         self.proc_map: dict[
             str,
             ProcedureHandler,
         ] = {}
-        self.states: list[engine.GameStateValue] = []
+        self.states: list[engine.GameStatePrototype] = []
         self.state_map: dict[str, object] = {}
 
-    def synced_state(
-        self, name: str, initial_value: T
+    def use_state(
+        self, name: str, initial_value: T, hidden=False
     ) -> tuple[typing.Callable[[], T], typing.Callable[[T], None]]:
-
+        ptype = portable_type(initial_value)
+        self.states.append(
+            engine.GameStatePrototype(name=name, hidden=hidden, data_type=ptype)
+        )
         self.state_map[name] = initial_value
 
         def get() -> T:
             return self.state_map[name]  # type: ignore
 
         def set(value: T):
+            if config().checkRPCTypes and ptype != portable_type(value):
+                raise TypeError(
+                    f"Type mismatch: expected '{ptype}', found '{portable_type(value)}'"
+                )
+            # for i, v in enumerate(self.states):
+            #     if v.name() == name:
+            #         self.states[i] = engine.GameStatePrototype(name=name, hidden=hidden, data_type=portable_type(value))
             self.state_map[name] = value
 
         return get, set
 
     def add_procedure(
-        self, proc: ProcedureHandler, hidden: bool = False, name: str | None = None
+        self,
+        proc: ProcedureHandler,
+        *,
+        signature: Signature,
+        hidden: bool = False,
+        name: str | None = None,
     ) -> "WalkieTalkie":
         n = name if name else proc.__name__
+        proc_ident = self.prefix + "::" + n
         self.procedures.append(
-            engine.Procedure(
-                name=self.prefix + "/" + n,
+            engine.ProcedureSignature(
+                name=proc_ident,
                 hidden=hidden,
-                args=[
-                    (k, _to_portable_value(v.annotation))
-                    for k, v in inspect.signature(proc).parameters.items()
-                ],
+                args=signature,
             )
         )
-        self.proc_map[n] = proc
+        self.proc_map[proc_ident] = proc
 
         return self
 
     def add_procedures(
         self,
         proc_list: list[
-            tuple[ProcedureHandler, bool]
-            | tuple[str, ProcedureHandler, bool]
-            | tuple[str, ProcedureHandler]
-            | ProcedureHandler
+            tuple[ProcedureHandler, bool, Signature]
+            | tuple[str, ProcedureHandler, bool, Signature]
+            | tuple[str, ProcedureHandler, Signature]
+            | tuple[ProcedureHandler, Signature]
         ],
     ) -> "WalkieTalkie":
-        for maybe_tuple in proc_list:
-            if isinstance(maybe_tuple, typing.Iterable):
-                if isinstance(maybe_tuple[0], str):
-                    if len(maybe_tuple) == 2 and isinstance(
-                        maybe_tuple[1], typing.Callable
-                    ):
-                        self.add_procedure(maybe_tuple[1], name=maybe_tuple[0])
-                    elif (
-                        len(maybe_tuple) == 3
-                        and isinstance(maybe_tuple[1], typing.Callable)
-                        and isinstance(maybe_tuple[2], bool)
-                    ):
-                        self.add_procedure(
-                            maybe_tuple[1], hidden=maybe_tuple[2], name=maybe_tuple[0]
-                        )
-                    else:
-                        raise ValueError(f"Invalid procedure notation: `{maybe_tuple}`")
-                elif len(maybe_tuple) == 2 and isinstance(maybe_tuple[1], bool):
-                    self.add_procedure(maybe_tuple[0], hidden=maybe_tuple[1])
-                else:
-                    raise ValueError(f"Invalid procedure notation: `{maybe_tuple}`")
-            else:
-                self.add_procedure(maybe_tuple, False)
+        for t in proc_list:
+            match t:
+                case (p1, p2, p3, signature):
+                    self.add_procedure(p2, name=p1, hidden=p3, signature=signature)
+                case (p1, p2, signature):
+                    if Is.proc(p1) and Is.bool(p2):
+                        self.add_procedure(p1, hidden=p2, signature=signature)  # type: ignore
+                    if Is.str(p1) and Is.proc(p2):
+                        self.add_procedure(p2, name=p1, signature=signature)  # type: ignore
+                case (p1, signature):
+                    self.add_procedure(p1, signature=signature)
+                case _:
+                    raise ValueError(f"Unknown procedure prototype: {t}")
 
         return self
 
@@ -245,11 +293,25 @@ class WalkieTalkie:
             case engine.Packet.CallProcedure():
                 call = packet.data
                 for proc in self.procedures:
-                    if proc.name() == call.name():
-                        return self.proc_map[proc.name()](show, packet, handle, addr)
+                    if proc.name == call.name:
+                        engine.log_debug(f"Calling procedure {call.name}")
+                        # TODO - type checking for procedure arguments.
+                        return self.proc_map[proc.name](show, packet, handle, addr)
                 else:
                     engine.log_error(
-                        f"Cannot find procedure with name `{proc.name()}`. Call ignored."
+                        f"Cannot find procedure with name `{proc.name}`. Call ignored."
                     )
-            case engine.Packet.ProcedureList():
-                await handle.send(engine.Packet.ProcedureList(self.procedures).pack())
+            case engine.Packet.Query():
+                request = packet.data
+                match request:
+                    case engine.Query.AvailableProcedures():
+                        await handle.send(
+                            engine.Packet.ProcedureList(self.procedures).pack()
+                        )
+                    case engine.Query.GameState():
+                        await handle.send(engine.Packet.GameState(self.states).pack())
+            case engine.Packet.UpdateGameState():
+                update = packet.data
+                for state in self.states:
+                    if state.name == update.name:
+                        self.state_map[state.name] = json.loads(update.data.json)

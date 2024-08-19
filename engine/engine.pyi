@@ -8,77 +8,131 @@ PacketData = Union[
     Credentials,
     Question,
     QuestionBank,
-    ResourceRequest,
+    Query,
     Show,
     Ticker,
     Timer,
     str,
-    list[Procedure],
+    list[ProcedureSignature],
     ProcedureCall,
     GameStateUpdate,
-    GameStateValue,
+    list[GameStatePrototype],
 ]
+"""All the possible values in a packet's data."""
 
 class Packet(ABC):
-    """An object encapsulating data decoded from JSON."""
+    """An algebraic datatype encapsulating data, serialize and
+    deserializable to and from JSON. Only `serde@rust` may
+    deserialize a `Packet`, while serializing is available
+    everywhere using `.pack()` or `str()`.
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✗ JavaScript, ✓ WASM
+
+    ---
+    ### Usage
+    A `match` statement may be used to differentiate between these
+    variants:
+    ```py
+    match packet:
+        case Packet.AuthStatus():
+            ...
+        case _:
+            ...
+    ```
+    """
 
     class AuthStatus(Packet):
+        """An :class:`AuthStatus` packet is sent to announce
+        to the client the success or failure of a :class:`Packet.CommenceSession`."""
+
         data: AuthenticationStatus
         def __init__(self, data: AuthenticationStatus): ...
 
     class Part(Packet):
+        """A :class:`Packet` contains properties about a game's part."""
+
         data: PartProperties
         def __init__(self, data: PartProperties): ...
 
     class Player(Packet):
+        """A :class:`Player` contains information about a given player."""
+
         data: Player
         def __init__(self, data: Player): ...
 
     class CommenceSession(Packet):
+        """This packet is sent in order to initiate connection between the
+        server and the client. API will change in order to implement security
+        measures.
+        """
+
         data: Credentials
         def __init__(self, data: Credentials): ...
 
     class Question(Packet):
+        """A packet containing a signle question."""
+
         data: Question
         def __init__(self, data: Question): ...
 
     class QuestionBank(Packet):
+        """A packet containing an entire question database."""
+
         data: QuestionBank
         def __init__(self, data: QuestionBank): ...
 
-    class RequestResource(Packet):
-        data: ResourceRequest
-        def __init__(self, data: ResourceRequest): ...
+    class Query(Packet):
+        """A packet containing a query for the resource specified in its payload.
+        The server is to respond by sending the correct packet type to the client."""
+
+        data: Query
+        def __init__(self, data: Query): ...
 
     class Show(Packet):
+        """A packet containing the entire show's details"""
+
         data: Show
         def __init__(self, data: Show): ...
 
     class Ticker(Packet):
+        """A packet containing a `Ticker`. See :class:`Ticker` for more details."""
+
         data: Ticker
         def __init__(self, data: Ticker): ...
 
     class Timer(Packet):
+        """A packet containing a `Timer`. See :class:`Timer` for more details."""
+
         data: Timer
         def __init__(self, data: Timer): ...
 
     class ProcedureList(Packet):
-        data: list[Procedure]
-        def __init__(self, data: list[Procedure]): ...
+        """A packet listing all of the available procedures the part can execute."""
+
+        data: list[ProcedureSignature]
+        def __init__(self, data: list[ProcedureSignature]): ...
 
     class CallProcedure(Packet):
+        """A packet invoking the procedure."""
+
         data: ProcedureCall
         def __init__(self, data: ProcedureCall): ...
 
     class GameState(Packet):
-        data: GameStateValue
-        def __init__(self, data: GameStateValue): ...
+        """A packet containing the state of the game."""
+
+        data: list[GameStatePrototype]
+        def __init__(self, data: list[GameStatePrototype]): ...
 
     class UpdateGameState(Packet):
+        """A packet updating the state of the game."""
+
         data: GameStateUpdate
         def __init__(self, data: GameStateUpdate): ...
 
     class Unknown(Packet):
+        """An packet used to contain unknown data."""
+
         data: str
         def __init__(self, data: str): ...
 
@@ -89,68 +143,98 @@ class Packet(ABC):
     def __str__(self) -> str: ...
     def pack(self) -> str: ...
 
-PortableValueName = (
-    Literal["array"]
-    | Literal["null"]
-    | Literal["number"]
-    | Literal["string"]
-    | Literal["object"]
-)
+class PortableType:
+    """All of the types representable in a :class:`PortableValue`."""
 
-class PortableValueType:
-    ARRAY = 0
-    NUMBER = 1
-    STRING = 2
-    NULL = 3
-    OBJECT = 4
-    BOOLEAN = 5
+    ARRAY: PortableType
+    NUMBER: PortableType
+    STRING: PortableType
+    NULL: PortableType
+    OBJECT: PortableType
+    BOOLEAN: PortableType
 
 class PortableValue:
-    def __init__(self, data: str, type: PortableValueType): ...
+    """A JSON-serialized value that may be sent and received as
+    arguments for :class:`ProcedureCall`, or value for :class:`GameStateUpdate`
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
+
+    json: str
+    data_type: PortableType
+
+    def __init__(self, data: str, type: PortableType): ...
     def as_str(self) -> str: ...
     def as_int(self) -> int: ...
     def as_float(self) -> float: ...
-    def data(self) -> str: ...
-    def data_type(self) -> PortableValueType: ...
 
-class Procedure:
-    def __init__(
-        self, name: str, hidden: bool, args: list[tuple[str, PortableValueType]]
-    ): ...
-    def name(self) -> str: ...
-    def hidden(self) -> bool: ...
+class ProcedureSignature:
+    """The signature for a procedure.
 
-class ProcedureCall:
-    def name(self) -> str: ...
-    def args(self) -> list[tuple[str, PortableValue]]: ...
-
-class GameStateValue:
-    def __init__(self, name: str, hidden: bool, data_type: PortableValue): ...
-    def name(self) -> str: ...
-    def hidden(self) -> bool: ...
-
-class GameStateUpdate:
-    def name(self) -> str: ...
-    def data(self) -> PortableValue: ...
-
-class Show:
-    """The name of the show."""
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    """
 
     name: str
-    """The parts included in the show."""
+    hidden: bool
+
+    def __init__(
+        self, name: str, hidden: bool, args: list[tuple[str, PortableType]]
+    ): ...
+
+class ProcedureCall:
+    """A procedure call.
+
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    """
+
+    name: str
+    args: list[tuple[str, PortableValue]]
+
+class GameStatePrototype:
+    """A game state's type and value.
+
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
+
+    name: str
+    hidden: bool
+
+    def __init__(self, name: str, hidden: bool, data_type: PortableType): ...
+
+class GameStateUpdate:
+    """
+    An update to the game state.
+
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
+
+    name: str
+    data: PortableValue
+
+class Show:
+    """An object containing all the resources available globally
+    in the show. This object should be a global variable, or otherwise
+    publicly and statically accessible.
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    """
+
+    name: str
+    """The name of the show."""
     parts: list[Part]
-    """The show's tick speed."""
+    """The parts included in the show."""
     tick_speed: int
-    """The current part index."""
+    """The show's tick speed."""
     current_part: int
-    """The players present"""
+    """The current part index."""
     players: list[Player]
-    """All the questions the show contains"""
+    """The players present"""
     qbank: QuestionBank
-    """The show's ticker"""
+    """All the questions the show contains"""
     ticker: Ticker
-    """The show's timer"""
+    """The show's ticker"""
     timer: Timer
+    """The show's timer"""
 
     def __init__(
         self,
@@ -167,19 +251,16 @@ class Show:
         serve_on: str,
         static_dir: str,
     ):
-        """
-        Starts the show. This is a blocking function, and will only stop
+        """Starts the show. This is a blocking function, and will only stop
         when the show is terminated by the user.
 
-        # Arguments
-        * `listen_on` - the host and port for the server to listen on.
-                        resource will be hosted on `/`, WebSocket PI on `/harlem`
-        * `serve_dir` - where the static content will be hosted at.
-                        May contain unsolicited WebAssembly.
-        * `static_dir` - where the static content lives. Should contain `404.html`.
+        :param: `listen_on` the host and port for the server to listen on. Resource will be hosted on `/`, WebSocket PI on `/harlem`
+        :param: `serve_dir` where the static content will be hosted at. May contain unsolicited WebAssembly files.
+        :param: `static_dir` where the static content lives. Should contain `404.html`.
 
-        # Examples
+        ## Usage
         ```py
+
         # This function will block until the show ends.
         show.start("localhost:6942", "./public", "./static")
         ```
@@ -194,6 +275,12 @@ class Show:
     ): ...
 
 class RawRequest:
+    """A raw request information. This is an internal engine type,
+    so you should not use it in the game logic.
+    ---
+    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    """
+
     handle: IOHandle
     sender: str
     content: Packet
@@ -237,11 +324,10 @@ class Player:
     identifier: str
     name: str
     score: int
+    handle: IOHandle
 
     def __init__(self, identifier: str, name: str, score: int) -> None: ...
     def add_score(self, additional_score: int) -> int: ...
-    def handle(self) -> IOHandle: ...
-    def set_handle(self, handle: IOHandle) -> None: ...
 
 class Question:
     prompt: str
@@ -270,16 +356,16 @@ class QuestionBank:
         It should have the following structure:
         ```json
         [
-        {
+          {
             "prompt": "What is one plus one?",
             "key": "Two",
             "score": 100,
             // Optional properties
-            "choices": ["One", "Two", "Three", "One Million Five Hundred and Fifty Two Thousand Seven Hundred and Three"],
+            "choices": ["One", "Two", "Three", "69"],
             "score_false": -5,
             "explaination": "bruh"
-        },
-        ...
+          },
+          ...
         ]
         ```
         """
@@ -332,51 +418,51 @@ class AuthenticationStatus:
     def __init__(self, success: bool, message: str): ...
 
 # = Union[
-#     ResourceRequest.Player,
-#     ResourceRequest.Question,
-#     ResourceRequest.QuestionBank,
-#     ResourceRequest.Show,
-#     ResourceRequest.Ticker,
-#     ResourceRequest.Timer,
-#     ResourceRequest.CurrentPart,
+#     Query.Player,
+#     Query.Question,
+#     Query.QuestionBank,
+#     Query.Show,
+#     Query.Ticker,
+#     Query.Timer,
+#     Query.CurrentPart,
 # ]
 
-class ResourceRequest(ABC):
-    class Player(ResourceRequest):
+class Query(ABC):
+    class Player(Query):
         index: str
         def __init__(self, index: str): ...
 
-    class Question(ResourceRequest):
+    class Question(Query):
         index: int
         def __init__(self, index: int): ...
 
-    class PartByID(ResourceRequest):
+    class PartByID(Query):
         index: int
         def __init__(self, index: int): ...
 
-    class PartByName(ResourceRequest):
+    class PartByName(Query):
         index: str
         def __init__(self, index: str): ...
 
-    class QuestionBank(ResourceRequest):
+    class QuestionBank(Query):
         pass
 
-    class Show(ResourceRequest):
+    class Show(Query):
         pass
 
-    class Ticker(ResourceRequest):
+    class Ticker(Query):
         pass
 
-    class Timer(ResourceRequest):
+    class Timer(Query):
         pass
 
-    class CurrentPart(ResourceRequest):
+    class CurrentPart(Query):
         pass
 
-    class AvailableProcedures(ResourceRequest):
+    class AvailableProcedures(Query):
         pass
 
-    class GameState(ResourceRequest):
+    class GameState(Query):
         pass
 
 class Color:
@@ -420,6 +506,7 @@ class Level:
 def to_color(color: str) -> Color: ...
 def mccolor(text: str) -> str: ...
 def mccolor_esc(text: str, esc_char: str) -> str: ...
+def set_log_level(min_level: Level): ...
 def log_debug(content: str): ...
 def log_success(content: str): ...
 def log_info(content: str): ...

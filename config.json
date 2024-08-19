@@ -2,11 +2,28 @@
   "listenOn": "localhost:6942",
   "serveDir": "dist",
   "staticDir": "static",
+  "checkRPCTypes": true,
+  "debug": true,
   "credentials": [
     {
       "fullName": "MrBeast",
       "username": "mrbeast",
       "accessKey": "joebiden"
+    },
+    {
+      "fullName": "Donald Trump",
+      "username": "jtrump",
+      "accessKey": "jdvance"
+    },
+    {
+      "fullName": "D. 5513",
+      "username": "scpf5513",
+      "accessKey": "o5council"
+    },
+    {
+      "fullName": "ChatGPT",
+      "username": "elonmusk",
+      "accessKey": "chatgpt"
     }
   ]
 }

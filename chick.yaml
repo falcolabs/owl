@@ -1,0 +1,29 @@
+name: owl
+
+default:
+  - cd engine
+  - maturin develop
+
+py:
+  - cd engine
+  - maturin develop
+
+wasm:
+  - cd frontend
+  - bun run compileRustDev
+
+front:
+  - cd frontend
+  - bun run dev
+
+cloc:
+  - cloc . --not-match-d="(frontend/node_modules|target)"
+
+run:
+  - cd engine
+  - maturin develop
+  - cd ../frontend
+  - bun run dev &
+  - cd ../server
+  - python3 main.py
+  

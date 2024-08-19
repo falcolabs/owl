@@ -3,7 +3,7 @@
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "logic", pyclass(eq, eq_int))]
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
 pub enum Status {

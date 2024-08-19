@@ -10,6 +10,7 @@ impl Player {
         Player::new(identifier, name, score)
     }
 
+    #[getter(handle)]
     pub fn handle(&self) -> PyResult<crate::net::wspy::IOHandle> {
         match &self.handle {
             Some(a) => Ok(a.clone()),
@@ -20,6 +21,7 @@ impl Player {
         }
     }
 
+    #[setter(handle)]
     pub fn set_handle(&mut self, handle: IOHandle) {
         self.handle = Some(handle);
     }

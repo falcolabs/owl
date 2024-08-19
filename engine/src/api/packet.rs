@@ -6,14 +6,18 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "net")]
 use axum::extract::ws::Message;
 
-use crate::extract::*;
-use crate::json;
-use crate::json::PortableValue;
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::*;
+
+use crate::prelude::*;
+use crate::pyproperty;
+use crate::universal;
+use crate::universal::PortableValue;
 use crate::Player;
 
 /// An object encapsulating data decoded from JSON.
-#[cfg_attr(feature = "logic", pyclass(module = "engine"))]
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "logic", pyclass(eq))]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Packet {
     Player { data: Player },
     Part { data: PartProperties },
@@ -24,10 +28,10 @@ pub enum Packet {
     Timer { data: Timer },
     CommenceSession { data: Credentials },
     AuthStatus { data: AuthenticationStatus },
-    RequestResource { data: ResourceRequest },
-    ProcedureList { data: Vec<Procedure> },
+    Query { data: Query },
+    ProcedureList { data: Vec<ProcedureSignature> },
     CallProcedure { data: ProcedureCall },
-    GameState { data: Vec<GameStateValue> },
+    GameState { data: Vec<GameStatePrototype> },
     UpdateGameState { data: GameStateUpdate },
     Unknown { data: String },
 }
@@ -70,7 +74,7 @@ impl Packet {
                 "AuthStatus" => Packet::AuthStatus {
                     data: std::mem::transmute_copy(&data),
                 },
-                "RequestResource" => Packet::RequestResource {
+                "RequestResource" => Packet::Query {
                     data: std::mem::transmute_copy(&data),
                 },
                 "Unknown" => Packet::Unknown {
@@ -83,10 +87,9 @@ impl Packet {
     }
 }
 
-#[allow(unreachable_code)]
 impl ToString for Packet {
     fn to_string(&self) -> String {
-        json::stringify(self)
+        universal::stringify(self)
     }
 }
 
@@ -97,8 +100,22 @@ impl Packet {
         self.to_string()
     }
 
+    #[pyo3(name = "pack")]
+    pub fn py_pack(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Packet {
     pub fn pack(&self) -> String {
         self.to_string()
+    }
+}
+
+#[cfg(feature = "wasm")]
+impl Packet {
+    pub fn wsmsg(&self) -> ws_stream_wasm::WsMessage {
+        ws_stream_wasm::WsMessage::Text(self.to_string())
     }
 }
 
@@ -110,62 +127,58 @@ impl Packet {
 }
 
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 /// A callable server-side procedure.
-pub struct Procedure {
-    pub name: String,
-    pub hidden: bool,
-    pub args: Vec<(String, json::PortableValueType)>,
+pub struct ProcedureSignature {
+    name: String,
+    hidden: bool,
+    args: Vec<(String, universal::PortableType)>,
 }
+pyproperty!(ProcedureSignature:name   -> String);
+pyproperty!(ProcedureSignature:hidden -> bool);
+pyproperty!(
+    ProcedureSignature:args -> Vec<(String, universal::PortableType)>
+);
 
 #[cfg(feature = "logic")]
 #[pymethods]
-impl Procedure {
+impl ProcedureSignature {
     #[new]
     pub fn new(
         name: String,
         hidden: bool,
-        args: Vec<(String, json::PortableValueType)>,
+        args: Vec<(String, universal::PortableType)>,
     ) -> PyResult<Self> {
         Ok(Self { name, hidden, args })
-    }
-
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-    pub fn hidden(&self) -> bool {
-        self.hidden
     }
 }
 
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 /// A value belonging to the game's state.
-pub struct GameStateValue {
-    pub name: String,
-    pub hidden: bool,
-    pub data_type: json::PortableValueType,
+pub struct GameStatePrototype {
+    name: String,
+    hidden: bool,
+    data_type: universal::PortableType,
 }
+pyproperty!(GameStatePrototype:name      -> String);
+pyproperty!(GameStatePrototype:hidden    -> bool);
+pyproperty!(GameStatePrototype:data_type -> universal::PortableType);
 
 #[cfg(feature = "logic")]
 #[pymethods]
-impl GameStateValue {
+impl GameStatePrototype {
     #[new]
-    pub fn new(name: String, hidden: bool, args: json::PortableValueType) -> PyResult<Self> {
+    pub fn new(name: String, hidden: bool, data_type: universal::PortableType) -> PyResult<Self> {
         Ok(Self {
             name,
             hidden,
-            data_type: args,
+            data_type,
         })
-    }
-
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-    pub fn hidden(&self) -> bool {
-        self.hidden
     }
 }
 
@@ -177,39 +190,35 @@ pub struct GameStateUpdate {
     pub name: String,
     pub data: PortableValue,
 }
-
-#[cfg_attr(feature = "logic", pymethods)]
-impl GameStateUpdate {
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn data(&self) -> PortableValue {
-        self.data.clone()
-    }
-}
+pyproperty!(GameStateUpdate:name -> String);
+pyproperty!(GameStateUpdate:data -> PortableValue);
 
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 /// Authorization request.
 pub struct ProcedureCall {
-    pub name: String,
-    pub args: Vec<(String, json::PortableValue)>,
+    name: String,
+    args: Vec<(String, universal::PortableValue)>,
 }
+pyproperty!(ProcedureCall:name -> String);
+pyproperty!(ProcedureCall:args -> Vec<(String, universal::PortableValue)>);
 
-#[cfg_attr(feature = "logic", pymethods)]
 impl ProcedureCall {
-    pub fn name(&self) -> String {
-        self.name.clone()
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            args: Vec::new(),
+        }
     }
 
-    pub fn args(&self) -> Vec<(String, json::PortableValue)> {
-        self.args.clone()
+    pub fn append_arg(&mut self, name: &str, v: PortableValue) {
+        self.args.push((name.to_string(), v))
     }
 }
 
-impl Procedure {
+impl ProcedureSignature {
     pub fn call0(&self) -> ProcedureCall {
         ProcedureCall {
             name: self.name.clone(),
@@ -218,7 +227,7 @@ impl Procedure {
     }
 
     pub fn call1(&self, arg0: PortableValue) -> Result<ProcedureCall, ()> {
-        if arg0.data_type != self.args.get(0).unwrap().1 {
+        if arg0.data_type() != self.args.get(0).unwrap().1 {
             return Err(());
         }
         Ok(ProcedureCall {
@@ -227,13 +236,9 @@ impl Procedure {
         })
     }
 
-    pub fn call2(
-        &self,
-        arg0: PortableValue,
-        arg1: PortableValue,
-    ) -> Result<ProcedureCall, ()> {
-        if arg0.data_type != self.args.get(0).unwrap().1
-            || arg1.data_type != self.args.get(1).unwrap().1
+    pub fn call2(&self, arg0: PortableValue, arg1: PortableValue) -> Result<ProcedureCall, ()> {
+        if arg0.data_type() != self.args.get(0).unwrap().1
+            || arg1.data_type() != self.args.get(1).unwrap().1
         {
             return Err(());
         }
@@ -246,15 +251,15 @@ impl Procedure {
         })
     }
 
-    pub fn call3<T: serde::Serialize, F: serde::Serialize, G: serde::Serialize>(
+    pub fn call3(
         &self,
         arg0: PortableValue,
         arg1: PortableValue,
         arg2: PortableValue,
     ) -> Result<ProcedureCall, ()> {
-        if arg0.data_type != self.args.get(0).unwrap().1
-            || arg1.data_type != self.args.get(1).unwrap().1
-            || arg2.data_type != self.args.get(2).unwrap().1
+        if arg0.data_type() != self.args.get(0).unwrap().1
+            || arg1.data_type() != self.args.get(1).unwrap().1
+            || arg2.data_type() != self.args.get(2).unwrap().1
         {
             return Err(());
         }
@@ -277,6 +282,8 @@ pub struct Credentials {
     pub username: String,
     pub access_key: String,
 }
+pyproperty!(Credentials:username   -> String);
+pyproperty!(Credentials:access_key -> String);
 
 impl crate::api::Resource for Credentials {}
 
@@ -288,6 +295,9 @@ pub struct AuthenticationStatus {
     pub success: bool,
     pub message: String,
 }
+pyproperty!(AuthenticationStatus:success -> bool);
+pyproperty!(AuthenticationStatus:message -> String);
+
 #[cfg(feature = "logic")]
 #[pymethods]
 impl AuthenticationStatus {
@@ -302,7 +312,7 @@ impl crate::api::Resource for AuthenticationStatus {}
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
-pub enum ResourceRequest {
+pub enum Query {
     Player { index: String },
     Question { index: usize },
     PartByID { index: usize },

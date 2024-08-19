@@ -90,6 +90,17 @@
 			],
 			"group": "build",
 			"label": "rust: run harlem"
+		},
+		{
+			"label": "Construct",
+			"command": "chick",
+			"args": [
+				"py",
+				"-v"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
 		}
 	]
 }

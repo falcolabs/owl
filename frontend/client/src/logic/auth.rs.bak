@@ -1,4 +1,4 @@
-use crate::{comms::Message, Context};
+use crate::{comms::Message, WalkieTalkie};
 use engine::{Credentials, Packet};
 use js_sys::Object;
 use wasm_bindgen::prelude::*;
@@ -30,7 +30,7 @@ impl Auth {
             .unwrap()
     }
 
-    pub fn login(&self, c: Context, username: String, access_key: String) {
+    pub fn login(&self, c: WalkieTalkie, username: String, access_key: String) {
         c.ws.send_with_str(
             Packet::CommenceSession {
                 data: Credentials {

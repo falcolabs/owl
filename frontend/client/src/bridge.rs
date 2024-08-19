@@ -1,3 +1,14 @@
+pub mod clientpacket;
+pub mod querybuilder;
+pub mod querypacket;
+pub mod rpcbuilder;
+pub mod timer;
+
+pub use clientpacket::{ClientPacket, PacketType};
+pub use querybuilder::Query;
+pub use querypacket::{QueryPacket, QueryType};
+pub use timer::Timer;
+
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -14,7 +25,7 @@ extern "C" {
 /// `format!()` or `println!()`.
 #[macro_export]
 macro_rules! console_log {
-    ($($t:tt)*) => (crate::jsbridge::log(&format_args!($($t)*).to_string()))
+    ($($t:tt)*) => (crate::bridge::log(&format_args!($($t)*).to_string()))
 }
 
 pub fn set_panic_hook() {
