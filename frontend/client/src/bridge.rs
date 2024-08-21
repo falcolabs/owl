@@ -1,7 +1,6 @@
 pub mod clientpacket;
 pub mod querybuilder;
 pub mod querypacket;
-pub mod rpcbuilder;
 pub mod timer;
 
 pub use clientpacket::{ClientPacket, PacketType};

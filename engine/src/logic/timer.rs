@@ -5,15 +5,18 @@ use std::time::{Duration, SystemTime};
 
 #[pymethods]
 impl Timer {
-    /// Creates a new timer, which starts immidiately after creation.
+    /// Creates a new timer, which pauses immidiately after creation.
     #[cfg(feature = "logic")]
     #[new]
     pub fn new() -> Timer {
+        // This has to be done, as one of the syscalls might return
+        // sooner, despite being scheduled first.
+        let now = SystemTime::now();
         Timer {
-            start_time: SystemTime::now(),
+            start_time: now,
             paused_duration: Duration::new(0, 0),
-            paused_time: SystemTime::now(),
-            is_paused: false,
+            paused_time: now,
+            is_paused: true,
         }
     }
 
@@ -40,14 +43,23 @@ impl Timer {
         let base_dur: Duration;
         if self.is_paused {
             base_dur = self
-                .start_time
-                .duration_since(self.paused_time)
-                .expect("We time travelled. Congrats.");
+                .paused_time
+                .duration_since(self.start_time)
+                .expect("We time travelled. Congrats");
         } else {
             base_dur = SystemTime::now()
                 .duration_since(self.start_time)
-                .expect("We time travelled. Congrats.");
+                .expect("We time travelled. Congrats");
         }
         base_dur - self.paused_duration
+    }
+
+    pub fn pack(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    #[staticmethod]
+    pub fn from_json(target: String) -> Timer {
+        serde_json::from_str(&target).unwrap()
     }
 }

@@ -26,6 +26,7 @@ wasm = [
     "dep:wasm-bindgen",
     "dep:ws_stream_wasm",
     "dep:futures",
+    "dep:serde_json",
 ]
 default = ["logic"]
 api = ["dep:tokio", "tokio/sync", "dep:futures"]

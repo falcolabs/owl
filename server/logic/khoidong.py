@@ -1,8 +1,9 @@
 import engine
-import utils
+import penguin
 import json
-from config import config
+import typing
 
+from config import config
 
 STAGE_SEPERATED = 0
 """Phần thi riêng"""
@@ -10,11 +11,11 @@ STAGE_JOINT = 1
 """Phần thi chung"""
 
 
-class KhoiDong(utils.PartImplementation):
+class KhoiDong(penguin.PartImplementation):
 
     def __init__(self) -> None:
         super().__init__()
-        self.rpc = utils.WalkieTalkie("khoidong")
+        self.rpc = penguin.RPCManager("khoidong")
 
         self.question_placement = {
             STAGE_SEPERATED: [
@@ -26,7 +27,10 @@ class KhoiDong(utils.PartImplementation):
             STAGE_JOINT: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
         }
 
-        self.get_state, self.set_state = self.rpc.use_state("state", STAGE_SEPERATED)
+        self.timer = engine.Timer()
+        self.timer.pause()
+
+        self.get_state, self.set_state = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
         self.get_qid, self.set_qid = self.rpc.use_state("qid", -1)
         self.lastqid = self.get_qid()
@@ -34,16 +38,16 @@ class KhoiDong(utils.PartImplementation):
         self.get_seperated_candidate, self.set_seperated_candidate = self.rpc.use_state(
             "seperated_candidate", ""
         )
-        # self.get_current_question, self.set_current_question = self.rpc.use_state(
-        #     "current_question", engine.Question("", "", 0, [], 0, "")
-        # )
+        self.get_current_question_content, self.set_current_question_content = (
+            self.rpc.use_state("current_question_content", "")
+        )
         """Username của thí sinh lượt thi hiện tại trong phần thi riêng"""
         self.get_joint_bell, self.set_joint_bell = self.rpc.use_state("joint_bell", "")
         """Username thí sinh bấm chuông trả lời trong phần thi chung"""
         self.rpc.add_procedures(
             [
-                ("setstate_seperated", lambda *_: self.set_state(STAGE_SEPERATED), []),
-                ("setstate_joint", lambda *_: self.set_state(STAGE_JOINT), []),
+                ("setstage_seperated", lambda *_: self.set_state(STAGE_SEPERATED), []),
+                ("setstage_joint", lambda *_: self.set_state(STAGE_JOINT), []),
                 (
                     "ring_bell",
                     lambda _, callprod, _2, _3: self.set_joint_bell(
@@ -51,21 +55,23 @@ class KhoiDong(utils.PartImplementation):
                     ),
                     [],
                 ),
+                ("next_question", lambda *_: self.set_qid(self.get_qid() + 1), []),
             ]
         )
 
     def _seperated(self, show: engine.Show) -> engine.Status:
-
         return engine.Status.RUNNING
 
     def _joint(self, show: engine.Show) -> engine.Status:
-
         return engine.Status.RUNNING
 
     def on_update(self, show: engine.Show) -> engine.Status:
         qid = self.get_qid()
         if self.lastqid != qid and qid != -1:
             self.lastqid = self.get_qid()
+            self.set_current_question_content(
+                show.qbank.get_question(self.lastqid).prompt
+            )
             # self.set_current_question(show.qbank.get_question(self.get_qid()))
         if self.get_state() == STAGE_SEPERATED:
             return self._seperated(show)
@@ -78,4 +84,4 @@ class KhoiDong(utils.PartImplementation):
         handle: engine.IOHandle,
         addr: str,
     ):
-        await self.rpc.handle(show, packet, handle, addr)
+        (await self.rpc.handle(show, packet, handle, addr)).unwrap()

@@ -13,6 +13,7 @@ use crate::prelude::*;
 use crate::pyproperty;
 use crate::universal;
 use crate::universal::PortableValue;
+use crate::wasmprop;
 use crate::Player;
 
 /// An object encapsulating data decoded from JSON.
@@ -31,8 +32,9 @@ pub enum Packet {
     Query { data: Query },
     ProcedureList { data: Vec<ProcedureSignature> },
     CallProcedure { data: ProcedureCall },
-    GameState { data: Vec<GameStatePrototype> },
-    UpdateGameState { data: GameStateUpdate },
+    StateList { data: Vec<GameState> },
+    State { data: GameState },
+    UpdateState { data: GameState },
     Unknown { data: String },
 }
 
@@ -155,43 +157,52 @@ impl ProcedureSignature {
     }
 }
 
+// #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+// #[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
+// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+// #[serde(deny_unknown_fields, rename_all = "camelCase")]
+// /// A value belonging to the game's state.
+// pub struct GameStatePrototype {
+//     name: String,
+//     hidden: bool,
+//     data_type: universal::PortableType,
+// }
+// pyproperty!(GameStatePrototype:name      -> String);
+// pyproperty!(GameStatePrototype:hidden    -> bool);
+// pyproperty!(GameStatePrototype:data_type -> universal::PortableType);
+
+// #[cfg(feature = "logic")]
+// #[pymethods]
+// impl GameStatePrototype {
+//     #[new]
+//     pub fn new(name: String, hidden: bool, data_type: universal::PortableType) -> PyResult<Self> {
+//         Ok(Self {
+//             name,
+//             hidden,
+//             data_type,
+//         })
+//     }
+// }
+
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
-#[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 /// A value belonging to the game's state.
-pub struct GameStatePrototype {
-    name: String,
-    hidden: bool,
-    data_type: universal::PortableType,
-}
-pyproperty!(GameStatePrototype:name      -> String);
-pyproperty!(GameStatePrototype:hidden    -> bool);
-pyproperty!(GameStatePrototype:data_type -> universal::PortableType);
-
-#[cfg(feature = "logic")]
-#[pymethods]
-impl GameStatePrototype {
-    #[new]
-    pub fn new(name: String, hidden: bool, data_type: universal::PortableType) -> PyResult<Self> {
-        Ok(Self {
-            name,
-            hidden,
-            data_type,
-        })
-    }
-}
-
-#[cfg_attr(feature = "logic", pyclass(module = "engine"))]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-#[serde(deny_unknown_fields, rename_all = "camelCase")]
-/// A value belonging to the game's state.
-pub struct GameStateUpdate {
+pub struct GameState {
     pub name: String,
     pub data: PortableValue,
 }
-pyproperty!(GameStateUpdate:name -> String);
-pyproperty!(GameStateUpdate:data -> PortableValue);
+pyproperty!(GameState:name:set_name -> String);
+pyproperty!(GameState:data:set_data -> PortableValue);
+
+#[cfg(feature = "logic")]
+#[pymethods]
+impl GameState {
+    #[new]
+    pub fn new(name: String, data: PortableValue) -> GameState {
+        GameState { name, data }
+    }
+}
 
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
 #[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
@@ -290,20 +301,30 @@ impl crate::api::Resource for Credentials {}
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
+#[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
 /// Authorization request.
 pub struct AuthenticationStatus {
-    pub success: bool,
-    pub message: String,
+    success: bool,
+    message: String,
+    token: String,
 }
 pyproperty!(AuthenticationStatus:success -> bool);
 pyproperty!(AuthenticationStatus:message -> String);
+pyproperty!(AuthenticationStatus:token -> String);
+wasmprop!(AuthenticationStatus:wasm_success->success -> bool);
+wasmprop!(AuthenticationStatus:wasm_message->message -> String);
+wasmprop!(AuthenticationStatus:wasm_token->token -> String);
 
 #[cfg(feature = "logic")]
 #[pymethods]
 impl AuthenticationStatus {
     #[new]
-    pub fn new(success: bool, message: String) -> Self {
-        AuthenticationStatus { success, message }
+    pub fn new(success: bool, message: String, token: String) -> Self {
+        AuthenticationStatus {
+            success,
+            message,
+            token,
+        }
     }
 }
 
@@ -312,16 +333,18 @@ impl crate::api::Resource for AuthenticationStatus {}
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub enum Query {
     Player { index: String },
     Question { index: usize },
     PartByID { index: usize },
     PartByName { index: String },
+    State { index: String },
     QuestionBank {},
     Show {},
     Ticker {},
     Timer {},
     CurrentPart {},
     AvailableProcedures {},
-    GameState {},
+    StateList {},
 }

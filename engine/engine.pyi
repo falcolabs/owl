@@ -15,8 +15,8 @@ PacketData = Union[
     str,
     list[ProcedureSignature],
     ProcedureCall,
-    GameStateUpdate,
-    list[GameStatePrototype],
+    GameState,
+    list[GameState],
 ]
 """All the possible values in a packet's data."""
 
@@ -118,17 +118,23 @@ class Packet(ABC):
         data: ProcedureCall
         def __init__(self, data: ProcedureCall): ...
 
-    class GameState(Packet):
-        """A packet containing the state of the game."""
+    class StateList(Packet):
+        """A packet containing a list of all states present."""
 
-        data: list[GameStatePrototype]
-        def __init__(self, data: list[GameStatePrototype]): ...
+        data: list[GameState]
+        def __init__(self, data: list[GameState]): ...
 
-    class UpdateGameState(Packet):
+    class State(Packet):
+        """A packet containing a paticular state of the game."""
+
+        data: GameState
+        def __init__(self, data: GameState): ...
+
+    class UpdateState(Packet):
         """A packet updating the state of the game."""
 
-        data: GameStateUpdate
-        def __init__(self, data: GameStateUpdate): ...
+        data: GameState
+        def __init__(self, data: GameState): ...
 
     class Unknown(Packet):
         """An packet used to contain unknown data."""
@@ -162,7 +168,7 @@ class PortableValue:
     json: str
     data_type: PortableType
 
-    def __init__(self, data: str, type: PortableType): ...
+    def __init__(self, json: str, data_type: PortableType): ...
     def as_str(self) -> str: ...
     def as_int(self) -> int: ...
     def as_float(self) -> float: ...
@@ -191,25 +197,16 @@ class ProcedureCall:
     name: str
     args: list[tuple[str, PortableValue]]
 
-class GameStatePrototype:
-    """A game state's type and value.
-
-    ---
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
-
-    name: str
-    hidden: bool
-
-    def __init__(self, name: str, hidden: bool, data_type: PortableType): ...
-
-class GameStateUpdate:
+class GameState:
     """
-    An update to the game state.
+    A game state.
 
     **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
 
     name: str
     data: PortableValue
+
+    def __init__(self, name: str, data: PortableValue): ...
 
 class Show:
     """An object containing all the resources available globally
@@ -286,6 +283,8 @@ class RawRequest:
     content: Packet
 
 class IOHandle:
+    addr: str
+
     async def send(self, msg: str): ...
 
 class Status:
@@ -389,7 +388,7 @@ class Timer:
     is_paused: bool
 
     def __init__(self):
-        """Creates a new timer, which starts immidiately after creation."""
+        """Creates a new timer, which pauses immidiately after creation."""
 
     def pause(self) -> None:
         """Pauses the timer."""
@@ -400,6 +399,10 @@ class Timer:
     def time_elapsed(self) -> Any:
         """Gets the time elapsed from the calling of `start()`,
         minus the pauses."""
+
+    def pack(self) -> str: ...
+    @staticmethod
+    def from_json(target: str) -> Timer: ...
 
 class Ticker:
     last_tick: Any
@@ -414,8 +417,9 @@ class Credentials:
 class AuthenticationStatus:
     success: bool
     message: str
+    token: str
 
-    def __init__(self, success: bool, message: str): ...
+    def __init__(self, success: bool, message: str, token: str): ...
 
 # = Union[
 #     Query.Player,
@@ -444,6 +448,10 @@ class Query(ABC):
         index: str
         def __init__(self, index: str): ...
 
+    class State(Query):
+        index: str
+        def __init__(self, index: str): ...
+
     class QuestionBank(Query):
         pass
 
@@ -462,7 +470,7 @@ class Query(ABC):
     class AvailableProcedures(Query):
         pass
 
-    class GameState(Query):
+    class StateList(Query):
         pass
 
 class Color:

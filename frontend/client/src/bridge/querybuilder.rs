@@ -22,6 +22,10 @@ impl Query {
     pub fn part_by_name(value: JsValue) -> ClientPacket {
         QueryPacket::new(QueryType::PartByName, value).into()
     }
+    #[wasm_bindgen(js_name = state)]
+    pub fn state(value: JsValue) -> ClientPacket {
+        QueryPacket::new(QueryType::State, value).into()
+    }
     #[wasm_bindgen(js_name = questionBank)]
     pub fn question_bank() -> ClientPacket {
         QueryPacket::new(QueryType::QuestionBank, JsValue::null()).into()
@@ -46,8 +50,8 @@ impl Query {
     pub fn available_procedures() -> ClientPacket {
         QueryPacket::new(QueryType::AvailableProcedures, JsValue::null()).into()
     }
-    #[wasm_bindgen(js_name = gameState)]
-    pub fn game_state() -> ClientPacket {
-        QueryPacket::new(QueryType::GameState, JsValue::null()).into()
+    #[wasm_bindgen(js_name = stateList)]
+    pub fn state_list() -> ClientPacket {
+        QueryPacket::new(QueryType::StateList, JsValue::null()).into()
     }
 }

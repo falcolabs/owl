@@ -3,11 +3,14 @@
 export const ORG_NAME: string = "CBN Shitposter Association · THPT Chuyên Bắc Ninh";
 export const SHOW_NAME: string = "Đáy xã hội 2";
 
-import type { PacketType, Packet, PacketVariant } from "client";
-type CBHandle = (packet: PacketVariant) => void
+import { PacketType, type Packet, type _PacketValue, type _PacketVariant } from "client";
+type CBHandle<T extends PacketType> = (packet: Packet<T>) => void
+type CBHandleAll = (packet: _PacketVariant) => void
 
 export var Peeker: typeof import("client");
-export { RPCBuilder } from "$lib/rpcbuilder";
+export { CallProcedure } from "$lib/rpcbuilder";
+export { UpdateState, StateManager, type AcceptableValue } from "$lib/gamestate";
+export { Value } from "$lib/value";
 
 async function ensure(socket: WebSocket, timeout = 10000) {
     const isOpened = () => (socket.readyState === WebSocket.OPEN)
@@ -29,8 +32,9 @@ async function ensure(socket: WebSocket, timeout = 10000) {
 
 export class Connection {
     ws!: WebSocket
-    callbacks!: Map<PacketType, CBHandle[]>
-    global_cb!: CBHandle[]
+    callbacks!: Map<PacketType, CBHandle<PacketType>[]>
+    globalCB!: CBHandleAll[]
+    public currentPart!: string
 
     static async create(): Promise<Connection> {
         Peeker = await import("client")
@@ -38,15 +42,18 @@ export class Connection {
         Peeker.ClientHandle.set_panic_hook()
         obj.ws = new WebSocket("ws://localhost:6942/harlem");
         obj.callbacks = new Map()
-        obj.global_cb = []
+        obj.globalCB = []
         obj.ws.onmessage = ((me) => {
             let packet: Packet<PacketType> = Peeker.ClientHandle.parse(me.data)
+            if (packet.variant == PacketType.Part) {
+                // @ts-ignore: can never happen
+                obj.currentPart = packet.value.name;
+            }
             if (obj.callbacks.has(packet.variant)) {
-                // @ts-ignore
                 obj.callbacks.get(packet.variant)?.forEach((handle) => handle(packet));
             }
             // @ts-ignore
-            obj.global_cb.forEach((handle) => handle(packet));
+            obj.globalCB.forEach(async (handle) => handle(packet));
         })
         if (!await ensure(obj.ws)) {
             throw new Error("Unable to connect to host.")
@@ -55,14 +62,18 @@ export class Connection {
         return obj
     }
 
-    on(trigger: PacketType | "*", handle: CBHandle) {
+    on<T extends PacketType>(trigger: T, handle: CBHandle<T>): void
+    on(trigger: "*", handle: CBHandleAll): void
+    on(trigger: PacketType | "*", handle: CBHandleAll | CBHandle<PacketType>): void {
         if (trigger === "*") {
-            this.global_cb.push(handle);
+            this.globalCB.push(handle);
             return;
         }
         if (this.callbacks.has(trigger)) {
+            // @ts-ignore
             this.callbacks.get(trigger)?.push(handle);
         } else {
+            // @ts-ignore
             this.callbacks.set(trigger, [handle,])
         }
     }

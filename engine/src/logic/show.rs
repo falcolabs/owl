@@ -9,17 +9,6 @@ use pyo3::prelude::*;
 impl Show {
     #[staticmethod]
     pub fn ws_task(listen_on: String, serve_on: String, static_dir: String, call_hook: Py<PyAny>) {
-        let test = crate::api::Packet::Part {
-            data: PartProperties {
-                name: String::from("auth"),
-            },
-        };
-        println!("{:#?}", test.pack());
-        println!(
-            "{:#?}",
-            serde_json::from_str::<crate::api::Packet>(test.pack().as_str())
-        );
-
         let (tx, mut rx) = std::sync::mpsc::channel::<crate::net::wspy::RawRequest>();
         std::thread::spawn(move || {
             crate::net::wspy::start_webservice(tx, listen_on, serve_on, static_dir);

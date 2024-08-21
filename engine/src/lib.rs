@@ -20,9 +20,9 @@ use pyo3::prelude::*;
 mod engine {
     #[pymodule_export]
     use crate::prelude::{
-        AuthenticationStatus, Credentials, GameStatePrototype, GameStateUpdate, Packet, Part,
-        PartProperties, Player, ProcedureCall, ProcedureSignature, Query, Question, QuestionBank,
-        Show, Status, Ticker, Timer,
+        AuthenticationStatus, Credentials, GameState, Packet, Part, PartProperties, Player,
+        ProcedureCall, ProcedureSignature, Query, Question, QuestionBank, Show, Status, Ticker,
+        Timer,
     };
 
     #[pymodule_export]
@@ -34,6 +34,6 @@ mod engine {
     #[pymodule_export]
     use crate::logging::{
         color::{mccolor, mccolor_esc, Color},
-        logger::{py_debug, py_error, py_info, py_warning, Level, set_log_level},
+        logger::{py_debug, py_error, py_info, py_warning, set_log_level, Level},
     };
 }

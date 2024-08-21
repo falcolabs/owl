@@ -108,11 +108,12 @@ pub struct RawRequest {
 pub struct IOHandle {
     sender: Arc<Mutex<futures::stream::SplitSink<WebSocket, axum::extract::ws::Message>>>,
     receiver: Arc<Mutex<futures::stream::SplitStream<WebSocket>>>,
+    addr: String,
 }
 
 impl PartialEq for IOHandle {
     fn eq(&self, other: &Self) -> bool {
-        Arc::ptr_eq(&self.sender, &other.sender)
+        self.addr == other.addr
     }
 }
 
@@ -120,13 +121,20 @@ impl Eq for IOHandle {}
 
 #[pymethods]
 impl IOHandle {
-    pub async fn send(&mut self, msg: String) {
-        self.sender
-            .lock()
-            .await
-            .send(Message::Text(msg))
-            .await
-            .unwrap();
+    pub async fn send(&mut self, msg: String) -> PyResult<()> {
+        match self.sender.lock().await.send(Message::Text(msg)).await {
+            Ok(_) => Ok(()),
+            Err(e) => Err(pyo3::exceptions::PyConnectionResetError::new_err(format!(
+                "Unable to send to handle {}: {}",
+                self.addr,
+                e.to_string()
+            ))),
+        }
+    }
+
+    #[getter]
+    pub fn addr(&self) -> String {
+        self.addr.clone()
     }
 }
 
@@ -137,6 +145,19 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
     let (s, r) = socket.split();
     let sender = Arc::new(Mutex::new(s));
     let receiver = Arc::new(Mutex::new(r));
+    call_hook
+        .send(RawRequest {
+            handle: IOHandle {
+                sender: Arc::clone(&sender),
+                receiver: Arc::clone(&receiver),
+                addr: who.to_string(),
+            },
+            sender: who.to_string(),
+            content: Packet::Unknown {
+                data: "CONNECTION INITIATED".to_string(),
+            },
+        })
+        .unwrap();
 
     while let Some(Ok(msg)) = receiver.lock().await.next().await {
         let content = msg.to_text().expect("Error extracting text from Message");
@@ -144,6 +165,7 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
             handle: IOHandle {
                 sender: Arc::clone(&sender),
                 receiver: Arc::clone(&receiver),
+                addr: who.to_string(),
             },
             sender: who.to_string(),
             content: serde_json::from_str(content).unwrap_or(Packet::Unknown {
@@ -167,4 +189,18 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
         //     .expect("Unable to form coroutine.");
         // tokio::spawn();
     }
+
+    call_hook
+        .send(RawRequest {
+            handle: IOHandle {
+                sender: Arc::clone(&sender),
+                receiver: Arc::clone(&receiver),
+                addr: who.to_string(),
+            },
+            sender: who.to_string(),
+            content: Packet::Unknown {
+                data: "CONNECTION HALTED".to_string(),
+            },
+        })
+        .unwrap();
 }

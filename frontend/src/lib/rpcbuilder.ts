@@ -1,8 +1,8 @@
-import { preloadData } from "$app/navigation";
 import { Peeker } from "$lib";
-import type { Packet, PacketType, PortableType } from "client";
+import type { Packet, PacketType, PortableType, PortableValue } from "client";
+import { Value } from "./value";
 
-export class RPCBuilder {
+export class CallProcedure {
     call!: Packet<PacketType.CallProcedure>
 
     constructor() {
@@ -16,36 +16,39 @@ export class RPCBuilder {
         }
     }
 
-    name(name: string): RPCBuilder {
-        this.call.value.name = name;
+    static name(name: string): CallProcedure {
+        let obj = new CallProcedure();
+        obj.call.value.name = name;
+        return obj;
+    }
+
+    arg(name: string, pv: PortableValue): CallProcedure {
+        this.call.value.args.push([name, pv])
         return this;
     }
 
-    arg(name: string, t: [] | number | string | boolean | null | object, type: "array" | "number" | "string" | "boolean" | "null" | "object") {
-        let pv: PortableType;
-        switch (type) {
-            case "array":
-                pv = Peeker.PortableType.ARRAY
-            case "boolean":
-                pv = Peeker.PortableType.BOOLEAN
-            case "string":
-                pv = Peeker.PortableType.STRING
-            case "number":
-                pv = Peeker.PortableType.NUMBER
-            case "object":
-                pv = Peeker.PortableType.OBJECT
-            case "null":
-                pv = Peeker.PortableType.NULL
-        }
+    array(name: string, arr: any[]): CallProcedure {
+        return this.arg(name, Value.array(arr))
+    }
 
+    number(name: string, num: number): CallProcedure {
+        return this.arg(name, Value.number(num))
+    }
 
-        this.call.value.args.push([name, {
-            data: JSON.stringify(t),
-            dataType: pv
-        }])
+    string(name: string, str: string): CallProcedure {
+        return this.arg(name, Value.string(str))
+    }
+
+    null(name: string): CallProcedure {
+        return this.arg(name, Value.null())
+    }
+
+    object(name: string, obj: object): CallProcedure {
+        return this.arg(name, Value.object(obj))
     }
 
     build(): Packet<PacketType.CallProcedure> {
+        console.log(this.call.value)
         return new Peeker.Packet(
             this.call.variant,
             this.call.value

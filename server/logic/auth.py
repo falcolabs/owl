@@ -1,9 +1,10 @@
 import engine
-import utils
+
+import penguin
 from config import config
 
 
-class Auth(utils.PartImplementation):
+class Auth(penguin.PartImplementation):
     # def __init__(self):
     # self.props = engine.PartProperties("auth")
 

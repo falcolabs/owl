@@ -4,20 +4,31 @@
     import ScoreBar from "../../../components/ScoreBar.svelte";
     import TitleBar from "../../../components/TitleBar.svelte";
     import { goto } from "$app/navigation";
-    const current_question = {
-        prompt: "Nguyên liệu để sản xuất bromine (Br) trong công nghiệp là gì?"
+    import { Peeker, Connection, StateManager, type AcceptableValue } from "$lib";
+    const STAGE_SEPERATED = 0;
+    const STAGE_JOINT = 1;
+    let conn: Connection;
+    let stateman: StateManager;
+    let state = {
+        qid: -1,
+        current_question_content: ""
     };
-    let ctx: import("client").WalkieTalkie;
+    const question_placement = {
+        STAGE_SEPERATED: [
+            [0, 1, 2, 3, 4, 5],
+            [6, 7, 8, 9, 10, 11],
+            [12, 13, 14, 15, 16, 17],
+            [18, 19, 20, 21, 22, 23]
+        ],
+        STAGE_JOINT: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    };
+
     onMount(async () => {
-        let peeker: typeof import("client") = await import("client");
-        peeker.panic_bait();
-        let khoidong = new peeker.KhoiDong();
-        ctx = await peeker.WalkieTalkie.create(
-            (pname: string) => {
-                if (pname == "khoidong") return khoidong;
-            },
-            (_: any) => {}
-        );
+        conn = await Connection.create();
+        stateman = await StateManager.create(conn);
+        // @ts-ignore
+        stateman.on_change((s) => (state = s));
+        
     });
 </script>
 
@@ -26,8 +37,13 @@
     <TitleBar activity="Khởi động" />
     <div class="center-box">
         <div class="box">
-            <PillTag text="Câu 1" />
-            <p class="prompt">{current_question.prompt}</p>
+            {#if state.qid > -1}
+                <PillTag text="Câu {state.qid}" />
+                <p class="prompt">{state.current_question_content}</p>
+            {:else}
+                <PillTag text="Chuẩn bị" />
+                <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
+            {/if}
             <div class="sbar"><ScoreBar /></div>
         </div>
     </div>

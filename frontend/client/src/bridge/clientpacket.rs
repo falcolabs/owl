@@ -23,9 +23,10 @@ pub enum PacketType {
     Query = 9,
     ProcedureList = 10,
     CallProcedure = 11,
-    GameState = 12,
-    UpdateGameState = 13,
-    Unknown = 14,
+    StateList = 12,
+    State = 13,
+    UpdateState = 14,
+    Unknown = 15,
 }
 
 impl Into<f64> for PacketType {
@@ -101,13 +102,6 @@ macro_rules! packet_conv {
 
 impl Into<engine::Packet> for ClientPacket {
     fn into(self) -> engine::Packet {
-        console_log!(
-            "trying to convert to engine::Packet: {}",
-            js_sys::JSON::stringify(&self.value)
-                .unwrap()
-                .as_string()
-                .unwrap()
-        );
         match self.variant {
             PacketType::Player => packet_conv!(self->Player),
             PacketType::Part => packet_conv!(self->Part),
@@ -120,8 +114,9 @@ impl Into<engine::Packet> for ClientPacket {
             PacketType::AuthStatus => packet_conv!(self->AuthStatus),
             PacketType::ProcedureList => packet_conv!(self->ProcedureList),
             PacketType::CallProcedure => packet_conv!(self->CallProcedure),
-            PacketType::GameState => packet_conv!(self->GameState),
-            PacketType::UpdateGameState => packet_conv!(self->UpdateGameState),
+            PacketType::StateList => packet_conv!(self->StateList),
+            PacketType::State => packet_conv!(self->State),
+            PacketType::UpdateState => packet_conv!(self->UpdateState),
             PacketType::Unknown => packet_conv!(self->Unknown),
             PacketType::Query => crate::bridge::QueryPacket::from(self.value).into(),
         }
@@ -143,13 +138,18 @@ impl From<engine::Packet> for ClientPacket {
             engine::Packet::Query { .. } => PacketType::Query,
             engine::Packet::ProcedureList { .. } => PacketType::ProcedureList,
             engine::Packet::CallProcedure { .. } => PacketType::CallProcedure,
-            engine::Packet::GameState { .. } => PacketType::GameState,
-            engine::Packet::UpdateGameState { .. } => PacketType::UpdateGameState,
+            engine::Packet::StateList { .. } => PacketType::StateList,
+            engine::Packet::State { .. } => PacketType::State,
+            engine::Packet::UpdateState { .. } => PacketType::UpdateState,
             engine::Packet::Unknown { .. } => PacketType::Unknown,
         };
         Self {
             variant: ptype,
-            value: JsValue::from_serde(&packet).unwrap().into(),
+            value: {
+                match packet {
+                    _ => JsValue::from_serde(&packet).unwrap().into(),
+                }
+            },
         }
     }
 }

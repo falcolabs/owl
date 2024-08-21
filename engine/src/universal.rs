@@ -1,6 +1,7 @@
 //! Bindings for types and methods usable and
 //! transferable to and from JS, WASM, Python and Rust.
 
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::*;
 
@@ -38,27 +39,29 @@ macro_rules! pyproperty {
 
 #[macro_export]
 macro_rules! wasmprop {
-    ($type:ty:$name:ident -> $dt:ty) => {
+    ($type:ty:$fname:ident->$name:ident -> $dt:ty) => {
         #[cfg(feature = "wasm")]
         #[wasm_bindgen]
+        #[allow(non_snake_case)]
         impl $type {
-            #[wasm_bindgen(getter)]
-            pub fn $name(&self) -> $dt {
+            #[wasm_bindgen(getter, js_name=$name)]
+            pub fn $fname(&self) -> $dt {
                 self.$name.clone()
             }
         }
     };
-    ($type:ty:$name:ident:$set_name:ident -> $dt:ty) => {
+    ($type:ty:$fname:ident,$fset:ident->$name:ident -> $dt:ty) => {
         #[cfg(feature = "wasm")]
         #[wasm_bindgen]
+        #[allow(non_snake_case)]
         impl $type {
-            #[wasm_bindgen(getter)]
-            pub fn $name(&self) -> $dt {
+            #[wasm_bindgen(getter, js_name=$name)]
+            pub fn $fname(&self) -> $dt {
                 self.$name.clone()
             }
 
-            #[wasm_bindgen(setter)]
-            pub fn $set_name(&mut self, new_value: $dt) {
+            #[wasm_bindgen(setter, js_name=$name)]
+            pub fn $fset(&mut self, new_value: $dt) {
                 self.$name = new_value
             }
         }
@@ -104,17 +107,63 @@ mod logic {
     }
 }
 
+/// Visitor must be implemented seperately as this type is used in JavaScript where
+/// enum does not exist, so a numer index is used instead.
+/// Packet and PacketType (client) does not need to implement this
+/// as only Rust code handles their matching and serialization.
+struct PortableTypeVisitor;
+
+impl<'de> serde::de::Visitor<'de> for PortableTypeVisitor {
+    type Value = PortableType;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str(&format!("an integer between 0 and 32767"))
+    }
+
+    fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match v {
+            0 => Ok(PortableType::ARRAY),
+            1 => Ok(PortableType::NUMBER),
+            2 => Ok(PortableType::STRING),
+            3 => Ok(PortableType::NULL),
+            4 => Ok(PortableType::OBJECT),
+            5 => Ok(PortableType::BOOLEAN),
+            _ => Err(E::custom("PortableType variant not found")),
+        }
+    }
+}
+
 #[cfg_attr(feature = "logic", pyclass(eq, eq_int))]
 #[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq)]
-#[serde(deny_unknown_fields, rename_all = "UPPERCASE")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PortableType {
-    ARRAY,
-    NUMBER,
-    STRING,
-    NULL,
-    OBJECT,
-    BOOLEAN,
+    ARRAY = 0,
+    NUMBER = 1,
+    STRING = 2,
+    NULL = 3,
+    OBJECT = 4,
+    BOOLEAN = 5,
+}
+
+impl<'de> Deserialize<'de> for PortableType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_u64(PortableTypeVisitor)
+    }
+}
+
+impl Serialize for PortableType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u64(*self as u64)
+    }
 }
 
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
@@ -126,13 +175,32 @@ pub struct PortableValue {
     data_type: PortableType,
 }
 
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+impl PortableValue {
+    #[wasm_bindgen(constructor)]
+    pub fn constructor(data: &str, data_type: PortableType) -> Self {
+        Self::new(data, data_type)
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn data(&self) -> String {
+        self.data.clone()
+    }
+
+    #[wasm_bindgen(getter, js_name = dataType)]
+    pub fn js_data_type(&self) -> PortableType {
+        self.data_type
+    }
+}
+
 #[cfg(feature = "logic")]
 #[pymethods]
 impl PortableValue {
     #[new]
-    pub fn create(data: &str, data_type: PortableType) -> PortableValue {
+    pub fn create(json: String, data_type: PortableType) -> PortableValue {
         PortableValue {
-            data: data.to_string(),
+            data: json,
             data_type,
         }
     }
@@ -179,7 +247,19 @@ impl PortableValue {
     #[pyo3(name = "data_type")]
     #[getter]
     pub fn py_data_type(&self) -> PortableType {
-        self.data_type.clone()
+        self.data_type
+    }
+
+    #[pyo3(name = "json")]
+    #[setter]
+    pub fn set_py_data(&mut self, data: String) {
+        self.data = data;
+    }
+
+    #[pyo3(name = "data_type")]
+    #[setter]
+    pub fn set_py_data_type(&mut self, data_type: PortableType) {
+        self.data_type = data_type;
     }
 }
 
@@ -253,7 +333,7 @@ impl PortableValue {
     }
 
     pub fn as_struct<'a, T: serde::de::DeserializeOwned>(sth: PortableValue) -> T {
-        parse(&sth.data)
+        serde_json::from_str(&sth.data).unwrap()
     }
 
     pub fn json(&self) -> String {
@@ -261,7 +341,7 @@ impl PortableValue {
     }
 
     pub fn data_type(&self) -> PortableType {
-        self.data_type.clone()
+        self.data_type
     }
 }
 
@@ -269,13 +349,10 @@ pub fn stringify<T>(sth: &T) -> String
 where
     T: serde::Serialize + std::fmt::Debug,
 {
-    #[cfg(feature = "logic")]
-    return logic::stringify(sth);
-    #[cfg(not(feature = "logic"))]
-    #[cfg(feature = "wasm")]
-    return wasm::stringify(sth);
+    serde_json::to_string(sth).unwrap()
 }
 
+#[deprecated]
 pub fn parse<'a, T>(data: &'a str) -> T
 where
     T: serde::de::DeserializeOwned,
