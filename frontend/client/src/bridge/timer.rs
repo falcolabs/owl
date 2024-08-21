@@ -4,8 +4,6 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_time::{Duration, SystemTime};
 
-use crate::console_log;
-
 #[wasm_bindgen(skip_typescript, inspectable)]
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[allow(dead_code)]

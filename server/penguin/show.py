@@ -8,6 +8,7 @@ from config import config
 
 SESSION_MAN = SessionManager()
 TASK_POOL: list = []
+SHOW: "ShowBootstrap" = None  # type: ignore
 
 
 class PartImplementation(abc.ABC):
@@ -84,6 +85,8 @@ class ShowBootstrap(engine.Show):
                 response = engine.Packet.Timer(self.timer)
             case engine.Query.CurrentPart():
                 response = engine.Packet.Part(self.parts[self.current_part].props)
+            case engine.Query.PlayerList():
+                response = engine.Packet.PlayerList(self.players)
             case _:
                 await self.parts[self.current_part].implementation.on_request(
                     self, req.content, req.handle, req.sender

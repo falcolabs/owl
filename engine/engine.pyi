@@ -142,6 +142,12 @@ class Packet(ABC):
         data: str
         def __init__(self, data: str): ...
 
+    class PlayerList(Packet):
+        """Packet containing a list of players."""
+
+        data: str
+        def __init__(self, data: list[Player]): ...
+
     data: PacketData
 
     @abstractmethod
@@ -451,6 +457,10 @@ class Query(ABC):
     class State(Query):
         index: str
         def __init__(self, index: str): ...
+
+    class PlayerList(Query):
+        index: str
+        def __init__(self): ...
 
     class QuestionBank(Query):
         pass

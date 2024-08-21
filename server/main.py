@@ -22,6 +22,7 @@ def main():
         60,
         qbank,
     )
+    penguin.SHOW = show
 
     show.start(
         "localhost:6942",

@@ -36,6 +36,7 @@ pub enum Packet {
     State { data: GameState },
     UpdateState { data: GameState },
     Unknown { data: String },
+    PlayerList { data: Vec<Player> },
 }
 
 impl Packet {
@@ -340,6 +341,7 @@ pub enum Query {
     PartByID { index: usize },
     PartByName { index: String },
     State { index: String },
+    PlayerList {},
     QuestionBank {},
     Show {},
     Ticker {},

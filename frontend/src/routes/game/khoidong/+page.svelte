@@ -26,9 +26,11 @@
     onMount(async () => {
         conn = await Connection.create();
         stateman = await StateManager.create(conn);
-        // @ts-ignore
-        stateman.on_change((s) => (state = s));
-        
+        stateman.on_change((s) => {
+            // @ts-ignore
+            state = s;
+            console.log(s);
+        });
     });
 </script>
 
@@ -38,7 +40,7 @@
     <div class="center-box">
         <div class="box">
             {#if state.qid > -1}
-                <PillTag text="Câu {state.qid}" />
+                <PillTag text="Câu {state.qid + 1}" />
                 <p class="prompt">{state.current_question_content}</p>
             {:else}
                 <PillTag text="Chuẩn bị" />

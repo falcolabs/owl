@@ -26,6 +26,10 @@ impl Query {
     pub fn state(value: JsValue) -> ClientPacket {
         QueryPacket::new(QueryType::State, value).into()
     }
+    #[wasm_bindgen(js_name = playerList)]
+    pub fn player_list(value: JsValue) -> ClientPacket {
+        QueryPacket::new(QueryType::PlayerList, value).into()
+    }
     #[wasm_bindgen(js_name = questionBank)]
     pub fn question_bank() -> ClientPacket {
         QueryPacket::new(QueryType::QuestionBank, JsValue::null()).into()

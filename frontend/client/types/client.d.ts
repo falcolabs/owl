@@ -1,3 +1,5 @@
+// TODO - reenable automatic generation so
+// changing Rust code does not lead to changing TS types.
 export enum PacketType {
     Player = 0,
     Part = 1,
@@ -15,6 +17,7 @@ export enum PacketType {
     State = 13,
     UpdateState = 14,
     Unknown = 15,
+    PlayerList = 16,
 }
 
 export type Player = {
@@ -99,13 +102,14 @@ export enum QueryType {
     PartByID = 2,
     PartByName = 3,
     State = 4,
-    QuestionBank = 5,
-    Show = 6,
-    Ticker = 7,
-    Timer = 8,
-    CurrentPart = 9,
-    AvailableProcedures = 10,
-    GameState = 11,
+    PlayerList = 5,
+    QuestionBank = 6,
+    Show = 7,
+    Ticker = 8,
+    Timer = 9,
+    CurrentPart = 10,
+    AvailableProcedures = 11,
+    StateList = 12,
 }
 
 export class QueryPacket<T extends QueryType> {
@@ -121,6 +125,7 @@ export class Query {
     static partById(value: number): Packet<PacketType.Query>;
     static partByName(value: string): Packet<PacketType.Query>;
     static state(value: string): Packet<PacketType.Query>;
+    static playerList(): Packet<PacketType.Query>;
     static questionBank(): Packet<PacketType.Query>;
     static show(): Packet<PacketType.Query>;
     static ticker(): Packet<PacketType.Query>;
@@ -146,12 +151,13 @@ type _QueryVariant =
     | { variant: QueryType.PartByID; index: number }
     | { variant: QueryType.PartByName; index: string }
     | { variant: QueryType.QuestionBank }
+    | { variant: QueryType.State }
+    | { variant: QueryType.PlayerList }
     | { variant: QueryType.Show }
     | { variant: QueryType.Ticker }
     | { variant: QueryType.Timer }
     | { variant: QueryType.CurrentPart }
-    | { variant: QueryType.AvailableProcedures }
-    | { variant: QueryType.GameState };
+    | { variant: QueryType.AvailableProcedures };
 
 export type ProcedureSignature = {
     name: string;
@@ -233,6 +239,8 @@ export type _PacketValue<T> = T extends PacketType.Player
     ? GameState
     : T extends PacketType.Unknown
     ? Unknown
+    : T extends PacketType.PlayerList
+    ? Player[]
     : never;
 
 export type _PacketVariant =
@@ -251,7 +259,8 @@ export type _PacketVariant =
     | { variant: PacketType.StateList; value: GameState[]; pack: () => string; }
     | { variant: PacketType.State; value: GameState; pack: () => string; }
     | { variant: PacketType.UpdateState; value: GameState; pack: () => string; }
-    | { variant: PacketType.Unknown; value: Unknown; pack: () => string; };
+    | { variant: PacketType.Unknown; value: Unknown; pack: () => string; }
+    | { variant: PacketType.PlayerList; value: Player[]; pack: () => string; };
 
 /** Infrastructure for sending and handling {@link Packet}. */
 export class ClientHandle {

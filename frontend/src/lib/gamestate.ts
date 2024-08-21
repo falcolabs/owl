@@ -7,7 +7,7 @@ export class StateManager {
     state_storage!: Map<string, GameState>
     connection!: Connection
     listeners!: Map<string, (value: GameState) => void>
-    state!: { [key: string]: AcceptableValue }
+    public state!: { [key: string]: AcceptableValue }
     listen_all!: (state: { [key: string]: AcceptableValue }) => void
 
     private handleState(state: GameState) {
@@ -35,6 +35,7 @@ export class StateManager {
             obj.state.__init = true
         })
         connection.on(Peeker.PacketType.State, (packet) => {
+            console.log(packet.value);
             obj.handleState(packet.value)
 
         })

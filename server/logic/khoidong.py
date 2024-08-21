@@ -18,12 +18,12 @@ class KhoiDong(penguin.PartImplementation):
         self.rpc = penguin.RPCManager("khoidong")
 
         self.question_placement = {
-            STAGE_SEPERATED: [
-                [0, 1, 2, 3, 4, 5],
-                [6, 7, 8, 9, 10, 11],
-                [12, 13, 14, 15, 16, 17],
-                [18, 19, 20, 21, 22, 23],
-            ],
+            STAGE_SEPERATED: {
+                0: [0, 1, 2, 3, 4, 5],
+                1: [6, 7, 8, 9, 10, 11],
+                2: [12, 13, 14, 15, 16, 17],
+                3: [18, 19, 20, 21, 22, 23],
+            },
             STAGE_JOINT: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
         }
 
@@ -33,8 +33,9 @@ class KhoiDong(penguin.PartImplementation):
         self.get_state, self.set_state = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
         self.get_qid, self.set_qid = self.rpc.use_state("qid", -1)
-        self.lastqid = self.get_qid()
-        """Trạng thái phần thi."""
+        """Câu hỏi hiện tại."""
+        self.rpc.on_change("qid", self.on_qid_change)
+
         self.get_seperated_candidate, self.set_seperated_candidate = self.rpc.use_state(
             "seperated_candidate", ""
         )
@@ -65,14 +66,22 @@ class KhoiDong(penguin.PartImplementation):
     def _joint(self, show: engine.Show) -> engine.Status:
         return engine.Status.RUNNING
 
+    def on_qid_change(self, _: engine.PortableValue):
+        self.set_current_question_content(
+            penguin.SHOW.qbank.get_question(self.get_qid()).prompt
+        )
+
     def on_update(self, show: engine.Show) -> engine.Status:
-        qid = self.get_qid()
-        if self.lastqid != qid and qid != -1:
-            self.lastqid = self.get_qid()
-            self.set_current_question_content(
-                show.qbank.get_question(self.lastqid).prompt
-            )
-            # self.set_current_question(show.qbank.get_question(self.get_qid()))
+        # qid = self.get_qid()
+        # if self.lastqid != qid and qid != -1:
+        #     self.lastqid = self.get_qid()
+        #     engine.log_debug(
+        #         f"Setting new question content: {show.qbank.get_question(self.lastqid).prompt}"
+        #     )
+        #     self.set_current_question_content(
+        #         show.qbank.get_question(self.lastqid).prompt
+        #     )
+        #     # self.set_current_question(show.qbank.get_question(self.get_qid()))
         if self.get_state() == STAGE_SEPERATED:
             return self._seperated(show)
         return self._joint(show)

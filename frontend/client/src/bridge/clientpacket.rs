@@ -5,8 +5,6 @@ use js_sys::{Object, Reflect};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-use crate::console_log;
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[wasm_bindgen(skip_typescript)]
 #[allow(unused)]
@@ -27,6 +25,7 @@ pub enum PacketType {
     State = 13,
     UpdateState = 14,
     Unknown = 15,
+    PlayerList = 16,
 }
 
 impl Into<f64> for PacketType {
@@ -118,6 +117,7 @@ impl Into<engine::Packet> for ClientPacket {
             PacketType::State => packet_conv!(self->State),
             PacketType::UpdateState => packet_conv!(self->UpdateState),
             PacketType::Unknown => packet_conv!(self->Unknown),
+            PacketType::PlayerList => packet_conv!(self->PlayerList),
             PacketType::Query => crate::bridge::QueryPacket::from(self.value).into(),
         }
     }
@@ -142,6 +142,7 @@ impl From<engine::Packet> for ClientPacket {
             engine::Packet::State { .. } => PacketType::State,
             engine::Packet::UpdateState { .. } => PacketType::UpdateState,
             engine::Packet::Unknown { .. } => PacketType::Unknown,
+            engine::Packet::PlayerList { .. } => PacketType::PlayerList,
         };
         Self {
             variant: ptype,
