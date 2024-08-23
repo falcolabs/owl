@@ -48,7 +48,6 @@ export class CallProcedure {
     }
 
     build(): Packet<PacketType.CallProcedure> {
-        console.log(this.call.value)
         return new Peeker.Packet(
             this.call.variant,
             this.call.value

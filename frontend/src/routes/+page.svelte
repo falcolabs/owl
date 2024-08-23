@@ -5,9 +5,7 @@
     import { onMount } from "svelte";
     import TitleBar from "../components/TitleBar.svelte";
     import { goto } from "$app/navigation";
-
-    let peeker: typeof import("client");
-    let res: string;
+    
     let username: HTMLInputElement;
     let accessKey: HTMLInputElement;
     let conn: Connection;
@@ -19,13 +17,13 @@
             unavailable = true;
         }
         conn.on(PacketType.AuthStatus, (packet) => {
-            // if (packet.value.success) {
-            //     console.log("redirecting");
-            //     goto(`/game/khoidong?token=${packet.value.token}`).then(() => {
-            //         console.error("Failed to redirect to target.");
-            //     });
-            // }
-            authenticated = true;
+            if (packet.value.success) {
+                //     console.log("redirecting");
+                //     goto(`/game/khoidong?token=${packet.value.token}`).then(() => {
+                //         console.error("Failed to redirect to target.");
+                //     });
+                authenticated = true;
+            }
         });
     });
 

@@ -4,51 +4,43 @@
     import ScoreBar from "../../../components/ScoreBar.svelte";
     import TitleBar from "../../../components/TitleBar.svelte";
     import { goto } from "$app/navigation";
-    import { Peeker, Connection, StateManager, type AcceptableValue } from "$lib";
+    import { Peeker, Connection, GameMaster, type AcceptableValue } from "$lib";
+    import { readable, type Readable } from "svelte/store";
     const STAGE_SEPERATED = 0;
     const STAGE_JOINT = 1;
     let conn: Connection;
-    let stateman: StateManager;
-    let state = {
+    let gm: GameMaster;
+    let states: Readable<any> = readable({
         qid: -1,
         current_question_content: ""
-    };
-    const question_placement = {
-        STAGE_SEPERATED: [
-            [0, 1, 2, 3, 4, 5],
-            [6, 7, 8, 9, 10, 11],
-            [12, 13, 14, 15, 16, 17],
-            [18, 19, 20, 21, 22, 23]
-        ],
-        STAGE_JOINT: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-    };
+    });
 
     onMount(async () => {
         conn = await Connection.create();
-        stateman = await StateManager.create(conn);
-        stateman.on_change((s) => {
-            // @ts-ignore
-            state = s;
-            console.log(s);
-        });
+        gm = await GameMaster.create(conn);
+        states = gm.states;
     });
 </script>
 
 <title>Khởi động - Đường đua xanh</title>
 <div class="bg">
-    <TitleBar activity="Khởi động" />
-    <div class="center-box">
-        <div class="box">
-            {#if state.qid > -1}
-                <PillTag text="Câu {state.qid + 1}" />
-                <p class="prompt">{state.current_question_content}</p>
-            {:else}
-                <PillTag text="Chuẩn bị" />
-                <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
-            {/if}
-            <div class="sbar"><ScoreBar /></div>
+    {#if gm !== undefined}
+        <TitleBar activity="Khởi động" />
+        <div class="center-box">
+            <div class="box">
+                {#if $states.qid > -1}
+                    <PillTag text="Câu {$states.qid + 1}" />
+                    <p class="prompt">{$states.current_question_content}</p>
+                {:else}
+                    <PillTag text="Chuẩn bị" />
+                    <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
+                {/if}
+                <div class="sbar"><ScoreBar gamemaster={gm} /></div>
+            </div>
         </div>
-    </div>
+    {:else}
+        <p class="prompt">Loading...</p>
+    {/if}
 </div>
 
 <style>

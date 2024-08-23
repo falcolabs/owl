@@ -1,16 +1,18 @@
 <script lang="ts">
     import ScorePill from "./ScorePill.svelte";
-    const PLAYER_DATA: [string, { score: number; activated: boolean }][] = Object.entries({
-        "Imap Ussay": { score: 20, activated: true },
-        "Hugh Jazz": { score: 20, activated: false },
-        "Quang Liêm": { score: 20, activated: false },
-        "Quang Trung": { score: 20, activated: false }
-    });
+    import { GameMaster } from "$lib";
+
+    export let gamemaster: GameMaster;
+    let { players, states } = gamemaster;
 </script>
 
 <div class="bar">
-    {#each PLAYER_DATA as [name, { activated, score }]}
-        <ScorePill {activated} {name} {score} />
+    {#each $players as [_, player]}
+        <ScorePill
+            activated={$states.seperated_candidate == player.identifier}
+            name={player.name}
+            score={player.score}
+        />
     {/each}
 </div>
 

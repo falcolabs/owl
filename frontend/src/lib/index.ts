@@ -9,7 +9,9 @@ type CBHandleAll = (packet: _PacketVariant) => void
 
 export var Peeker: typeof import("client");
 export { CallProcedure } from "$lib/rpcbuilder";
-export { UpdateState, StateManager, type AcceptableValue } from "$lib/gamestate";
+export { GameMaster, type AcceptableValue } from "$lib/gamemaster";
+export { StateManager } from "$lib/state";
+export { Push } from "$lib/push"
 export { Value } from "$lib/value";
 
 async function ensure(socket: WebSocket, timeout = 10000) {

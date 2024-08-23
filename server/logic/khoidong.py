@@ -67,6 +67,11 @@ class KhoiDong(penguin.PartImplementation):
         return engine.Status.RUNNING
 
     def on_qid_change(self, _: engine.PortableValue):
+        if self.get_qid() == -1:
+            self.set_current_question_content(
+                "Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút."
+            )
+            return
         self.set_current_question_content(
             penguin.SHOW.qbank.get_question(self.get_qid()).prompt
         )
