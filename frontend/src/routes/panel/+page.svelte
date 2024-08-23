@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { Connection, Peeker, CallProcedure, Push, GameMaster, StateManager } from "$lib";
     import { Timer, type Player } from "client";
+    import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
     import ScoreBar from "../../components/ScoreBar.svelte";
 
@@ -73,8 +74,8 @@
 </script>
 
 <div class="bg">
-    <div class="container">
-        {#if gm !== undefined}
+    <Load until={gm !== undefined}>
+        <div class="container">
             <h1>Trash control panel</h1>
             <ScoreBar gamemaster={gm} />
             <div>
@@ -147,7 +148,7 @@
                             </button>
                         {/each}
                     {:else}
-                        <p>
+                        <p class="smol code">
                             {$states.stage == STAGE_SEPERATED
                                 ? "No candidate selected."
                                 : "IMPOSSIBLE SITUATION!!!"}
@@ -155,10 +156,8 @@
                     {/if}
                 </div>
             </div>
-        {:else}
-            <h1>Loading...</h1>
-        {/if}
-    </div>
+        </div>
+    </Load>
 </div>
 
 <style>

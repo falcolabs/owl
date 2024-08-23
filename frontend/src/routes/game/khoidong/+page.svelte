@@ -3,6 +3,8 @@
     import PillTag from "../../../components/PillTag.svelte";
     import ScoreBar from "../../../components/ScoreBar.svelte";
     import TitleBar from "../../../components/TitleBar.svelte";
+    import Load from "../../../components/Load.svelte";
+
     import { goto } from "$app/navigation";
     import { Peeker, Connection, GameMaster, type AcceptableValue } from "$lib";
     import { readable, type Readable } from "svelte/store";
@@ -24,7 +26,7 @@
 
 <title>Khởi động - Đường đua xanh</title>
 <div class="bg">
-    {#if gm !== undefined}
+    <Load until={gm !== undefined}>
         <TitleBar activity="Khởi động" />
         <div class="center-box">
             <div class="box">
@@ -38,9 +40,7 @@
                 <div class="sbar"><ScoreBar gamemaster={gm} /></div>
             </div>
         </div>
-    {:else}
-        <p class="prompt">Loading...</p>
-    {/if}
+    </Load>
 </div>
 
 <style>
