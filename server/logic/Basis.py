@@ -188,34 +188,14 @@ Participant_object = Participant(Initializer["Name"])
 INITIAL_MESSAGE = COMMS.CRC(Input = b'CONNECT', Exponents = [16,12,5,0])
 ACCEPTANCE_MESSAGE = b''
 HOLD_MESSAGE = COMMS.CRC(Input = b'HOLD', Exponents = [16,12,5,0])
+CALLSIGN = Initializer["Callsign"]
 
 Confirmation = b''
-Operation_start = 0
-Operation_time = 0
-
-def Get_time() -> "Reads the time from the Time_Queue.":
-    Obtained_time = Time_Queue.get(blocking = False, timeout = None)
-    Time_Queue.put(Obtained_time, blocking = False, timeout = None)
-    return Obtained_time
 
 if Initializer["Regulator"] == 1:
     for PARTICIPANT in Device_Address_List:
-        Operation_start = Get_time()
-        Operation_time = 0
-        COMMS.Communicate(message = b'Hello!', port = UDP_Port, buffersize = 0, source = '', destination = PARTICIPANT, rw = True)
-        while Operation_time < Operation_start + 20:
-            Confirmation = COMMS.Communicate(message = b'', port = UDP_Port, buffersize = 256, source = PARTICIPANT, destination = '', rw = False)
-            Operation_time = Get_time()
-            if Confirmation != b'':
-                break
-            else:
-                pass
-
+        COMMS.Communicate(message = CALLSIGN, port = UDP_Port, buffersize = 0, source = '', destination = PARTICIPANT, rw = True)
+        Confirmation = COMMS.Communicate(message = b'', port = UDP_Port, buffersize = 3, source = PARTICIPANT, destination = '', rw = False)
 elif Initializer["Regulator"] == 0:
-    Operation_start = Get_time()
-    while Operation_time < Operation_start + 20:
-        Received_Request = COMMS.Communicate(message = b'', port = UDP_Port, buffersize = 256, source = Regulator_Address, destination = '', rw = False)
-        if Received_Request != b'':
-            COMMS.Communicate(message = b'Hi!', port = UDP_Port, buffersize = 0, source = '', destination = Regulator_Address, rw = True)
-            break
-        Operation_time = Get_time()
+    Received_Request = COMMS.Communicate(message = b'', port = UDP_Port, buffersize = 6, source = Regulator_Address, destination = '', rw = False)
+    COMMS.Communicate(message = CALLSIGN, port = UDP_Port, buffersize = 0, source = '', destination = Regulator_Address, rw = True)
