@@ -30,18 +30,13 @@ def Communicate(message:bytes,port:int,buffersize:int, source:str,destination:st
     When rw is set to False, this function receives data, and no destination address is needed.
     '''
     Communicating_object = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-    try:
-        if rw == True:
-            Communicating_object.sendto(message,(destination,port))
-        elif rw == False:
-            Communicating_object.bind((source,port))
-            while True:
-                Data, Peer_address = Communicating_object.recvfrom(buffersize)
-                if Data != b'':
-                    break
-                else:
-                    pass
-    finally:
+    if rw == True:
+        Communicating_object.sendto(message,(destination,port))
+    elif rw == False:
+        Communicating_object.bind((source,port))
+        Data, Peer_address = Communicating_object.recvfrom(buffersize)
+    else:
+        Communicating_object.shutdown(SHUT_RDWR)
         Communicating_object.close()
     if rw == True:
         return True
