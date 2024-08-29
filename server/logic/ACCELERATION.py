@@ -6,36 +6,43 @@ import datetime as TIME
 
 #ACCELERATION PART
 
-Questions = {1:"Speed",2:"Organization",3:"Logic",4:"Identification"}
+RPC_object = penguin.rpc.RPCManager("Accelerate")
+Timer_object = engine.Timer()
+Timer_object.pause()
 
-RPC_object = penguin.rpc.RPCManager()
-Timing_object = TIME.today()
+def Question_number():
+    get_question_number, set_question_number = penguin.rpc.use_state("qid",-1)
+    #   ^^^^                ^^^^
+    #GET QID             BROADCAST QID
 
-def Timer_start():
-    Start_time = Timing_object.second()
-
-def Timer_stop():
-    Stop_time = Timing_object.second()
-    Time_elapsed = Stop_time - Start_time
-
-Question_number = 0
+def Question_content():
+    get_question_content, set_question_content = penguin.rpc.use_state("current_question_content","")
+    #   ^^^^                ^^^^
+    # GET QUESTION         BROADCAST QUESTION
 
 RPC.object.add_procedure(
     [
-        ("Answer", Timer_stop, []),
-        ("Start_timer", Timer_start, []),
-        ("Proceed", engine.QuestionBank.get_question, [Question_number])
+        ("Stop_timer", Timer_object.pause, []),
+        ("Start_timer", Timer_object.resume, []),
+        ("Proceed", lambda *_ : set_question_number(get_question_number()+1),[])
     ]
 )
 
-def Get_question(number: int):
-    return penguin.SHOW.qbank.get_question(number).prompt
+def View_question():
+    if get_question_number == -1:
+        set_question_content("Please wait until the session starts.")
+    else:
+        set_question_content(penguin.SHOW.qbank.get_question(get_question_number()).prompt)
+        Timer_object.resume() 
 
-if Question_number == 0:
-    False
-else:
-    Get_question(Question_number)
+def Wait():
+    ...
+    #HOW IS AN ANSWER GOT FROM THE USER? AND HOW CAN IT BE SENT?
 
-'''
-TO BE DEVELOPED
-'''
+async def Main_program_per_question():
+    while True:
+        Question_number()
+        Question_content()
+        View_question()
+        await Wait()
+        break
