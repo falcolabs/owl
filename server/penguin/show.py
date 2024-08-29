@@ -1,6 +1,7 @@
 import engine
 import abc
 import platform
+import os
 
 from .session import SessionManager
 
@@ -22,11 +23,24 @@ class PartImplementation(abc.ABC):
     ): ...
 
 
-if platform.python_implementation() == "CPython":
-    import uvloop  # type: ignore
+if platform.python_implementation() == "CPython" and platform.platform().startswith(
+    "Linux"
+):
+    try:
+        import uvloop  # type: ignore
 
-    LOOP = uvloop.new_event_loop()
+        LOOP = uvloop.new_event_loop()
+    except ImportError:
+        engine.log_warning(
+            "uvloop is not installed. If you are on Linux, uvloop drastically improve Python async performance. Falling back to asyncio."
+        )
+        import asyncio  # type: ignore
+
+        LOOP = asyncio.new_event_loop()
 else:
+    engine.log_info(
+        "Non-CPython implementation or non-Linux OS detected. Falling back to asyncio."
+    )
     import asyncio  # type: ignore
 
     LOOP = asyncio.new_event_loop()
