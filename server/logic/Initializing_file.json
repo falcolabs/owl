@@ -3,6 +3,7 @@
     {
         "Name":"Name",
         "IP":"IP",
-        "Regulator":0   
+        "Regulator":0,
+        "Callsign":"Hi!"
     }
 }
