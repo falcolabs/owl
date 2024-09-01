@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
     import TitleBar from "../components/TitleBar.svelte";
     import { goto } from "$app/navigation";
-    
+
     let username: HTMLInputElement;
     let accessKey: HTMLInputElement;
     let conn: Connection;

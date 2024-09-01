@@ -47,6 +47,7 @@ class Some(Option[T]):
             raise ValueError("Some cannot be None")
         self._value = value
 
+    @typing.override
     def is_some(self):
         return True
 
@@ -55,5 +56,6 @@ class Null(Option[T]):
     def __init__(self):
         self._value = None
 
+    @typing.override
     def is_some(self):
         return False

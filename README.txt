@@ -1,18 +1,18 @@
 OWL
-- a high priority Team Falco project 
+- a high priority Team Falco project
 ======================
 Open source development of the new Rust engine
 
 Technical specifications
 ------------------------
-The server software will host a web service and a WebSockets server on a 
+The server software will host a web service and a WebSockets server on a
 hard-coded IP adress and port at `localhost:6942/`.
 
 The Python bindings is manually typed and wheel built using PyO3.
 The JavaScript bindings is automatically generated using wasm-
 
 The protocol in which the client and server communicates in is based
-on `serde` serialization of Rust structs. Bindings for Python and 
+on `serde` serialization of Rust structs. Bindings for Python and
 JavaScript is available (see `engine/engine.pyi` and the generated
 `node_modules/client/client.d.ts`)
 
@@ -40,7 +40,7 @@ Building
 --------
 * For client, use `bun run dev`. The Rust module will be automatically
   compiled and bundled, and hot-reload enabled Vite starts serving on
-  localhost:5173/. 
+  localhost:5173/.
 * For server, use `./gang run`. The Rust module will be compiled,
   the Python binding generated, the wheel built and installed automatically.
   `server/main.py` is subsequenly called, with CWD=/server/.

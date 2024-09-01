@@ -4,10 +4,11 @@
     /**
      * World-class super secure "the ultimate hammer" ACC NCP Vulkan NoFly
      * "popbob killer" "5x hausemaster" "100x2b anticheat no cap fr fr"
+     * "TheChosenOne Annihilator" "the superior watchdawg"
      *
-     * Detects debugger using an old feature named SourceMappingURL.
-     * When the browser devtools is open, it automatically sends a get request
-     * to the specified URL. This does not affect non-devtools usage.
+     * Identify debugger-like behaviour ultilizing an obscure browser feature.
+     * When activated, a get request is automatically initiated in the instant
+     * DevTools is opened. Non-DevTools usage is not affected by this countermeasure.
      * TODO - test this.
      */
     export let url: string;

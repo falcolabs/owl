@@ -1,9 +1,6 @@
+from typing import override
 import engine
 import penguin
-import json
-import typing
-
-from config import config
 
 STAGE_SEPERATED = 0
 """Phần thi riêng"""
@@ -60,10 +57,10 @@ class KhoiDong(penguin.PartImplementation):
             ]
         )
 
-    def _seperated(self, show: engine.Show) -> engine.Status:
+    def _seperated(self, _show: engine.Show) -> engine.Status:
         return engine.Status.RUNNING
 
-    def _joint(self, show: engine.Show) -> engine.Status:
+    def _joint(self, _show: engine.Show) -> engine.Status:
         return engine.Status.RUNNING
 
     def on_qid_change(self, _: engine.PortableValue):
@@ -76,6 +73,7 @@ class KhoiDong(penguin.PartImplementation):
             penguin.SHOW.qbank.get_question(self.get_qid()).prompt
         )
 
+    @override
     def on_update(self, show: engine.Show) -> engine.Status:
         # qid = self.get_qid()
         # if self.lastqid != qid and qid != -1:
@@ -91,6 +89,7 @@ class KhoiDong(penguin.PartImplementation):
             return self._seperated(show)
         return self._joint(show)
 
+    @override
     async def on_request(
         self,
         show: engine.Show,

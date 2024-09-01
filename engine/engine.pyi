@@ -1,23 +1,23 @@
 from typing import Any, Optional, Callable, Literal, Union, Iterable, Mapping
 from abc import abstractmethod, ABC
 
-PacketData = Union[
-    AuthenticationStatus,
-    PartProperties,
-    Player,
-    Credentials,
-    Question,
-    QuestionBank,
-    Query,
-    Show,
-    Ticker,
-    Timer,
-    str,
-    list[ProcedureSignature],
-    ProcedureCall,
-    GameState,
-    list[GameState],
-]
+PacketData = (
+    AuthenticationStatus
+    | PartProperties
+    | Player
+    | Credentials
+    | Question
+    | QuestionBank
+    | Query
+    | Show
+    | Ticker
+    | Timer
+    | str
+    | list[ProcedureSignature]
+    | ProcedureCall
+    | GameState
+    | list[GameState]
+)
 """All the possible values in a packet's data."""
 
 class Packet(ABC):
@@ -338,9 +338,9 @@ class Question:
     prompt: str
     key: str
     score: int
-    choices: Optional[list[str]]
-    score_false: Optional[int]
-    explaination: Optional[str]
+    choices: list[str] | None
+    score_false: int | None
+    explaination: str | None
 
     def __init__(
         self,

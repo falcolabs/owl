@@ -1,8 +1,9 @@
+from typing import override
 import engine
 import abc
 import platform
 import os
-
+import asyncio
 from .session import SessionManager
 
 from config import config
@@ -23,27 +24,25 @@ class PartImplementation(abc.ABC):
     ): ...
 
 
-if platform.python_implementation() == "CPython" and platform.platform().startswith(
-    "Linux"
-):
-    try:
-        import uvloop  # type: ignore
+# if platform.python_implementation() == "CPython" and platform.platform().startswith(
+#     "Linux"
+# ):
+#     try:
+#         import uvloop
 
-        LOOP = uvloop.new_event_loop()
-    except ImportError:
-        engine.log_warning(
-            "uvloop is not installed. If you are on Linux, uvloop drastically improve Python async performance. Falling back to asyncio."
-        )
-        import asyncio  # type: ignore
+#         LOOP = uvloop.new_event_loop()
+#     except ImportError:
+#         engine.log_warning(
+#             "uvloop is not installed. If you are on Linux, uvloop drastically improve Python async performance. Falling back to asyncio."
+#         )
+#         import asyncio
 
-        LOOP = asyncio.new_event_loop()
-else:
-    engine.log_info(
-        "Non-CPython implementation or non-Linux OS detected. Falling back to asyncio."
-    )
-    import asyncio  # type: ignore
-
-    LOOP = asyncio.new_event_loop()
+#         LOOP = asyncio.new_event_loop()
+# else:
+# engine.log_info(
+#     "Non-CPython implementation or non-Linux OS detected. Falling back to asyncio."
+# )
+LOOP = asyncio.new_event_loop()
 
 
 class ShowBootstrap(engine.Show):
@@ -66,7 +65,7 @@ class ShowBootstrap(engine.Show):
                             )
                         )
                         return
-                token = SESSION_MAN.link_player(detail.username, req.handle)
+                token = SESSION_MAN.link_player(detail.username, req.handle)  # type: ignore
                 response = engine.Packet.AuthStatus(
                     engine.AuthenticationStatus(True, "Authenticated.", token)
                 )
@@ -118,6 +117,7 @@ class ShowBootstrap(engine.Show):
     def on_req(self, req: engine.RawRequest):
         LOOP.run_until_complete(self.handle_webreq(req))
 
+    @override
     def start(self, listen_on: str, serve_on: str, static_dir: str):
         engine.log_info("Starting show...")
         engine.Show.ws_task(
@@ -150,6 +150,8 @@ class ShowBootstrap(engine.Show):
                         exit(0)
                     self.current_part -= 1
                     part = self.parts[self.current_part]
+                case _:
+                    pass
 
         # return super().start(listen_on, serve_on, static_dir)
 

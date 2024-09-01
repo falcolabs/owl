@@ -1,11 +1,13 @@
 """Manages configuration entries.
 """
+
 from __future__ import annotations
 
 import json
 import typing
 import engine
-from typing import TypedDict
+import collections.abc
+from typing import TypedDict, override
 
 
 class ConfigurationValue:
@@ -26,14 +28,14 @@ class ConfigurationValue:
         | bool
     ):
         res = None
-        if isinstance(inp, typing.Mapping):
+        if isinstance(inp, collections.abc.Mapping):
             r = {}
             for k, v in inp.items():
                 r[k] = self.rec_convert(v)
             res = ConfigurationValue(r, False)
         elif isinstance(inp, str):
             res = inp
-        elif isinstance(inp, typing.Iterable):
+        elif isinstance(inp, collections.abc.Iterable):
             r = []
             for v in inp:
                 r.append(self.rec_convert(v))
@@ -46,34 +48,39 @@ class ConfigurationValue:
     def __getattr__(self, name: str) -> typing.Any:
         try:
             if isinstance(self._hive, ConfigurationValue):
-                if isinstance(self._hive._hive, typing.Mapping):
-                    return self._hive._hive[name]  # type: ignore
-            if isinstance(self._hive, typing.Mapping):
-                return self._hive[name]  # type: ignore
+                if isinstance(self._hive._hive, collections.abc.Mapping):
+                    return self._hive._hive[name]
+            if isinstance(self._hive, collections.abc.Mapping):
+                return self._hive[name]
         except KeyError:
             pass
         raise KeyError(
-            f"Cannot find key '{name}' in available config entry: {self._hive.keys() if isinstance(self._hive, typing.Mapping) else self._hive}"
+            f"Cannot find key '{name}' in available config entry: {self._hive.keys() if isinstance(self._hive, collections.abc.Mapping) else self._hive}"
         )
 
     def __getitem__(self, index: slice) -> typing.Any:
         if isinstance(self._hive, ConfigurationValue):
-            if isinstance(self._hive._hive, typing.Sequence) and not isinstance(
-                self._hive._hive, str
-            ):
-                return self._hive._hive[index]  # type: ignore
-        if isinstance(self._hive, typing.Sequence) and not isinstance(self._hive, str):
-            return self._hive[index]  # type: ignore
+            if isinstance(
+                self._hive._hive, collections.abc.Sequence
+            ) and not isinstance(self._hive._hive, str):
+                return self._hive._hive[index]
+        if isinstance(self._hive, collections.abc.Sequence) and not isinstance(
+            self._hive, str
+        ):
+            return self._hive[index]
         raise KeyError(f"Cannot find index '{index}' in {self}")
 
+    @override
     def __eq__(self, other):
         if isinstance(other, ConfigurationValue):
             return self._hive == other._hive
         return self._hive == other
 
+    @override
     def __str__(self) -> str:
         return str(self._hive)
 
+    @override
     def __repr__(self) -> str:
         return f"ConfigurationValue({self._hive})"
 

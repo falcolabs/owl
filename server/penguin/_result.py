@@ -76,14 +76,16 @@ class Ok(Result[T, E]):
     def __init__(self, value: T = None) -> None:
         self._value = value
 
+    @typing.override
     def is_ok(self):
         return True
 
 
 class Err(Result[T, E]):
 
-    def __init__(self, value = None) -> None:
+    def __init__(self, value=None) -> None:
         self._value = value
 
+    @typing.override
     def is_ok(self):
         return False

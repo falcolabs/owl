@@ -26,4 +26,3 @@ run:
   - bun run dev &
   - cd ../server
   - python3 main.py
-  

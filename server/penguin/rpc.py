@@ -1,3 +1,4 @@
+import collections.abc
 import engine
 import typing
 import json
@@ -60,7 +61,7 @@ class Is:
 
     @staticmethod
     def signature(v: typing.Any):
-        return isinstance(v, typing.Iterable) and not isinstance(v, str)
+        return isinstance(v, collections.abc.Iterable) and not isinstance(v, str)
 
     @staticmethod
     def bool(v: typing.Any):
@@ -98,9 +99,9 @@ class RPCManager:
     @typing.overload
     def get_state(self, name: str, *, deser: typing.Callable[[str], T]) -> T: ...
     @typing.overload
-    def get_state(self, name: str, *, raw: bool = True) -> str: ...
+    def get_state(self, name: str, *, raw: bool) -> str: ...
     @typing.overload
-    def get_state(self, name: str, *, ret_raw: bool = True) -> engine.PortableValue: ...
+    def get_state(self, name: str, *, ret_raw: bool) -> engine.PortableValue: ...
 
     def get_state(
         self,
@@ -111,7 +112,7 @@ class RPCManager:
         ret_raw: bool = False,
     ) -> T | str | engine.PortableValue:
         # TODO - maintain cache for this. low priority.
-        if deser is None and raw is None:
+        if deser is None and raw:
             raise ValueError("Both deser and raw cannot be none at the same time.")
         if deser:
             return deser(self.states[name].data.json)
@@ -119,7 +120,7 @@ class RPCManager:
             return self.states[name].data.json
         if ret_raw:
             return self.states[name].data
-        return json.loads(self.states[name].data.json)  # type: ignore
+        return json.loads(self.states[name].data.json)
 
     @typing.overload
     def set_state(
@@ -286,7 +287,7 @@ class RPCManager:
             def get_raw() -> engine.PortableValue:
                 return self.get_state(name, ret_raw=True)
 
-            def set_raw(value: engine.PortableValue):  # type: ignore
+            def set_raw(value: engine.PortableValue):
                 self.set_state(name, value)
 
             get, set = get_raw, set_raw
@@ -351,8 +352,8 @@ class RPCManager:
                         self.add_procedure(p2, name=p1, signature=signature)  # type: ignore
                 case (p1, signature):
                     self.add_procedure(p1, signature=signature)
-                case _:
-                    raise ValueError(f"Unknown procedure prototype: {t}")
+                case _:  # type: ignore
+                    raise ValueError(f"Unknown procedure prototype: {t}")  # type: ignore
 
         return self
 
@@ -363,7 +364,7 @@ class RPCManager:
         _2: engine.IOHandle,
         _3,
     ):
-        operation: typing.Literal["start", "pause", "reset"] = json.loads(
+        operation: typing.Literal["start", "pause", "reset"] | str = json.loads(
             callproc.data.args[0][1].json
         )
         engine.log_debug(f"Processing timer operation: {operation}")
@@ -419,6 +420,8 @@ class RPCManager:
                         )
                     case engine.Query.Timer():
                         await handle.send(engine.Packet.Timer(self.timer).pack())
+                    case _:
+                        pass
             case engine.Packet.UpdateState():
                 update = packet.data
                 if update.name == "timer_json":
@@ -442,4 +445,6 @@ class RPCManager:
                     engine.log_warning(
                         f"Cannot find procedure with name `{update.name}`. Call ignored."
                     )
+            case _:
+                pass
         return Ok()

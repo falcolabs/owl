@@ -1,0 +1,26 @@
+{
+  "stubPath": "engine",
+  "exclude": [
+    "engine"
+  ],
+  "reportUnusedCallResult": "none",
+  "reportImplicitRelativeImport": "none",
+  "reportImplicitOverride": "information",
+  "reportUnusedParameter": "none",
+  "reportUnknownLambdaType": "none",
+  "reportUnusedImport": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportMissingTypeArgument": "none",
+  "reportAny": "none",
+  "reportUnknownParameterType": "none",
+  "reportMissingParameterType": "none",
+  "reportIgnoreCommentWithoutRule": "none",
+  "reportPrivateLocalImportUsage": "none",
+  "reportUninitializedInstanceVariable": "none",
+  "reportMissingSuperCall": "none",
+  "reportConstantRedefinition": "none",
+  "reportIncompatibleVariableOverride": "none",
+  "enableTypeIgnoreComments": true
+}

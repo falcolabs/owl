@@ -122,4 +122,3 @@ export class StateManager implements Readable<any> {
         await this.connection.send(Push.create("timer_json", t.pack(), Peeker.PortableType.OBJECT));
     }
 }
-
