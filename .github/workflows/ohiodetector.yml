@@ -1,0 +1,23 @@
+name: "Ohio Moment Detector 9000"
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions/setup-python@v5
+      - name: "Installing dependencies"
+        run: "pip install -r requirements.txt"
+      - name: "Building dev wheel..."
+        run: |
+            mkdir dist
+            cd engine
+            maturin develop
+      - name: "Running Ohio Detector 9000"
+        uses: pre-commit-ci/lite-action@v1.0.2
+        if: always()

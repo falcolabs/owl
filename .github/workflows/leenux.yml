@@ -1,0 +1,29 @@
+name: "Python Penguin"
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions/setup-python@v5
+        with:
+            python-version: "3.12"
+            cache: "pip"
+      - name: "Installing dependencies"
+        run: "pip install -r requirements.txt"
+
+      - name: "Building dev wheel..."
+        run: |
+            mkdir dist
+            cd engine
+            maturin build -o ../dist/
+      - name: Uploading wheels
+        uses: actions/upload-artifact@v4
+        with:
+            name: engine
+            path: dist/*
