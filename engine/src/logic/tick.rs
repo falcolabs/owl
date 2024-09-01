@@ -5,6 +5,12 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+impl Default for Ticker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[pymethods]
 impl Ticker {
     #[new]
@@ -18,8 +24,7 @@ impl Ticker {
         let code_runtime = SystemTime::now()
             .duration_since(self.last_tick)
             .expect("Error when calculating time elapsed for regulating tick speed");
-        let sleep_dur =
-            Duration::from_millis(((1 as f32 / tick_speed as f32) * 1000 as f32) as u64);
+        let sleep_dur = Duration::from_millis(((1_f32 / tick_speed as f32) * 1000_f32) as u64);
         thread::sleep(sleep_dur - code_runtime);
         self.last_tick = SystemTime::now();
     }

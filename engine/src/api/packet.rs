@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use part::PartProperties;
 #[cfg(feature = "logic")]
 use pyo3::prelude::*;
@@ -90,9 +92,9 @@ impl Packet {
     }
 }
 
-impl ToString for Packet {
-    fn to_string(&self) -> String {
-        universal::stringify(self)
+impl Display for Packet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", universal::stringify(self))
     }
 }
 
@@ -238,9 +240,9 @@ impl ProcedureSignature {
         }
     }
 
-    pub fn call1(&self, arg0: PortableValue) -> Result<ProcedureCall, ()> {
-        if arg0.data_type() != self.args.get(0).unwrap().1 {
-            return Err(());
+    pub fn call1(&self, arg0: PortableValue) -> Result<ProcedureCall, String> {
+        if arg0.data_type() != self.args.first().unwrap().1 {
+            return Err(String::from("Typecheck failed."));
         }
         Ok(ProcedureCall {
             name: self.name.clone(),
@@ -248,11 +250,11 @@ impl ProcedureSignature {
         })
     }
 
-    pub fn call2(&self, arg0: PortableValue, arg1: PortableValue) -> Result<ProcedureCall, ()> {
-        if arg0.data_type() != self.args.get(0).unwrap().1
+    pub fn call2(&self, arg0: PortableValue, arg1: PortableValue) -> Result<ProcedureCall, String> {
+        if arg0.data_type() != self.args.first().unwrap().1
             || arg1.data_type() != self.args.get(1).unwrap().1
         {
-            return Err(());
+            return Err(String::from("Typecheck failed."));
         }
         Ok(ProcedureCall {
             name: self.name.clone(),
@@ -268,12 +270,12 @@ impl ProcedureSignature {
         arg0: PortableValue,
         arg1: PortableValue,
         arg2: PortableValue,
-    ) -> Result<ProcedureCall, ()> {
-        if arg0.data_type() != self.args.get(0).unwrap().1
+    ) -> Result<ProcedureCall, String> {
+        if arg0.data_type() != self.args.first().unwrap().1
             || arg1.data_type() != self.args.get(1).unwrap().1
             || arg2.data_type() != self.args.get(2).unwrap().1
         {
-            return Err(());
+            return Err(String::from("Type check failed"));
         }
         Ok(ProcedureCall {
             name: self.name.clone(),

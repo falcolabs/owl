@@ -3,6 +3,12 @@ pub use crate::api::Timer;
 use pyo3::prelude::*;
 use std::time::{Duration, SystemTime};
 
+impl Default for Timer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[pymethods]
 impl Timer {
     /// Creates a new timer, which pauses immidiately after creation.
@@ -40,17 +46,15 @@ impl Timer {
     /// Gets the time elapsed from the calling of `start()`,
     /// minus the pauses.
     pub fn time_elapsed(&self) -> Duration {
-        let base_dur: Duration;
-        if self.is_paused {
-            base_dur = self
-                .paused_time
+        let base_dur: Duration = if self.is_paused {
+            self.paused_time
                 .duration_since(self.start_time)
-                .expect("We time travelled. Congrats");
+                .expect("We time travelled. Congrats")
         } else {
-            base_dur = SystemTime::now()
+            SystemTime::now()
                 .duration_since(self.start_time)
-                .expect("We time travelled. Congrats");
-        }
+                .expect("We time travelled. Congrats")
+        };
         base_dur - self.paused_duration
     }
 

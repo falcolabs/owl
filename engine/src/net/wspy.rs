@@ -126,8 +126,7 @@ impl IOHandle {
             Ok(_) => Ok(()),
             Err(e) => Err(pyo3::exceptions::PyConnectionResetError::new_err(format!(
                 "Unable to send to handle {}: {}",
-                self.addr,
-                e.to_string()
+                self.addr, e
             ))),
         }
     }
@@ -161,17 +160,20 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
 
     while let Some(Ok(msg)) = receiver.lock().await.next().await {
         let content = msg.to_text().expect("Error extracting text from Message");
-        if let Err(_) = call_hook.send(RawRequest {
-            handle: IOHandle {
-                sender: Arc::clone(&sender),
-                receiver: Arc::clone(&receiver),
-                addr: who.to_string(),
-            },
-            sender: who.to_string(),
-            content: serde_json::from_str(content).unwrap_or(Packet::Unknown {
-                data: content.to_string(),
-            }),
-        }) {
+        if call_hook
+            .send(RawRequest {
+                handle: IOHandle {
+                    sender: Arc::clone(&sender),
+                    receiver: Arc::clone(&receiver),
+                    addr: who.to_string(),
+                },
+                sender: who.to_string(),
+                content: serde_json::from_str(content).unwrap_or(Packet::Unknown {
+                    data: content.to_string(),
+                }),
+            })
+            .is_err()
+        {
             logging::error("Failed to send RawRequest")
         }
         // let chbound = call_hook.bind(py);

@@ -58,7 +58,7 @@ pub fn to_color(code: String) -> Color {
 
 #[cfg_attr(feature = "logic", pymethods)]
 impl Color {
-    pub fn to_string(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         match *self {
             Color::BLACK => "\x1b[30m",
             Color::RED => "\x1b[31m",
@@ -103,7 +103,7 @@ pub fn mccolor_esc(text: &str, esc_char: &str) -> String {
         }
 
         if is_escape_seq {
-            output.push_str(&to_color(c.to_string()).to_string());
+            output.push_str(to_color(c.to_string()).as_str());
             is_escape_seq = false;
         } else {
             output.push(c);

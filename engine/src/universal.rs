@@ -102,7 +102,7 @@ mod logic {
         serde_json::to_string(sth).expect("serde serialization error")
     }
 
-    pub fn parse<'a, T: serde::de::DeserializeOwned>(data: &'a str) -> T {
+    pub fn parse<T: serde::de::DeserializeOwned>(data: &str) -> T {
         serde_json::from_str(data).expect("serde deserialization error")
     }
 }
@@ -117,7 +117,7 @@ impl<'de> serde::de::Visitor<'de> for PortableTypeVisitor {
     type Value = PortableType;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str(&format!("an integer between 0 and 32767"))
+        formatter.write_str("an integer between 0 and 32767")
     }
 
     fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
@@ -263,6 +263,15 @@ impl PortableValue {
     }
 }
 
+impl From<String> for PortableValue {
+    fn from(value: String) -> Self {
+        PortableValue {
+            data: stringify(&value),
+            data_type: PortableType::STRING,
+        }
+    }
+}
+
 impl PortableValue {
     pub fn new(data: &str, data_type: PortableType) -> PortableValue {
         PortableValue {
@@ -301,12 +310,6 @@ impl PortableValue {
         }
     }
 
-    pub fn from_str(sth: String) -> PortableValue {
-        PortableValue {
-            data: stringify(&sth),
-            data_type: PortableType::STRING,
-        }
-    }
     pub fn from_vec<T: serde::Serialize + std::fmt::Debug>(sth: Vec<T>) -> PortableValue {
         PortableValue {
             data: stringify(&sth),
@@ -332,7 +335,7 @@ impl PortableValue {
         }
     }
 
-    pub fn as_struct<'a, T: serde::de::DeserializeOwned>(sth: PortableValue) -> T {
+    pub fn as_struct<T: serde::de::DeserializeOwned>(sth: PortableValue) -> T {
         serde_json::from_str(&sth.data).unwrap()
     }
 
@@ -353,7 +356,7 @@ where
 }
 
 #[deprecated]
-pub fn parse<'a, T>(data: &'a str) -> T
+pub fn parse<T>(data: &str) -> T
 where
     T: serde::de::DeserializeOwned,
 {

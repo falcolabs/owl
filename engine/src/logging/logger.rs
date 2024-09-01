@@ -82,11 +82,11 @@ pub fn log_str<StringLike: AsRef<str>>(level: Level, content: StringLike) -> Str
     let time = Local::now();
     let result = format!(
         "{}[{} {}] {}{}\n",
-        level.get_color().to_string(),
-        time.format("%H:%M:%S").to_string(),
+        level.get_color().as_str(),
+        time.format("%H:%M:%S"),
         level.get_name(),
         content.as_ref(),
-        Color::RESET.to_string()
+        Color::RESET.as_str()
     );
     result
 }
