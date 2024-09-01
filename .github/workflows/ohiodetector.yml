@@ -20,7 +20,8 @@ jobs:
         run: |
             mkdir dist
             cd engine
-            maturin develop
+            maturin build -o ../dist/
+            pip install ../dist/engine*
       - name: "Running Ohio Detector 9000"
         uses: pre-commit-ci/lite-action@v1.0.2
         if: always()
