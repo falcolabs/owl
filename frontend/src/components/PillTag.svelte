@@ -70,7 +70,6 @@
 
     .pilltag {
         position: absolute;
-        transform: translateY(-3em);
         overflow: hidden;
         font-size: 1.5em;
         display: flex;

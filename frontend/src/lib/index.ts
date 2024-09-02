@@ -3,7 +3,7 @@
 export const ORG_NAME: string = "CBN Shitposter Association · THPT Chuyên Bắc Ninh";
 export const SHOW_NAME: string = "Đáy xã hội 2";
 
-import { PacketType, type Packet, type _PacketValue, type _PacketVariant } from "client";
+import type { PacketType, Packet, _PacketValue, _PacketVariant } from "client";
 type CBHandle<T extends PacketType> = (packet: Packet<T>) => void
 type CBHandleAll = (packet: _PacketVariant) => void
 
@@ -47,7 +47,7 @@ export class Connection {
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {
             let packet: Packet<PacketType> = Peeker.ClientHandle.parse(me.data)
-            if (packet.variant == PacketType.Part) {
+            if (packet.variant == Peeker.PacketType.Part) {
                 // @ts-ignore: can never happen
                 obj.currentPart = packet.value.name;
             }

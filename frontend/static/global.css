@@ -17,13 +17,14 @@
     --radius-2: 32px;
     --bg-gradient: linear-gradient(119deg, #222441 0%, #363d7a 101%);
     --shadow-ss: 0 2px 5px 4px #00000040;
-    --shadow-s: 0 4px 4px 4px #00000040;
+    --shadow-s: 0 4px 4px 0 #00000040;
     --shadow-l: 0 4px 20px 4px #00000040;
     --font: "Plus Jakarta Sans", "SF Pro Text", "SF Pro Display", "Segoe UI Variable", "Arial",
         sans-serif;
     --font-monospace: "SF Mono", "Liga SFMono Nerd Font", "JetBrains Mono", "Consolas", monospace;
+    --font-small: 1rem;
     --font-normal: 1.5rem;
-    --font-large: 2.5rem
+    --font-large: 2rem;
 }
 
 .box {
@@ -45,6 +46,7 @@
     font-weight: bold;
     text-align: left;
     color: var(--text);
+    line-height: 1.2;
 }
 
 .tag {
