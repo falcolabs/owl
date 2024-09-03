@@ -1,5 +1,5 @@
 <script lang="ts">
-    import PillTag from "./PillTag.svelte";
+    import PillTag from "../PillTag.svelte";
 
     export let name: string;
     export let time: number;

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Connection, Peeker, CallProcedure, Push, GameMaster, StateManager } from "$lib";
+    import { Connection, GameMaster, StateManager } from "$lib";
     import type { Timer, Player } from "client";
     import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
@@ -13,7 +13,6 @@
     let timer: Writable<Timer> = writable({ elapsedSecs: () => 6.9 });
     let players: Readable<Map<string, Player>> = readable(new Map());
     let elapsed = writable("0.00");
-    // @ts-ignore
     let states: StateManager
 
     onMount(async () => {

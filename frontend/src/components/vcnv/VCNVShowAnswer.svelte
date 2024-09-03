@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Readable } from "svelte/store";
-    import PillTag from "./PillTag.svelte";
+    import PillTag from "../PillTag.svelte";
     import TextAnswer from "./TextAnswer.svelte";
 
     export let states: Readable<any>;
@@ -18,5 +18,4 @@
         flex-direction: column;
         gap: 70px;
     }
-
 </style>
