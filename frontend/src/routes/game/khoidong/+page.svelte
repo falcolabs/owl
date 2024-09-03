@@ -31,10 +31,10 @@
         <div class="center-box">
             <div class="box">
                 {#if $states.qid > -1}
-                    <PillTag text="Câu {$states.qid + 1}" />
+                    <div class="qnum"><PillTag text="Câu {$states.qid + 1}" /></div>
                     <p class="prompt">{$states.current_question_content}</p>
                 {:else}
-                    <PillTag text="Chuẩn bị" />
+                    <div class="qnum"><PillTag text="Chuẩn bị" /></div>
                     <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
                 {/if}
                 <div class="sbar"><ScoreBar gamemaster={gm} /></div>
@@ -49,6 +49,15 @@
         height: 100vh;
         overflow: hidden;
         background: var(--bg-gradient);
+        display: flex;
+    }
+
+    .qnum {
+        position: absolute;
+        width: 60vw;
+        transform: translateY(-7rem);
+        display: flex;
+        justify-content: center;
     }
 
     .box {

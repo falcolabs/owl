@@ -9,13 +9,13 @@
 <div class="top">
     <div class="left">
         <div class="up box">
-            {#each $states.current_key as {content, status, tag}}
-                <VcnvLine {content} {status} {tag} ></VcnvLine>
+            {#each $states.puzzle_data as { content, status, tag }}
+                <VcnvLine {content} {status} {tag}></VcnvLine>
             {/each}
         </div>
         <div class="qbox box">
             <div class="ptag"><PillTag text="Hàng 1" /></div>
-            <p class=prompt>{$states.prompt}</p>
+            <p class="prompt">{$states.prompt}</p>
             <div class="timerbar">timerbar</div>
         </div>
     </div>

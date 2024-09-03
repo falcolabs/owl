@@ -27,33 +27,31 @@ class KhoiDong(penguin.PartImplementation):
         self.timer = engine.Timer()
         self.timer.pause()
 
-        self.get_state, self.set_state = self.rpc.use_state("stage", STAGE_SEPERATED)
+        self.state = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
-        self.get_qid, self.set_qid = self.rpc.use_state("qid", -1)
-        """Câu hỏi hiện tại."""
-        self.rpc.on_change("qid", self.on_qid_change)
-
-        self.get_seperated_candidate, self.set_seperated_candidate = self.rpc.use_state(
-            "seperated_candidate", ""
-        )
-        self.get_current_question_content, self.set_current_question_content = (
-            self.rpc.use_state("current_question_content", "")
+        self.current_question_content = self.rpc.use_state(
+            "current_question_content", ""
         )
         """Username của thí sinh lượt thi hiện tại trong phần thi riêng"""
-        self.get_joint_bell, self.set_joint_bell = self.rpc.use_state("joint_bell", "")
+        self.qid = self.rpc.use_state("qid", -1)
+        """Câu hỏi hiện tại."""
+        self.qid.subscribe(self.on_qid_change)
+
+        self.seperated_candidate = self.rpc.use_state("seperated_candidate", "")
+        self.joint_bell = self.rpc.use_state("joint_bell", "")
         """Username thí sinh bấm chuông trả lời trong phần thi chung"""
         self.rpc.add_procedures(
             [
-                ("setstage_seperated", lambda *_: self.set_state(STAGE_SEPERATED), []),
-                ("setstage_joint", lambda *_: self.set_state(STAGE_JOINT), []),
+                ("setstage_seperated", lambda *_: self.state.set(STAGE_SEPERATED), []),
+                ("setstage_joint", lambda *_: self.state.set(STAGE_JOINT), []),
                 (
                     "ring_bell",
-                    lambda _, callprod, _2, _3: self.set_joint_bell(
+                    lambda _, callprod, _2, _3: self.joint_bell.set(
                         callprod.data.args[0][1].as_str()
                     ),
                     [],
                 ),
-                ("next_question", lambda *_: self.set_qid(self.get_qid() + 1), []),
+                ("next_question", lambda *_: self.qid.set(self.qid.get() + 1), []),
             ]
         )
 
@@ -64,13 +62,13 @@ class KhoiDong(penguin.PartImplementation):
         return engine.Status.RUNNING
 
     def on_qid_change(self, _: engine.PortableValue):
-        if self.get_qid() == -1:
-            self.set_current_question_content(
+        if self.qid.get() == -1:
+            self.current_question_content.set(
                 "Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút."
             )
             return
-        self.set_current_question_content(
-            penguin.SHOW.qbank.get_question(self.get_qid()).prompt
+        self.current_question_content.set(
+            penguin.SHOW.qbank.get_question(self.qid.get()).prompt
         )
 
     @override
@@ -85,7 +83,7 @@ class KhoiDong(penguin.PartImplementation):
         #         show.qbank.get_question(self.lastqid).prompt
         #     )
         #     # self.set_current_question(show.qbank.get_question(self.get_qid()))
-        if self.get_state() == STAGE_SEPERATED:
+        if self.state.get() == STAGE_SEPERATED:
             return self._seperated(show)
         return self._joint(show)
 

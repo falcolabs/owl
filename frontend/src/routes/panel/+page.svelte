@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { Connection, Peeker, CallProcedure, Push, GameMaster, StateManager } from "$lib";
-    import { Timer, type Player } from "client";
+    import type { Timer, Player } from "client";
     import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
     import ScoreBar from "../../components/ScoreBar.svelte";
@@ -59,6 +59,7 @@
             };
         });
         timer = states.timerStore;
+        setInterval(() => {elapsed = $timer.elapsedSecs().toFixed(2)}, 100)
     });
 
     const setStage = (stage: number) => async () => await states.setNumber("stage", stage);

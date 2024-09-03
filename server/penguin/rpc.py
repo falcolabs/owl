@@ -1,4 +1,5 @@
 import collections.abc
+from os import initgroups
 import engine
 import typing
 import json
@@ -7,6 +8,7 @@ from config import config
 from ._result import Result, Ok, Err
 from ._option import Some, Null, Option
 from .show import LOOP, SESSION_MAN, TASK_POOL
+from .store import Writable
 
 
 def str_portable_type(inp: str) -> engine.PortableType:
@@ -24,19 +26,69 @@ def str_portable_type(inp: str) -> engine.PortableType:
         raise TypeError(f"Unsupported argument type: `{inp}`")
 
 
-def portable_type(inp: object) -> engine.PortableType:
+JSONPortable = collections.abc.Collection | int | float | str | collections.abc.Mapping
+
+
+def portable_type(
+    inp: typing.Any, serializer: typing.Callable | None = None
+) -> engine.PortableType:
     if isinstance(inp, list):
         return engine.PortableType.ARRAY
-    if inp is None:
+    elif inp is None:
         return engine.PortableType.NULL
-    if isinstance(inp, int) or isinstance(inp, float):
+    elif isinstance(inp, int) or isinstance(inp, float):
         return engine.PortableType.NUMBER
-    if isinstance(inp, str):
+    elif isinstance(inp, str):
         return engine.PortableType.STRING
-    if isinstance(inp, dict) or isinstance(inp, map):
+    elif isinstance(inp, dict) or isinstance(inp, map):
         return engine.PortableType.OBJECT
+    elif isinstance(inp, engine.PortableValue):
+        return inp.data_type
+    elif isinstance(inp, JSONPortable):
+        return portable_type(inp)
+    elif serializer is not None:
+        return serializer(inp).data_type
     else:
-        raise TypeError(f"Unsupported argument type: `{inp}`")
+        raise ValueError(
+            f"{inp} of type {type(inp)} is not PortableValue or automatically derivable types, but serializer is None"
+        )
+
+
+def pack_portable_value(
+    name: str,
+    inp: typing.Any,
+    serializer: typing.Callable[[typing.Any], engine.PortableValue] | None,
+) -> engine.GameState:
+    if isinstance(inp, engine.PortableValue):
+        return engine.GameState(
+            name=name,
+            data=inp,
+        )
+
+    porttype: engine.PortableType
+    if serializer is not None:
+        return engine.GameState(name=name, data=serializer(inp))
+    elif isinstance(inp, list):
+        porttype = engine.PortableType.ARRAY
+    elif inp is None:
+        porttype = engine.PortableType.NULL
+    elif isinstance(inp, int) or isinstance(inp, float):
+        porttype = engine.PortableType.NUMBER
+    elif isinstance(inp, str):
+        porttype = engine.PortableType.STRING
+    elif isinstance(inp, dict) or isinstance(inp, map):
+        porttype = engine.PortableType.OBJECT
+    elif isinstance(inp, JSONPortable):
+        porttype = portable_type(inp)
+    else:
+        raise ValueError(
+            f"{inp} of type {type(inp)} is not PortableValue or automatically derivable types, but serializer is None"
+        )
+
+    return engine.GameState(
+        name=name,
+        data=engine.PortableValue(json=json.dumps(inp), data_type=porttype),
+    )
 
 
 ProcedureHandler = typing.Callable[
@@ -44,7 +96,15 @@ ProcedureHandler = typing.Callable[
     None,
 ]
 
-T = typing.TypeVar("T", list, int, float, str, dict)
+T = typing.TypeVar(
+    "T",
+    collections.abc.Collection,
+    int,
+    float,
+    str,
+    collections.abc.Mapping,
+    typing.Any,
+)
 Signature = list[tuple[str, engine.PortableType]]
 
 
@@ -85,13 +145,17 @@ class RPCManager:
                 engine.PortableValue(self.timer.pack(), engine.PortableType.OBJECT),
             )
         }
+        self.states_writable: dict[str, Writable[typing.Any]] = {}
+        self.orgtype_map: dict[str, type] = {
+            "timer_json": engine.Timer,
+        }
+        self.deser_map: dict[
+            str, typing.Callable[[engine.PortableValue], typing.Any]
+        ] = {}
         self.add_procedure(
             self.timer_operation,
             signature=[("operation", engine.PortableType.STRING)],
             name="timer_operation",
-        )
-        self.change_listen: dict[str, typing.Callable[[engine.PortableValue], None]] = (
-            {}
         )
 
     @typing.overload
@@ -122,70 +186,7 @@ class RPCManager:
             return self.states[name].data
         return json.loads(self.states[name].data.json)
 
-    @typing.overload
-    def set_state(
-        self,
-        name: str,
-        value: T,
-        *,
-        ptype: engine.PortableType,
-    ): ...
-    @typing.overload
-    def set_state(
-        self,
-        name: str,
-        value: str,
-        *,
-        ser: typing.Callable[[T], str],
-        ptype: engine.PortableType | None = None,
-    ): ...
-    @typing.overload
-    def set_state(
-        self,
-        name: str,
-        value: engine.PortableValue,
-    ): ...
-
-    def set_state(
-        self,
-        name: str,
-        value: T | engine.PortableValue | str,
-        *,
-        ser: typing.Callable[[T], str] | None = None,
-        ptype: engine.PortableType | None = None,
-    ):
-        def typecheck() -> bool:
-            if isinstance(value, engine.PortableValue):
-                return True
-            if ser:
-                return True
-            return ptype != portable_type(value)
-
-        if config().checkRPCTypes and typecheck():
-            raise TypeError(
-                f"Type mismatch: expected '{ptype}', found '{portable_type(value)}'"
-            )
-
-        if isinstance(value, engine.PortableValue):
-            return self._set_state_value(
-                name=name,
-                pvalue=value,
-            )
-        if ser is not None and ptype is not None:
-            return self._set_state_value(
-                name=name,
-                pvalue=engine.PortableValue(json=ser(value), data_type=ptype),  # type: ignore
-            )
-
-        if not ptype:
-            raise ValueError("ptype must be provided.")
-
-        return self._set_state_value(
-            name=name,
-            pvalue=engine.PortableValue(json=json.dumps(value), data_type=ptype),
-        )
-
-    def _set_state_value(self, name: str, pvalue: engine.PortableValue):
+    def set_state(self, name: str, pvalue: engine.PortableValue):
         """Non type-checked and accepts raw PortableValue."""
         self.states[name] = engine.GameState(
             name=name,
@@ -194,8 +195,12 @@ class RPCManager:
         engine.log_debug(
             f"Broadcasting gamestate change & calling hooks: Logic: {name} = {pvalue.json}"
         )
-        if name in self.change_listen:
-            self.change_listen[name](pvalue)
+        original_type = self.orgtype_map[name]
+        if original_type is engine.Timer:
+            pass
+        else:
+            self.states_writable[name].set(self.deser_map[name](pvalue))
+
         TASK_POOL.append(
             LOOP.create_task(
                 SESSION_MAN.broadcast(engine.Packet.State(self.states[name]).pack())
@@ -209,103 +214,71 @@ class RPCManager:
         initial_value: engine.PortableValue,
         *,
         hidden=False,
-    ) -> tuple[typing.Callable[[], str], typing.Callable[[str], None]]: ...
+    ) -> Writable[engine.PortableValue]:
+        """Creates a syncronized state handling raw `engine.Portable` values."""
 
     @typing.overload
     def use_state(
         self,
         name: str,
-        initial_value: str,
+        initial_value: T,
         *,
-        serializer: typing.Callable[[T], str],
-        deserializer: typing.Callable[[str], T],
+        serializer: typing.Callable[[T], engine.PortableValue],
+        deserializer: typing.Callable[[engine.PortableValue], T],
         hidden=False,
-    ) -> tuple[typing.Callable[[], T], typing.Callable[[T], None]]: ...
+    ) -> Writable[T]:
+        """Creates a syncronized state handling custom values with the provided
+        serialize and deserializer."""
 
     @typing.overload
-    def use_state(
-        self, name: str, initial_value: T, *, hidden=False
-    ) -> tuple[typing.Callable[[], T], typing.Callable[[T], None]]: ...
+    def use_state(self, name: str, initial_value: T, *, hidden=False) -> Writable[T]:
+        """Creates a syncronized state handling native JSON types with serialize and
+        deserialization automatically inferred."""
 
     def use_state(
         self,
         name: str,
-        initial_value: T | str | engine.PortableValue,
+        initial_value: engine.PortableValue | T,
         *,
-        serializer: typing.Callable[[T], str] | None = None,
-        deserializer: typing.Callable[[str], T] | None = None,
+        serializer: typing.Callable[[T], engine.PortableValue] | None = None,
+        deserializer: typing.Callable[[engine.PortableValue], T] | None = None,
         hidden=False,
-    ) -> (
-        tuple[typing.Callable[[], T], typing.Callable[[T], None]]
-        | tuple[typing.Callable[[], str], typing.Callable[[str], None]]
-        | tuple[
-            typing.Callable[[], engine.PortableValue],
-            typing.Callable[[engine.PortableValue], None],
-        ]
-    ):
-        porttype = (
-            initial_value.data_type
-            if isinstance(initial_value, engine.PortableValue)
-            else portable_type(initial_value)
-        )
-        if isinstance(initial_value, engine.PortableValue):
-            if not isinstance(initial_value, str):
-                raise ValueError("initial_value must be str if ptype is set.")
-            self.states[name] = engine.GameState(
-                name=name,
-                data=initial_value,
-            )
-        elif serializer:
-            self.states[name] = engine.GameState(
-                name=name,
-                data=engine.PortableValue(
-                    json=serializer(initial_value), data_type=porttype  # type: ignore
-                ),
-            )
-        else:
-            self.states[name] = engine.GameState(
-                name=name,
-                data=engine.PortableValue(
-                    json=json.dumps(initial_value), data_type=porttype
-                ),
-            )
-
-        get, set = None, None
-
+    ) -> Writable[engine.PortableValue] | Writable[T]:
+        output = Writable(initial_value)
+        initial_gamestate = pack_portable_value(name, output.get(), serializer)
+        data_type = initial_gamestate.data.data_type
+        self.states[name] = initial_gamestate
+        self.orgtype_map[name] = type(initial_value)
+        self.states_writable[name] = Writable(initial_value)
         if deserializer and serializer:
-
-            def get_ser() -> T:
-                return self.get_state(name, deser=deserializer)
-
-            def set_ser(value: str):
-                self.set_state(name, value, ser=serializer, ptype=porttype)
-
-            get, set = get_ser, set_ser
-
+            self.deser_map[name] = deserializer
+            output.subscribe(
+                lambda value: self.set_state(name, serializer(value))  # type: ignore
+            )
         elif isinstance(initial_value, engine.PortableValue):
+            self.deser_map[name] = lambda x: x
 
-            def get_raw() -> engine.PortableValue:
-                return self.get_state(name, ret_raw=True)
+            def type_is_correct(
+                value: engine.PortableValue, ptype: engine.PortableType
+            ) -> bool:
+                return ptype == value.data_type
 
-            def set_raw(value: engine.PortableValue):
-                self.set_state(name, value)
+            def error(value, ptype):
+                raise TypeError(
+                    f"Type mismatch: expected '{ptype}', found '{portable_type(value)}'"
+                )
 
-            get, set = get_raw, set_raw
-
+            output.subscribe(lambda value: self.set_state(name, value) if config().checkRPCTypes and type_is_correct(value, data_type) else error(value, data_type))  # type: ignore
         else:
+            self.deser_map[name] = lambda x: json.loads(x.json)
+            output.subscribe(
+                lambda value: self.set_state(
+                    name,
+                    engine.PortableValue(json=json.dumps(value), data_type=data_type),
+                )
+            )
 
-            def get_nor() -> T:
-                return self.get_state(name)
-
-            def set_nor(value: T):
-                self.set_state(name, value, ptype=porttype)
-
-            get, set = get_nor, set_nor
-
-        return get, set  # type: ignore
-
-    def on_change(self, name: str, F: typing.Callable[[engine.PortableValue], None]):
-        self.change_listen[name] = F
+        return output  # type: ignore
 
     def add_procedure(
         self,
@@ -380,7 +353,7 @@ class RPCManager:
             case _:
                 engine.log_warning(f"Timer operation not found: {operation}. Ignoring.")
 
-        self._set_state_value(
+        self.set_state(
             "timer_json",
             engine.PortableValue(
                 json=self.timer.pack(), data_type=engine.PortableType.OBJECT
@@ -432,12 +405,13 @@ class RPCManager:
                     f"Changing game state {update.name} to {update.data.json}"
                 )
                 try:
-                    self.states[update.name] = update
                     engine.log_debug(
                         f"Broadcasting gamestate change & calling hooks: WSUpdated: {update.name} = {json.dumps(update.data.json)}"
                     )
-                    if update.name in self.change_listen:
-                        self.change_listen[update.name](update.data)
+                    self.states[update.name] = update
+                    self.states_writable[update.name].set(
+                        self.deser_map[update.name](update.data)
+                    )
                     await SESSION_MAN.broadcast(
                         engine.Packet.State(self.states[update.name]).pack()
                     )
