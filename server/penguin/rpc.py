@@ -195,11 +195,11 @@ class RPCManager:
         engine.log_debug(
             f"Broadcasting gamestate change & calling hooks: Logic: {name} = {pvalue.json}"
         )
-        original_type = self.orgtype_map[name]
-        if original_type is engine.Timer:
-            pass
-        else:
-            self.states_writable[name].set(self.deser_map[name](pvalue))
+        # original_type = self.orgtype_map[name]
+        # if original_type is engine.Timer:
+        #     pass
+        # else:
+        #     self.states_writable[name].set(self.deser_map[name](pvalue))
 
         TASK_POOL.append(
             LOOP.create_task(
@@ -249,7 +249,7 @@ class RPCManager:
         data_type = initial_gamestate.data.data_type
         self.states[name] = initial_gamestate
         self.orgtype_map[name] = type(initial_value)
-        self.states_writable[name] = Writable(initial_value)
+        self.states_writable[name] = output
         if deserializer and serializer:
             self.deser_map[name] = deserializer
             output.subscribe(
