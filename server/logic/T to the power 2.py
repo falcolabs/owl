@@ -8,6 +8,7 @@ class TT(penguin.PartImplementation):
 
         self.rpc = penguin.RPCManager('TT')
         self.questions = self.rpc.use_state(
+            "questions",
             [
                 {"status":None,"content":"the early bird gets the worms","number":1},
                 {"status":None,"content":"get the ducks in a row","number":2},
@@ -17,6 +18,7 @@ class TT(penguin.PartImplementation):
         )
 
         self.images = self.rpc.use_state(
+            "illustrations",
             [
                 {"type":"image","path":"","part":1},
                 {"type":"video","path":"","part":4}
@@ -26,6 +28,7 @@ class TT(penguin.PartImplementation):
         self.prompt = self.rpc.use_state("prompt","why are you still here?")
 
         self.answers = self.rpc.use_state(
+            "answers",
             [
                 {"answer":"i am too dumb for this","time":0.5},
                 {"answer":"why am i still here?","time":0.55},
