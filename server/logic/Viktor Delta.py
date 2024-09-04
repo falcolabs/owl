@@ -6,7 +6,7 @@ class VD(penguin.PartImplementation):
     def __init__(self):
         super().__init__()
 
-        self.rpc = penguin.RPCManager('TT')
+        self.rpc = penguin.RPCManager('VD')
         
         self.question_selections = self.rpc.use_state(
             "selected",
