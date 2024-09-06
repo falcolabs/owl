@@ -8,9 +8,9 @@ Time_elapsed = 0
 Time_queue = queue.Queue(maxsize = 1)
 
 CALLSIGN = b'Hi!'
-POLYNOMIAL = polynomial
 Port = Communicator.Port
 Initializer_Values = Communicator.Initializer_Values
+POLYNOMIAL = Initializer_Values["CRC polynomial exponents"]
 Socket_Descriptor = Communicator.Socket_Descriptor
 HOST = Initializer_Values["Host address"]
 Name = Initializer_Values["Name"]
