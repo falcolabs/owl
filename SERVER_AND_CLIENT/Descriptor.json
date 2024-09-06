@@ -1,0 +1,14 @@
+{
+    "Descriptor":
+    [
+        {
+            "Name":"",
+            "Host":0,
+            "Address":"",
+            "Host address":"",
+            "Port":50000,
+            "CRC polynomial exponents":[16,12,5,0],
+            "Callsign list":["","","",""]
+        }
+    ]
+}
