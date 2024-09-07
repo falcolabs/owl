@@ -13,6 +13,15 @@
             "preLaunchTask": "Construct",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/server"
+        },
+                {
+            "name": "skibidi quick",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/server/main.py",
+            "consoleName": "Skibidi Agent",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/server"
         }
     ]
 }

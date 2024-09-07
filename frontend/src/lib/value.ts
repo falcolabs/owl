@@ -29,6 +29,10 @@ export class WASMValue {
     static object(t: object): PortableValue {
         return Value.create(t, Peeker.PortableType.OBJECT)
     }
+
+    static boolean(t: boolean): PortableValue {
+        return Value.create(t, Peeker.PortableType.BOOLEAN)
+    }
 }
 
 export class Value {
@@ -56,5 +60,9 @@ export class Value {
 
     static object(t: object): PortableValue {
         return Value.create(t, Peeker.PortableType.OBJECT)
+    }
+
+    static boolean(t: boolean): PortableValue {
+        return Value.create(t, Peeker.PortableType.BOOLEAN)
     }
 }

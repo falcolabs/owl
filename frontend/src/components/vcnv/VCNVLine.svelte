@@ -1,13 +1,20 @@
 <script lang="ts">
-    export let content: string;
-    export let status: "hidden" | "selected" | "shown" | "disabled";
-    export let tag: string;
+    import type { Writable } from "svelte/store";
+
+    export let line: Writable<any>;
 </script>
 
 <div class="line">
-    <div class="letter disabled tag">{tag}</div>
-    {#each content as lett}
-        <div class="letter" class:selected={status == "selected"} class:shown={status == "shown"} class:disabled={status == "disabled"}>{lett}</div>
+    <div class="letter disabled tag">{$line.tag}</div>
+    {#each $line.content as lett}
+        <div
+            class="letter"
+            class:selected={$line.status == "selected"}
+            class:shown={$line.status == "shown"}
+            class:disabled={$line.status == "disabled"}
+        >
+            <span class:hide={$line.status != "shown"}>{lett}</span>
+        </div>
     {/each}
 </div>
 
@@ -33,6 +40,7 @@
         align-items: center;
         justify-content: center;
         font-weight: bold;
+        transition: 200ms ease-in-out;
     }
 
     .selected {
@@ -49,4 +57,7 @@
         background-color: var(--bg-dark-1);
     }
 
+    .hide {
+        display: none;
+    }
 </style>

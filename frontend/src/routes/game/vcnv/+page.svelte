@@ -4,9 +4,10 @@
     import { readable, writable, type Readable } from "svelte/store";
     import Load from "../../../components/Load.svelte";
     import TitleBar from "../../../components/TitleBar.svelte";
-    import DATA from "../../../p2b64.b64?raw";
-    import VcnvMain from "../../../components/VCNVMain.svelte";
-    import VcnvShowAnswer from "../../../components/VCNVShowAnswer.svelte";
+    import VcnvMain from "../../../components/vcnv/VCNVMain.svelte";
+    import VcnvShowAnswer from "../../../components/vcnv/VCNVShowAnswer.svelte";
+    import ScoreBar from "../../../components/ScoreBar.svelte";
+    import type { PlayerManager } from "$lib/player";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -19,7 +20,7 @@
         ],
         prompt: 'Đây là những lời nhận xét của Hoài Thanh - Hoài Chân về ai: "chỉ tiên sinh là người của hai thế kỷ. Tiên sinh sẽ đại biểu cho một lớp người để chứng giám công việc lớp người kế tiếp. Ở địa vị ấy còn có ai xứng đáng hơn tiên sinh"?',
         key_length: 69,
-        image: DATA,
+        image: "",
         show_key: false,
         answers: [
             { time: 29.5, name: "MrBeast", content: "IELT", verdict: null },
@@ -28,34 +29,37 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
+    let players: PlayerManager;
 
-    // onMount(async () => {
-    //     conn = await Connection.create();
-    //     gm = await GameMaster.create(conn);
-    //     states = gm.states;
-    // });
+    onMount(async () => {
+        conn = await Connection.create();
+        gm = await GameMaster.create(conn);
+        states = gm.states;
+        players = gm.players;
+    });
 </script>
 
 <title>Vượt chướng ngại vật - Đường đua xanh</title>
 <div class="bg">
-    <!-- <Load until={gm !== undefined}> -->
-    <TitleBar activity="Vượt chướng ngại vật" />
-    <div class="center-box">
-        <div class="main">
-            <VcnvMain {states} />
+    <Load until={gm !== undefined && $states.__init}>
+        <TitleBar activity="Vượt chướng ngại vật" />
+        <div class="center-box">
+            {#if $states.show_key}
+                <div class="answers">
+                    <VcnvShowAnswer {states} />
+                </div>
+            {:else}
+                <div class="main">
+                    <VcnvMain {states} />
+                </div>
+            {/if}
         </div>
-        <div class="answers hidden">
-            <VcnvShowAnswer {states} />
-        </div>
-        <div class="bottom">scoreboard</div>
-    </div>
-    <!-- </Load> -->
+        <div class="bottom"><ScoreBar {players} {states} /></div>
+    </Load>
 </div>
 
 <style>
-    .hidden {
-        display: none;
-    }
+
     .bg {
         width: 100vw;
         height: 100vh;
@@ -68,12 +72,17 @@
         align-items: center;
         justify-content: center;
         width: 100vw;
-        height: 100%;
+        height: 100vh;
         flex-direction: column;
-        transform: translateY(40px);
+        transform: translateY(2rem);
     }
 
     .bottom {
-        margin-top: 30px;
+        position: absolute;
+        transform: translateY(-5rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
     }
 </style>

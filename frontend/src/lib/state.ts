@@ -57,6 +57,10 @@ export class StateManager implements Readable<any> {
         }
     }
 
+    isInitialized(): boolean {
+        return this.store.__init;
+    }
+
 
     async updateAll() {
         await this.connection.send(Peeker.Query.stateList());
@@ -116,6 +120,10 @@ export class StateManager implements Readable<any> {
 
     async setObject(name: string, t: object) {
         await this.connection.send(Push.object(name, t));
+    }
+
+    async setBoolean(name: string, t: boolean) {
+        await this.connection.send(Push.boolean(name, t));
     }
 
     async setTimer(t: Timer) {

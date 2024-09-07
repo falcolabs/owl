@@ -2,12 +2,12 @@
     import ScorePill from "./ScorePill.svelte";
     import { GameMaster } from "$lib";
 
-    export let gamemaster: GameMaster;
-    let { players, states } = gamemaster;
+    export let players;
+    export let states;
 </script>
 
 <div class="bar">
-    {#each $players as [_, player]}
+    {#each $players.entries() as [_, player]}
         <ScorePill
             activated={$states.seperated_candidate == player.identifier}
             name={player.name}

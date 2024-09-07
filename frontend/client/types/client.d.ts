@@ -30,6 +30,7 @@ export type PartProperties = {
 };
 export type Question = {
     prompt: string;
+    media: string;
     key: string;
     score: number;
     choices: string[];

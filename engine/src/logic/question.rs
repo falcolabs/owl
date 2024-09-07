@@ -9,6 +9,7 @@ impl Question {
     #[new]
     pub fn new(
         prompt: String,
+        media: String,
         key: String,
         score: i32,
         choices: Vec<String>,
@@ -17,6 +18,7 @@ impl Question {
     ) -> Question {
         Question {
             prompt,
+            media,
             key,
             score,
             choices,

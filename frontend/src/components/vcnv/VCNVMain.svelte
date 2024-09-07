@@ -1,20 +1,51 @@
 <script lang="ts">
     import VcnvLine from "./VCNVLine.svelte";
-    import PillTag from "./PillTag.svelte";
+    import PillTag from "../PillTag.svelte";
     import type { StateManager } from "$lib";
-    import type { Readable } from "svelte/store";
+    import { writable, type Readable, type Writable } from "svelte/store";
     export let states: Readable<any>;
+
+    let lines = writable(
+        new Map<string, Writable<{ status: string; content: string; tag: string }>>()
+    );
+    states.subscribe((s) => {
+        if (s.final_hint) {
+            if ($lines.size != 1) {
+                console.log("M");
+                let o = new Map();
+                o.set(s.puzzle_data.center.tag, writable(s.puzzle_data.center));
+                lines.set(o);
+            } else {
+                $lines.get(s.puzzle_data.center.tag)?.set(s.puzzle_data.center);
+            }
+        } else {
+            if ($lines.size != 4) {
+                console.log("not M");
+                let o = new Map();
+                for (let entry of $states.puzzle_data.normal) {
+                    o.set(entry.tag, writable(entry));
+                }
+                lines.set(o);
+            } else {
+                for (let entry of $states.puzzle_data.normal) {
+                    $lines.get(entry.tag)?.set(entry);
+                }
+            }
+        }
+    });
 </script>
 
 <div class="top">
     <div class="left">
         <div class="up box">
-            {#each $states.puzzle_data as { content, status, tag }}
-                <VcnvLine {content} {status} {tag}></VcnvLine>
+            {#each $lines as [_, line]}
+                <VcnvLine {line} />
             {/each}
         </div>
         <div class="qbox box">
-            <div class="ptag"><PillTag text="Hàng 1" /></div>
+            <div class="ptag">
+                <PillTag text={$states.selected != "" ? "Hàng 1" : "Lựa chọn"} />
+            </div>
             <p class="prompt">{$states.prompt}</p>
             <div class="timerbar">timerbar</div>
         </div>
@@ -50,6 +81,10 @@
     .qbox {
         width: 40vw;
         height: 100%;
+        min-height: 12rem;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
     }
 
     .picontainer {

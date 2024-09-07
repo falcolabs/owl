@@ -34,4 +34,8 @@ export class Push {
     static object(name: string, t: object): Packet<PacketType.UpdateState> {
         return Push.create(name, t, Peeker.PortableType.OBJECT)
     }
+
+    static boolean(name: string, t: boolean): Packet<PacketType.UpdateState> {
+        return Push.create(name, t, Peeker.PortableType.BOOLEAN)
+    }
 }

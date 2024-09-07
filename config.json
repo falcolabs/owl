@@ -4,6 +4,7 @@
   "staticDir": "static",
   "checkRPCTypes": true,
   "debug": true,
+  "tickSpeed": 60,
   "credentials": [
     {
       "fullName": "MrBeast",

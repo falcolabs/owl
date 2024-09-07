@@ -96,6 +96,8 @@ class ConfigHive(ConfigurationValue):
     serveDir: str
     staticDir: str
     checkRPCTypes: bool
+    debug: bool
+    tickSpeed: int
     credentials: list[UserCredentials]
 
 

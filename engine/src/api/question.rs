@@ -9,13 +9,19 @@ use serde::{Deserialize, Serialize};
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Question {
     pub prompt: String,
+    #[serde(default)]
+    pub media: String,
     pub key: String,
     pub score: i32,
+    #[serde(default)]
     pub choices: Vec<String>,
+    #[serde(default)]
     pub score_false: i32,
+    #[serde(default)]
     pub explaination: String,
 }
 pyproperty!( Question:prompt       -> String      );
+pyproperty!( Question:media        -> String      );
 pyproperty!( Question:key          -> String      );
 pyproperty!( Question:score        -> i32         );
 pyproperty!( Question:choices      -> Vec<String> );

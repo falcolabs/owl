@@ -336,6 +336,7 @@ class Player:
 
 class Question:
     prompt: str
+    media: str
     key: str
     score: int
     choices: list[str] | None
@@ -345,6 +346,7 @@ class Question:
     def __init__(
         self,
         prompt: str,
+        media: str,
         key: str,
         score: int,
         choices: list[str],

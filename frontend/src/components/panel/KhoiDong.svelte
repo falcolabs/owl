@@ -20,7 +20,6 @@
         qid: -1
     });
     export let conn: Connection;
-    export let elapsed: Readable<any>;
     export let players: Readable<Map<string, Player>>;
 
     let question_placement: Writable<any> = writable({
@@ -67,40 +66,20 @@
 <div>
     <p class="code">Question #{$states.qid + 1}. {$states.current_question_content}</p>
 </div>
-<div>
-    <p>Time Elapsed: <span class="code">&nbsp{$elapsed}</span></p>
-    <div class="bgroup-hor">
-        {#each ["start", "pause", "reset"] as ops}
-            <button
-                on:click={async () => {
-                    await conn.send(
-                        CallProcedure.name("engine::timer_operation")
-                            .string("operation", ops)
-                            .build()
-                    );
-                }}
-                class="btn"
-            >
-                {ops}
-            </button>
-        {/each}
-    </div>
-</div>
+
 <div>
     <p>Game Master Controls</p>
     <div class="bgroup-hor">
         <button
             on:click={$states.qid != -1
                 ? incrementQuestion
-                : () => {
+                : async () => {
                       if ($states.stage == STAGE_SEPERATED) {
-                          setQuestion(
+                          await setQuestion(
                               $question_placement[$states.stage][$states.seperated_candidate][0]
-                          );
+                          )();
                       } else {
-                          setQuestion(
-                              $question_placement[$states.stage][$states.seperated_candidate][0]
-                          );
+                          await setQuestion($question_placement[$states.stage][0])();
                       }
                   }}
             class="btn"
@@ -122,7 +101,11 @@
         <div class="bgroup-hor">
             <button on:click={setPlayerSeperate("")} class="btn smol sep"> unset </button>
             {#each $players as [ident, p]}
-                <button on:click={setPlayerSeperate(ident)} class="btn smol">
+                <button
+                    on:click={setPlayerSeperate(ident)}
+                    class="btn smol"
+                    class:accent={ident == $states.seperated_candidate}
+                >
                     {p.name}
                 </button>
             {/each}
@@ -131,23 +114,33 @@
     <div>
         <p>Câu hỏi cho thí sinh</p>
         <div class="setq">
-            <button on:click={setQuestion(-1)} class="btn smol"> prepare </button>
+            <button on:click={setQuestion(-1)} class="btn smol" class:accent={$states.qid == -1}>
+                prepare
+            </button>
             {#if $question_placement[$states.stage][$states.seperated_candidate] !== undefined}
                 {#each $question_placement[$states.stage][$states.seperated_candidate] as q}
-                    <button on:click={setQuestion(tsignore(q))} class="btn smol code">
+                    <button
+                        on:click={setQuestion(tsignore(q))}
+                        class="btn smol code eqsize"
+                        class:accent={q == $states.qid}
+                    >
                         {tsignore(q) + 1}
                     </button>
                 {/each}
             {/if}
         </div>
     </div>
-{:else}
+{:else if $states.stage == STAGE_JOINT}
     <div>
         <p>Câu hỏi phần thi chung</p>
         <div class="setq">
             <button on:click={setQuestion(-1)} class="btn smol"> prepare </button>
             {#each $question_placement[$states.stage] as q}
-                <button on:click={setQuestion(tsignore(q))} class="btn smol code">
+                <button
+                    on:click={setQuestion(tsignore(q))}
+                    class="btn smol code eqsize"
+                    class:accent={q == $states.qid}
+                >
                     {tsignore(q) + 1}
                 </button>
             {/each}
@@ -191,7 +184,7 @@
     }
 
     .accent {
-        background-color: var(--border-color);
+        background-color: var(--accent);
     }
 
     .btn:hover {
@@ -212,5 +205,13 @@
 
     .code {
         font-family: var(--font-monospace);
+    }
+
+    .eqsize {
+        display: flex;
+        width: 70px;
+        height: auto;
+        align-items: center;
+        justify-content: center;
     }
 </style>
