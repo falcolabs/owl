@@ -1,3 +1,4 @@
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::fmt::Display;
 
 use part::PartProperties;
@@ -26,7 +27,6 @@ pub enum Packet {
     Part { data: PartProperties },
     Question { data: Question },
     QuestionBank { data: QuestionBank },
-    Show { data: Show },
     Ticker { data: Ticker },
     Timer { data: Timer },
     CommenceSession { data: Credentials },
@@ -39,6 +39,10 @@ pub enum Packet {
     UpdateState { data: GameState },
     Unknown { data: String },
     PlayerList { data: Vec<Player> },
+    PartList { data: Vec<PartProperties> },
+    PlaySound { data: String },
+    NextAnimation { data: String },
+    LogEntry { data: LogEntry },
 }
 
 impl Packet {
@@ -62,9 +66,6 @@ impl Packet {
                     data: std::mem::transmute_copy(&data),
                 },
                 "QuestionBank" => Packet::QuestionBank {
-                    data: std::mem::transmute_copy(&data),
-                },
-                "Show" => Packet::Show {
                     data: std::mem::transmute_copy(&data),
                 },
                 "Ticker" => Packet::Ticker {
@@ -131,6 +132,19 @@ impl Packet {
     }
 }
 
+#[cfg_attr(feature = "logic", pyclass(module = "engine", eq, eq_int))]
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
+#[derive(Serialize_repr, Deserialize_repr, Debug, Clone, PartialEq, Eq)]
+#[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
+#[repr(u8)]
+#[allow(non_camel_case_types)]
+pub enum MediaProperty {
+    PLAYING = 0,
+    PAUSED = 1,
+    SHOWN = 2,
+    HIDDEN = 3,
+}
+
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
 #[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -160,32 +174,21 @@ impl ProcedureSignature {
     }
 }
 
-// #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
-// #[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
-// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-// #[serde(deny_unknown_fields, rename_all = "camelCase")]
-// /// A value belonging to the game's state.
-// pub struct GameStatePrototype {
-//     name: String,
-//     hidden: bool,
-//     data_type: universal::PortableType,
-// }
-// pyproperty!(GameStatePrototype:name      -> String);
-// pyproperty!(GameStatePrototype:hidden    -> bool);
-// pyproperty!(GameStatePrototype:data_type -> universal::PortableType);
-
-// #[cfg(feature = "logic")]
-// #[pymethods]
-// impl GameStatePrototype {
-//     #[new]
-//     pub fn new(name: String, hidden: bool, data_type: universal::PortableType) -> PyResult<Self> {
-//         Ok(Self {
-//             name,
-//             hidden,
-//             data_type,
-//         })
-//     }
-// }
+#[cfg_attr(feature = "logic", pyclass(module = "engine"))]
+#[cfg_attr(feature = "wasm", wasm_bindgen(skip_typescript))]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+/// A callable server-side procedure.
+pub struct LogEntry {
+    timestamp: u128,
+    level: i32,
+    logger: String,
+    content: String,
+}
+pyproperty!(LogEntry:timestamp:set_timestamp -> u128);
+pyproperty!(LogEntry:level:set_level -> i32);
+pyproperty!(LogEntry:logger:set_logger -> String);
+pyproperty!(LogEntry:content:set_content -> String);
 
 #[cfg_attr(feature = "logic", pyclass(module = "engine"))]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -229,6 +232,50 @@ impl ProcedureCall {
 
     pub fn append_arg(&mut self, name: &str, v: PortableValue) {
         self.args.push((name.to_string(), v))
+    }
+}
+
+#[cfg(feature = "logic")]
+#[pymethods]
+impl ProcedureCall {
+    pub fn argno(&self, n: usize) -> universal::PortableValue {
+        self.args[n].1.clone()
+    }
+
+    fn argname(&self, name: &str) -> Result<PortableValue, pyo3::PyErr> {
+        for (n, v) in &self.args {
+            if n == name {
+                return Ok(v.clone());
+            }
+        }
+        Err(pyo3::exceptions::PyIndexError::new_err(format!(
+            "No argument with name {}",
+            name
+        )))
+    }
+
+    pub fn str_argno(&self, n: usize) -> Result<String, PyErr> {
+        self.args[n].1.as_str()
+    }
+
+    pub fn int_argno(&self, n: usize) -> Result<i32, PyErr> {
+        self.args[n].1.as_int()
+    }
+
+    pub fn float_argno(&self, n: usize) -> Result<f32, PyErr> {
+        self.args[n].1.as_float()
+    }
+
+    pub fn str_arg(&self, name: &str) -> Result<String, PyErr> {
+        self.argname(name)?.as_str()
+    }
+
+    pub fn int_arg(&self, name: &str) -> Result<i32, PyErr> {
+        self.argname(name)?.as_int()
+    }
+
+    pub fn float_arg(&self, name: &str) -> Result<f32, PyErr> {
+        self.argname(name)?.as_float()
     }
 }
 
@@ -345,10 +392,11 @@ pub enum Query {
     State { index: String },
     PlayerList {},
     QuestionBank {},
-    Show {},
     Ticker {},
     Timer {},
     CurrentPart {},
     AvailableProcedures {},
     StateList {},
+    PartList {},
+    Log { index: i32 },
 }

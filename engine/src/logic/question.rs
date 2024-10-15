@@ -1,5 +1,5 @@
 pub use crate::api::{Question, QuestionBank};
-use crate::logging;
+use crate::{logging, MediaContent};
 use pyo3::{exceptions::PyIndexError, prelude::*};
 use rand::{seq::SliceRandom, thread_rng};
 use std::fs;
@@ -7,24 +7,37 @@ use std::fs;
 #[pymethods]
 impl Question {
     #[new]
+    #[allow(clippy::too_many_arguments)]
+    #[pyo3(signature = (prompt, key, score, time, choices, score_false, explaination, media=None))]
     pub fn new(
         prompt: String,
-        media: String,
         key: String,
         score: i32,
+        time: i32,
         choices: Vec<String>,
         score_false: i32,
         explaination: String,
+        media: Option<MediaContent>,
     ) -> Question {
         Question {
             prompt,
-            media,
             key,
             score,
+            time,
             choices,
             score_false,
             explaination,
+            media,
         }
+    }
+
+    pub fn pack(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    #[staticmethod]
+    pub fn from_json(data: String) -> Self {
+        serde_json::from_str(&data).unwrap()
     }
 }
 
@@ -62,10 +75,16 @@ impl QuestionBank {
     pub fn load(&mut self, filepath: &str) {
         self.question_storage = serde_json::from_str(
             fs::read_to_string(filepath)
-                .unwrap_or_else(|_| panic!("{}", logging::error_str("Unable to read file")))
+                .unwrap_or_else(|e| panic!("{}: {}", logging::error_str("Unable to read file"), e))
                 .as_str(),
         )
-        .unwrap_or_else(|_| panic!("{}", logging::error_str("Invalid JSON structure.")));
+        .unwrap_or_else(|e| {
+            panic!(
+                "{}: {:#?}",
+                logging::error_str("Invalid JSON structure."),
+                e
+            )
+        });
     }
 
     /// Gets the question with the specified ID.
@@ -120,5 +139,14 @@ impl QuestionBank {
             .for_each(|q| output.push(q.clone()));
 
         output
+    }
+
+    pub fn pack(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    #[staticmethod]
+    pub fn from_json(data: String) -> Self {
+        serde_json::from_str(&data).unwrap()
     }
 }

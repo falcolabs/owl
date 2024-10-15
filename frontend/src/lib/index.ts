@@ -13,6 +13,7 @@ export { GameMaster, type AcceptableValue } from "$lib/gamemaster";
 export { StateManager } from "$lib/state";
 export { Push } from "$lib/push"
 export { Value } from "$lib/value";
+export { PlayerManager } from "$lib/player"
 
 async function ensure(socket: WebSocket, timeout = 10000) {
     const isOpened = () => (socket.readyState === WebSocket.OPEN)
@@ -47,6 +48,7 @@ export class Connection {
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {
             let packet: Packet<PacketType> = Peeker.ClientHandle.parse(me.data)
+            console.log(JSON.parse(me.data))
             if (packet.variant == Peeker.PacketType.Part) {
                 // @ts-ignore: can never happen
                 obj.currentPart = packet.value.name;

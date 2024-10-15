@@ -10,13 +10,13 @@ class Auth(penguin.PartImplementation):
     # self.props = engine.PartProperties("auth")
 
     @override
-    def on_update(self, show: engine.Show) -> engine.Status:
+    def on_update(self, show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
 
     @override
     async def on_request(
         self,
-        show: engine.Show,
+        show: penguin.Show,
         packet: engine.Packet,
         handle: engine.IOHandle,
         addr: str,

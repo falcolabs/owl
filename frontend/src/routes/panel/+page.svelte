@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Connection, GameMaster, StateManager } from "$lib";
+    import { Connection, GameMaster, StateManager, Peeker } from "$lib";
     import type { Timer, Player } from "client";
     import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
@@ -8,6 +8,9 @@
     import KhoiDong from "../../components/panel/KhoiDong.svelte";
     import Vcnv from "../../components/panel/VCNV.svelte";
     import TimerControls from "../../components/panel/TimerControls.svelte";
+    import TangToc from "../../components/panel/TangToc.svelte";
+    import VeDich from "../../components/panel/VeDich.svelte";
+    import PartSwitcher from "../../components/panel/PartSwitcher.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -16,32 +19,48 @@
     let players: Readable<Map<string, Player>> = readable(new Map());
     let elapsed = writable("0.00");
     let states: StateManager;
-    let partName: Writable<string>;
 
     onMount(async () => {
         conn = await Connection.create();
         gm = await GameMaster.create(conn);
         states = gm.states;
         players = gm.players;
-        partName = gm.partName;
         timer = states.timerStore;
         setInterval(() => {
             $elapsed = $timer.elapsedSecs().toFixed(2);
         }, 100);
+
+        conn.on(Peeker.PacketType.State, async (update) => {
+            console.log(`Updated ${update.value.name}`)
+            if (update.value.name === "current_part") {
+                await gm.updateAll();
+            }
+        });
     });
 </script>
 
 <div class="bg">
-    <Load until={gm !== undefined}>
+    <Load until={gm !== undefined && $states.available_parts !== undefined}>
         <div class="container">
             <h1>Trash control panel</h1>
             <ScoreBar {players} {states} />
-            <TimerControls {elapsed} {conn} />
-            {#if $partName == "khoidong"}
-                <KhoiDong {states} {conn} {players} />
-            {:else if $partName == "vcnv"}
-                <Vcnv {states} {conn} {players} />
-            {/if}
+            <div class="horizontal">
+                <div>
+                    <TimerControls {elapsed} {conn} />
+                    {#if $states.available_parts[$states.current_part] == "khoidong"}
+                        <KhoiDong {states} {conn} {players} />
+                    {:else if $states.available_parts[$states.current_part] == "vcnv"}
+                        <Vcnv {states} {conn} />
+                    {:else if $states.available_parts[$states.current_part] == "tangtoc"}
+                        <TangToc {states} {conn} />
+                    {:else if $states.available_parts[$states.current_part] == "vedich"}
+                        <VeDich {states} {conn} />
+                    {/if}
+                </div>
+                <div>
+                    <PartSwitcher {states} {conn} />
+                </div>
+            </div>
         </div>
     </Load>
 </div>
@@ -67,5 +86,11 @@
         overflow: hidden;
         background: var(--bg-dark-1);
         padding: 2em;
+    }
+
+    .horizontal {
+        display: grid;
+        grid-template-columns: 50vw 50vw;
+        flex-direction: row;
     }
 </style>

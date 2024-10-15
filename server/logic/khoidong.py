@@ -27,23 +27,23 @@ class KhoiDong(penguin.PartImplementation):
         self.timer = engine.Timer()
         self.timer.pause()
 
-        self.state = self.rpc.use_state("stage", STAGE_SEPERATED)
+        self.stage = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
         self.current_question_content = self.rpc.use_state(
             "current_question_content", ""
         )
-        """Username của thí sinh lượt thi hiện tại trong phần thi riêng"""
         self.qid = self.rpc.use_state("qid", -1)
         """Câu hỏi hiện tại."""
         self.qid.subscribe(self.on_qid_change)
-
+        self.highlighted = self.rpc.use_state("highlighted", [])
         self.seperated_candidate = self.rpc.use_state("seperated_candidate", "")
+        """Username của thí sinh lượt thi hiện tại trong phần thi riêng"""
         self.joint_bell = self.rpc.use_state("joint_bell", "")
         """Username thí sinh bấm chuông trả lời trong phần thi chung"""
         self.rpc.add_procedures(
             [
-                ("setstage_seperated", lambda *_: self.state.set(STAGE_SEPERATED), []),
-                ("setstage_joint", lambda *_: self.state.set(STAGE_JOINT), []),
+                ("setstage_seperated", lambda *_: self.stage.set(STAGE_SEPERATED), []),
+                ("setstage_joint", lambda *_: self.stage.set(STAGE_JOINT), []),
                 (
                     "ring_bell",
                     lambda _, callprod, _2, _3: self.joint_bell.set(
@@ -54,11 +54,26 @@ class KhoiDong(penguin.PartImplementation):
                 ("next_question", lambda *_: self.qid.set(self.qid.get() + 1), []),
             ]
         )
+        self.seperated_candidate.subscribe(
+            lambda candidate_name: self.highlighted.set(
+                [
+                    candidate_name,
+                ]
+            )
+        )
+        self.joint_bell.subscribe(
+            lambda candidate_name: self.highlighted.set(
+                self.highlighted.get()
+                + [
+                    candidate_name,
+                ]
+            )
+        )
 
-    def _seperated(self, _show: engine.Show) -> engine.Status:
+    def _seperated(self, _show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
 
-    def _joint(self, _show: engine.Show) -> engine.Status:
+    def _joint(self, _show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
 
     def on_qid_change(self, _: engine.PortableValue):
@@ -70,9 +85,20 @@ class KhoiDong(penguin.PartImplementation):
         self.current_question_content.set(
             penguin.SHOW.qbank.get_question(self.qid.get()).prompt
         )
+        # TODO - configuration entry for this
+        # automatically clearing the bell queue when question changes
+        self.joint_bell.set("")
+        if self.stage.get() == STAGE_SEPERATED:
+            self.highlighted.set(
+                [
+                    self.seperated_candidate,
+                ]
+            )
+        else:
+            self.highlighted.set([])
 
     @override
-    def on_update(self, show: engine.Show) -> engine.Status:
+    def on_update(self, show: penguin.Show) -> engine.Status:
         # qid = self.get_qid()
         # if self.lastqid != qid and qid != -1:
         #     self.lastqid = self.get_qid()
@@ -83,14 +109,14 @@ class KhoiDong(penguin.PartImplementation):
         #         show.qbank.get_question(self.lastqid).prompt
         #     )
         #     # self.set_current_question(show.qbank.get_question(self.get_qid()))
-        if self.state.get() == STAGE_SEPERATED:
+        if self.stage.get() == STAGE_SEPERATED:
             return self._seperated(show)
         return self._joint(show)
 
     @override
     async def on_request(
         self,
-        show: engine.Show,
+        show: penguin.Show,
         packet: engine.Packet,
         handle: engine.IOHandle,
         addr: str,

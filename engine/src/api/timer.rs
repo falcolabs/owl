@@ -12,6 +12,7 @@ use crate::pyproperty;
 pub struct Timer {
     pub start_time: SystemTime,
     pub paused_time: SystemTime,
+    // TODO - migrate to std::time::Instant
     pub paused_duration: Duration,
     pub is_paused: bool,
 }

@@ -1,23 +1,26 @@
 // TODO - reenable automatic generation so
 // changing Rust code does not lead to changing TS types.
 export enum PacketType {
-    Player = 0,
-    Part = 1,
-    Question = 2,
-    QuestionBank = 3,
-    Show = 4,
-    Ticker = 5,
-    Timer = 6,
-    CommenceSession = 7,
-    AuthStatus = 8,
-    Query = 9,
-    ProcedureList = 10,
-    CallProcedure = 11,
-    StateList = 12,
-    State = 13,
-    UpdateState = 14,
-    Unknown = 15,
-    PlayerList = 16,
+    Player,
+    Part,
+    Question,
+    QuestionBank,
+    Ticker,
+    Timer,
+    CommenceSession,
+    AuthStatus,
+    Query,
+    ProcedureList,
+    CallProcedure,
+    StateList,
+    State,
+    UpdateState,
+    Unknown,
+    PlayerList,
+    PartList,
+    PlaySound,
+    NextAnimation,
+    LogEntry,
 }
 
 export type Player = {
@@ -33,6 +36,7 @@ export type Question = {
     media: string;
     key: string;
     score: number;
+    time: number;
     choices: string[];
     scoreFalse: number;
     explaination: string;
@@ -58,6 +62,13 @@ export type TimerLike = {
     isPaused: boolean;
 }
 
+export type LogEntry = {
+    timestamp: number,
+    level: number,
+    logger: string,
+    content: string,
+}
+
 export class Timer {
     startTime: ServerTime;
     pausedTime: ServerTime;
@@ -75,22 +86,6 @@ export class Timer {
 export type Ticker = {
     lastTick: string;
 };
-export type Show = {
-    /** The name of the show. */
-    name: string;
-    /** The show's tick speed. */
-    tickSpeed: number;
-    /** The current part index. */
-    currentPart: number;
-    /** The players present */
-    players: Player[];
-    /** All the questions the show contains */
-    qbank: QuestionBank;
-    /** The show's ticker */
-    ticker: Ticker;
-    /** The show's timer */
-    timer: Timer;
-};
 
 export type Credentials = {
     username: string;
@@ -105,12 +100,13 @@ export enum QueryType {
     State = 4,
     PlayerList = 5,
     QuestionBank = 6,
-    Show = 7,
-    Ticker = 8,
-    Timer = 9,
-    CurrentPart = 10,
-    AvailableProcedures = 11,
-    StateList = 12,
+    Ticker = 7,
+    Timer = 8,
+    CurrentPart = 9,
+    AvailableProcedures = 10,
+    StateList = 11,
+    PartList = 12,
+    Log = 13,
 }
 
 export class QueryPacket<T extends QueryType> {
@@ -128,12 +124,13 @@ export class Query {
     static state(value: string): Packet<PacketType.Query>;
     static playerList(): Packet<PacketType.Query>;
     static questionBank(): Packet<PacketType.Query>;
-    static show(): Packet<PacketType.Query>;
     static ticker(): Packet<PacketType.Query>;
     static timer(): Packet<PacketType.Query>;
     static currentPart(): Packet<PacketType.Query>;
     static availableProcedures(): Packet<PacketType.Query>;
     static stateList(): Packet<PacketType.Query>;
+    static partList(): Packet<PacketType.Query>;
+    static log(value: number): Packet<PacketType.Query>;
 }
 
 type _QueryIndex<T> = T extends QueryType.Player
@@ -144,7 +141,9 @@ type _QueryIndex<T> = T extends QueryType.Player
     ? number
     : T extends QueryType.PartByName
     ? string
-    : null;
+    : T extends QueryType.Log
+    ? number
+    : QueryType;
 
 type _QueryVariant =
     | { variant: QueryType.Player; index: string }
@@ -153,12 +152,14 @@ type _QueryVariant =
     | { variant: QueryType.PartByName; index: string }
     | { variant: QueryType.QuestionBank }
     | { variant: QueryType.State }
+    | { variant: QueryType.StateList }
+    | { variant: QueryType.PartList }
     | { variant: QueryType.PlayerList }
-    | { variant: QueryType.Show }
     | { variant: QueryType.Ticker }
     | { variant: QueryType.Timer }
     | { variant: QueryType.CurrentPart }
-    | { variant: QueryType.AvailableProcedures };
+    | { variant: QueryType.AvailableProcedures }
+    | { variant: QueryType.Log };
 
 export type ProcedureSignature = {
     name: string;
@@ -216,8 +217,6 @@ export type _PacketValue<T> = T extends PacketType.Player
     ? Question
     : T extends PacketType.QuestionBank
     ? QuestionBank
-    : T extends PacketType.Show
-    ? Show
     : T extends PacketType.Ticker
     ? Ticker
     : T extends PacketType.Timer
@@ -242,6 +241,14 @@ export type _PacketValue<T> = T extends PacketType.Player
     ? Unknown
     : T extends PacketType.PlayerList
     ? Player[]
+    : T extends PacketType.PartList
+    ? PartProperties[]
+    : T extends PacketType.PlaySound
+    ? string
+    : T extends PacketType.NextAnimation
+    ? string
+    : T extends PacketType.LogEntry
+    ? LogEntry
     : never;
 
 export type _PacketVariant =
@@ -249,7 +256,6 @@ export type _PacketVariant =
     | { variant: PacketType.Part; value: PartProperties; pack: () => string; }
     | { variant: PacketType.Question; value: Question; pack: () => string; }
     | { variant: PacketType.QuestionBank; value: QuestionBank; pack: () => string; }
-    | { variant: PacketType.Show; value: Show; pack: () => string; }
     | { variant: PacketType.Ticker; value: Ticker; pack: () => string; }
     | { variant: PacketType.Timer; value: TimerLike; pack: () => string; }
     | { variant: PacketType.CommenceSession; value: Credentials; pack: () => string; }
@@ -261,7 +267,11 @@ export type _PacketVariant =
     | { variant: PacketType.State; value: GameState; pack: () => string; }
     | { variant: PacketType.UpdateState; value: GameState; pack: () => string; }
     | { variant: PacketType.Unknown; value: Unknown; pack: () => string; }
-    | { variant: PacketType.PlayerList; value: Player[]; pack: () => string; };
+    | { variant: PacketType.PlayerList; value: Player[]; pack: () => string; }
+    | { variant: PacketType.PlayerList; value: Player[]; pack: () => string; }
+    | { variant: PacketType.PlaySound; value: string; pack: () => string; }
+    | { variant: PacketType.NextAnimation; value: string; pack: () => string; }
+    | { variant: PacketType.LogEntry; value: LogEntry; pack: () => string; };
 
 /** Infrastructure for sending and handling {@link Packet}. */
 export class ClientHandle {

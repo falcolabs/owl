@@ -27,6 +27,7 @@ wasm = [
     "dep:ws_stream_wasm",
     "dep:futures",
     "dep:serde_json",
+    "dep:serde_repr"
 ]
 default = ["logic"]
 api = ["dep:tokio", "tokio/sync", "dep:futures"]
@@ -39,6 +40,7 @@ logic = [
     "dep:rand",
     "dep:pyo3",
     "dep:paste",
+    "dep:serde_repr"
 ]
 net = [
     "dep:axum",
@@ -63,6 +65,7 @@ pyo3 = { version = "0.22.2", features = [
 serde = { version = "1.0", features = ["derive"], optional = true }
 rand = { version = "0.8.5", optional = true }
 serde_json = { version = "1.0", optional = true }
+serde_repr = {version = "0.1", optional = true}
 axum = { version = "0.7.5", features = ["ws"], optional = true }
 axum-extra = { version = "0.9.3", features = ["typed-header"], optional = true }
 tower = { version = "0.4", optional = true }

@@ -1,6 +1,5 @@
 <script lang="ts">
     import ScorePill from "./ScorePill.svelte";
-    import { GameMaster } from "$lib";
 
     export let players;
     export let states;
@@ -9,7 +8,7 @@
 <div class="bar">
     {#each $players.entries() as [_, player]}
         <ScorePill
-            activated={$states.seperated_candidate == player.identifier}
+            activated={$states.highlighted == player.identifier}
             name={player.name}
             score={player.score}
         />

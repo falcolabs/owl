@@ -2,30 +2,34 @@ use core::fmt;
 
 use gloo_utils::format::JsValueSerdeExt;
 use js_sys::{Object, Reflect};
-use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-#[wasm_bindgen(skip_typescript)]
+#[derive(Debug, Clone, Copy, Serialize_repr, Deserialize_repr)]
+#[wasm_bindgen]
 #[allow(unused)]
+#[repr(u8)]
 pub enum PacketType {
-    Player = 0,
-    Part = 1,
-    Question = 2,
-    QuestionBank = 3,
-    Show = 4,
-    Ticker = 5,
-    Timer = 6,
-    CommenceSession = 7,
-    AuthStatus = 8,
-    Query = 9,
-    ProcedureList = 10,
-    CallProcedure = 11,
-    StateList = 12,
-    State = 13,
-    UpdateState = 14,
-    Unknown = 15,
-    PlayerList = 16,
+    Player,
+    Part,
+    Question,
+    QuestionBank,
+    Ticker,
+    Timer,
+    CommenceSession,
+    AuthStatus,
+    Query,
+    ProcedureList,
+    CallProcedure,
+    StateList,
+    State,
+    UpdateState,
+    Unknown,
+    PlayerList,
+    PartList,
+    PlaySound,
+    NextAnimation,
+    LogEntry,
 }
 
 impl Into<f64> for PacketType {
@@ -106,7 +110,6 @@ impl Into<engine::Packet> for ClientPacket {
             PacketType::Part => packet_conv!(self->Part),
             PacketType::Question => packet_conv!(self->Question),
             PacketType::QuestionBank => packet_conv!(self->QuestionBank),
-            PacketType::Show => packet_conv!(self->Show),
             PacketType::Ticker => packet_conv!(self->Ticker),
             PacketType::Timer => packet_conv!(self->Timer),
             PacketType::CommenceSession => packet_conv!(self->CommenceSession),
@@ -118,7 +121,11 @@ impl Into<engine::Packet> for ClientPacket {
             PacketType::UpdateState => packet_conv!(self->UpdateState),
             PacketType::Unknown => packet_conv!(self->Unknown),
             PacketType::PlayerList => packet_conv!(self->PlayerList),
+            PacketType::PartList => packet_conv!(self->PartList),
             PacketType::Query => crate::bridge::QueryPacket::from(self.value).into(),
+            PacketType::PlaySound => packet_conv!(self->PlaySound),
+            PacketType::NextAnimation => packet_conv!(self->NextAnimation),
+            PacketType::LogEntry => packet_conv!(self->LogEntry),
         }
     }
 }
@@ -130,7 +137,6 @@ impl From<engine::Packet> for ClientPacket {
             engine::Packet::Part { .. } => PacketType::Part,
             engine::Packet::Question { .. } => PacketType::Question,
             engine::Packet::QuestionBank { .. } => PacketType::QuestionBank,
-            engine::Packet::Show { .. } => PacketType::Show,
             engine::Packet::Ticker { .. } => PacketType::Ticker,
             engine::Packet::Timer { .. } => PacketType::Timer,
             engine::Packet::CommenceSession { .. } => PacketType::CommenceSession,
@@ -143,6 +149,10 @@ impl From<engine::Packet> for ClientPacket {
             engine::Packet::UpdateState { .. } => PacketType::UpdateState,
             engine::Packet::Unknown { .. } => PacketType::Unknown,
             engine::Packet::PlayerList { .. } => PacketType::PlayerList,
+            engine::Packet::PartList { .. } => PacketType::PartList,
+            engine::Packet::PlaySound { .. } => PacketType::PlaySound,
+            engine::Packet::NextAnimation { .. } => PacketType::NextAnimation,
+            engine::Packet::LogEntry { .. } => PacketType::LogEntry,
         };
         Self {
             variant: ptype,

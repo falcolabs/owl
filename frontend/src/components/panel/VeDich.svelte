@@ -1,0 +1,174 @@
+<script lang="ts">
+    import { Connection, Peeker, type StateManager, CallProcedure } from "$lib";
+    import type { Timer, Player } from "client";
+    import { writable, readable, type Readable, type Writable } from "svelte/store";
+    import SubmitJudger from "./SubmitJudger.svelte";
+    import Load from "../Load.svelte";
+    export let states: StateManager;
+    export let conn: Connection;
+
+    const STAGE_CHOOSE: number = 0;
+    const STAGE_COMPETE: number = 1;
+</script>
+
+<Load until={$states.package !== undefined}>
+    <div class="vertical">
+        <div class="vertical">
+            <h1>GameMaster Controls</h1>
+            <button
+                class="btn"
+                class:accent={$states.stage == STAGE_COMPETE}
+                on:click={async () => {
+                    await states.setNumber(
+                        "stage",
+                        $states.stage == STAGE_CHOOSE ? STAGE_COMPETE : STAGE_CHOOSE
+                    );
+                }}
+                >{$states.stage == STAGE_CHOOSE ? "Màn hình Chọn gói" : "Màn hình Phần thi"}</button
+            >
+            <button
+                class="btn"
+                on:click={async () => {
+                    if ($states.qid == -1) {
+                        await states.setNumber(
+                            "qid",
+                            $states.placement[$states.current_player_username][0]
+                        );
+                    } else {
+                        let a = $states.placement[$states.current_player_username];
+                        let newIndex = Array.from(a).indexOf($states.qid) + 1;
+                        if (newIndex > 2) {
+                            await states.setNumber("qid", -1);
+                        } else {
+                            await states.setNumber("qid", a[newIndex]);
+                        }
+                    }
+                }}>Next question</button
+            >
+        </div>
+
+        <div class="vertical">
+            <h1>Player Controls</h1>
+            <div class="horizontal">
+                <button
+                    class="btn smol nomargin-horizontal"
+                    class:accent={$states.current_player_username == ""}
+                    on:click={async () => {
+                        await states.setString("current_player_username", "");
+                    }}>unset</button
+                >
+                {#each Object.keys($states.package) as ident}
+                    <button
+                        class="btn smol nomargin-horizontal"
+                        class:accent={$states.current_player_username == ident}
+                        on:click={async () => {
+                            await states.setString("current_player_username", ident);
+                        }}>{ident}</button
+                    >
+                {/each}
+            </div>
+            {#if $states.current_player_username !== ""}
+                <div class="vertical">
+                    <h1>Gói câu hỏi cho {$states.current_player_username}:</h1>
+                    {#each [0, 1, 2] as i}
+                        <div class="horizontal smolmargin">
+                            {#each [0, 20, 30] as score}
+                                <button
+                                    class="btn smol nomargin"
+                                    class:accent={$states.package[$states.current_player_username][
+                                        i
+                                    ] == score}
+                                    on:click={async () => {
+                                        await conn.send(
+                                            CallProcedure.name("vedich::set_choice")
+                                                .string("target", $states.current_player_username)
+                                                .number("slot", i)
+                                                .number("to", score)
+                                                .build()
+                                        );
+                                    }}>{score != 0 ? score : "unset"}</button
+                                >
+                            {/each}
+                        </div>
+                    {/each}
+                </div>
+                <div class="vertical">
+                    <h1>Question Controls</h1>
+                    <div class="horizontal">
+                        <button
+                            class="btn smol nomargin-horizontal"
+                            class:accent={$states.qid == -1}
+                            on:click={async () => await states.setNumber("qid", -1)}>unset</button
+                        >
+                        {#each $states.placement[$states.current_player_username] as qid}
+                            <button
+                                class="btn smol nomargin-horizontal"
+                                class:accent={qid == $states.qid && qid != -1}
+                                on:click={async () => await states.setNumber("qid", qid)}
+                                >{qid == -1 ? "unset" : qid}</button
+                            >
+                        {/each}
+                    </div>
+                </div>
+            {:else}
+                <p>Không người chơi nào được chọn</p>
+            {/if}
+        </div>
+    </div>
+</Load>
+
+<style>
+    h1 {
+        font-weight: bold;
+    }
+
+    .btn {
+        font-family: var(--font);
+        font-size: var(--font-normal);
+        color: var(--text);
+        padding: 1rem;
+        margin: 1rem;
+        margin-left: 0;
+        user-select: none;
+        cursor: pointer;
+        background-color: var(--bg-dark-2);
+        border: 2px var(--accent) solid;
+        border-radius: var(--radius-1);
+        transition: 100ms ease-in-out;
+        width: fit-content;
+    }
+
+    .btn:hover {
+        filter: brightness(120%);
+    }
+
+    .nomargin {
+        margin: 0;
+    }
+
+    .smolmargin {
+        margin: 5px;
+    }
+
+    .accent {
+        background-color: var(--accent);
+    }
+
+    .nomargin-horizontal {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .smol {
+        padding: 15px;
+        font-size: 1em;
+        border-radius: 13px;
+        border: none;
+    }
+
+    .horizontal {
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+    }
+</style>

@@ -2,11 +2,12 @@ use core::fmt;
 
 use gloo_utils::format::JsValueSerdeExt;
 use js_sys::{JsString, Object, Reflect};
-use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen(skip_typescript)]
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[wasm_bindgen]
+#[derive(Serialize_repr, Deserialize_repr, Clone, Copy, PartialEq, Eq, Debug)]
+#[repr(u8)]
 pub enum QueryType {
     Player = 0,
     Question = 1,
@@ -15,12 +16,13 @@ pub enum QueryType {
     State = 4,
     PlayerList = 5,
     QuestionBank = 6,
-    Show = 7,
-    Ticker = 8,
-    Timer = 9,
-    CurrentPart = 10,
-    AvailableProcedures = 11,
-    StateList = 12,
+    Ticker = 7,
+    Timer = 8,
+    CurrentPart = 9,
+    AvailableProcedures = 10,
+    StateList = 11,
+    PartList = 12,
+    Log = 13,
 }
 
 impl Into<f64> for QueryType {
@@ -57,12 +59,13 @@ impl From<Object> for QueryPacket {
                 4.0 => QueryType::State,
                 5.0 => QueryType::PlayerList,
                 6.0 => QueryType::QuestionBank,
-                7.0 => QueryType::Show,
-                8.0 => QueryType::Ticker,
-                9.0 => QueryType::Timer,
-                10.0 => QueryType::CurrentPart,
-                11.0 => QueryType::AvailableProcedures,
-                12.0 => QueryType::StateList,
+                7.0 => QueryType::Ticker,
+                8.0 => QueryType::Timer,
+                9.0 => QueryType::CurrentPart,
+                10.0 => QueryType::AvailableProcedures,
+                11.0 => QueryType::StateList,
+                12.0 => QueryType::PartList,
+                13.0 => QueryType::Log,
                 _ => panic!("Unknown QueryType"),
             },
             match Reflect::get(&value, &JsValue::from("index")) {
@@ -126,12 +129,13 @@ impl Into<engine::Packet> for QueryPacket {
             QueryType::State => requestentry!(self->State),
             QueryType::PlayerList => requestentry!(PlayerList),
             QueryType::QuestionBank => requestentry!(QuestionBank),
-            QueryType::Show => requestentry!(Show),
             QueryType::Ticker => requestentry!(Ticker),
             QueryType::Timer => requestentry!(Timer),
             QueryType::CurrentPart => requestentry!(CurrentPart),
             QueryType::AvailableProcedures => requestentry!(AvailableProcedures),
             QueryType::StateList => requestentry!(StateList),
+            QueryType::PartList => requestentry!(PartList),
+            QueryType::Log => requestentry!(self->Log),
         }
     }
 }

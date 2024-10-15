@@ -24,4 +24,5 @@
   "reportIncompatibleVariableOverride": "none",
   "enableTypeIgnoreComments": true,
   "reportUnusedVariable": "unused",
+  "reportImportCycles": "none"
 }

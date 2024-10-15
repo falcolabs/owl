@@ -34,10 +34,6 @@ impl Query {
     pub fn question_bank() -> ClientPacket {
         QueryPacket::new(QueryType::QuestionBank, JsValue::null()).into()
     }
-    #[wasm_bindgen(js_name = show)]
-    pub fn show() -> ClientPacket {
-        QueryPacket::new(QueryType::Show, JsValue::null()).into()
-    }
     #[wasm_bindgen(js_name = ticker)]
     pub fn ticker() -> ClientPacket {
         QueryPacket::new(QueryType::Ticker, JsValue::null()).into()
@@ -57,5 +53,15 @@ impl Query {
     #[wasm_bindgen(js_name = stateList)]
     pub fn state_list() -> ClientPacket {
         QueryPacket::new(QueryType::StateList, JsValue::null()).into()
+    }
+
+    #[wasm_bindgen(js_name = partList)]
+    pub fn part_list() -> ClientPacket {
+        QueryPacket::new(QueryType::PartList, JsValue::null()).into()
+    }
+
+    #[wasm_bindgen(js_name = log)]
+    pub fn log(value: JsValue) -> ClientPacket {
+        QueryPacket::new(QueryType::Log, value).into()
     }
 }

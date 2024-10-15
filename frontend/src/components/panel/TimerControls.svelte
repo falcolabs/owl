@@ -7,6 +7,7 @@
 </script>
 
 <div>
+    <h1>Timer Controls</h1>
     <p>Time Elapsed: <span class="code">&nbsp{$elapsed}</span></p>
     <div class="bgroup-hor">
         {#each ["start", "pause", "reset"] as ops}
@@ -45,5 +46,16 @@
 
     .code {
         font-family: var(--font-monospace);
+    }
+
+    .btn:hover {
+        filter: brightness(120%);
+    }
+
+    h1 {
+        font-size: var(--font-normal);
+        font-weight: bold;
+        width: fit-content;
+        margin-bottom: 1rem;
     }
 </style>

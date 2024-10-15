@@ -23,21 +23,21 @@ class Option(typing.Generic[T]):
         """Raises an exeption if the value contained inside is of the Null variant."""
         if not self.is_some():
             raise Exception(f"Option.unwrap() on a Null value: {self._value}")
-        return self._value  # type: ignore
+        return self._value  # type: ignore[reportReturnType]
 
     def expect(self, msg: str) -> T:
         """Raises an exeption with the provided message if the value contained
         inside is of the Null variant."""
         if not self.is_some():
             raise Exception(msg)
-        return self._value  # type: ignore
+        return self._value  # type: ignore[reportReturnType]
 
     def unwrap_or(self, f: typing.Callable[[], T]) -> T:
         """Calls the given callback if the value
         contained inside is of the Null variant."""
         if not self.is_some():
-            return f(self._value)  # type: ignore
-        return self._value  # type: ignore
+            return f(self._value)  # type: ignore[reportReturnType]
+        return self._value  # type: ignore[reportReturnType]
 
 
 class Some(Option[T]):

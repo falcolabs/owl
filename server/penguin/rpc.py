@@ -7,7 +7,7 @@ import json
 from config import config
 from ._result import Result, Ok, Err
 from ._option import Some, Null, Option
-from .show import LOOP, SESSION_MAN, TASK_POOL
+from .show import LOOP, SESSION_MAN, TASK_POOL, Show
 from .store import Writable
 
 
@@ -87,12 +87,14 @@ def pack_portable_value(
 
     return engine.GameState(
         name=name,
-        data=engine.PortableValue(json=json.dumps(inp), data_type=porttype),
+        data=engine.PortableValue(
+            json=json.dumps(inp, ensure_ascii=False), data_type=porttype
+        ),
     )
 
 
 ProcedureHandler = typing.Callable[
-    [engine.Show, engine.Packet.CallProcedure, engine.IOHandle, str],
+    [Show, engine.Packet.CallProcedure, engine.IOHandle, str],
     None,
 ]
 
@@ -131,7 +133,7 @@ class Is:
 class RPCManager:
     """Listens to & manages Remote Procedure Calls and updating GameState"""
 
-    def __init__(self, prefix: str = "") -> None:
+    def __init__(self, prefix: str = "engine") -> None:
         self.prefix = prefix
         self.procedures: list[engine.ProcedureSignature] = []
         self.proc_map: dict[
@@ -141,6 +143,7 @@ class RPCManager:
         self.timer = engine.Timer()
         self.states: dict[str, engine.GameState] = {
             "timer_json": engine.GameState(
+                # TODO - move timer_json to penguin.ShowBootstrap's self.rpc
                 "timer_json",
                 engine.PortableValue(self.timer.pack(), engine.PortableType.OBJECT),
             )
@@ -192,9 +195,7 @@ class RPCManager:
             name=name,
             data=pvalue,
         )
-        engine.log_debug(
-            f"Broadcasting gamestate change & calling hooks: Logic: {name} = {pvalue.json}"
-        )
+        engine.log_debug(f"(Logic) Broadcasting {name} = JSON(' {pvalue.json} ')")
         # original_type = self.orgtype_map[name]
         # if original_type is engine.Timer:
         #     pass
@@ -253,7 +254,7 @@ class RPCManager:
         if deserializer and serializer:
             self.deser_map[name] = deserializer
             output.subscribe(
-                lambda value: self.set_state(name, serializer(value))  # type: ignore
+                lambda value: self.set_state(name, serializer(value))  # type: ignore[reportArgumentType]
             )
         elif isinstance(initial_value, engine.PortableValue):
             self.deser_map[name] = lambda x: x
@@ -268,17 +269,19 @@ class RPCManager:
                     f"Type mismatch: expected '{ptype}', found '{portable_type(value)}'"
                 )
 
-            output.subscribe(lambda value: self.set_state(name, value) if config().checkRPCTypes and type_is_correct(value, data_type) else error(value, data_type))  # type: ignore
+            output.subscribe(lambda value: self.set_state(name, value) if config().checkRPCTypes and type_is_correct(value, data_type) else error(value, data_type))  # type: ignore[reportArgumentType]
         else:
             self.deser_map[name] = lambda x: json.loads(x.json)
             output.subscribe(
                 lambda value: self.set_state(
                     name,
-                    engine.PortableValue(json=json.dumps(value), data_type=data_type),
+                    engine.PortableValue(
+                        json=json.dumps(value, ensure_ascii=False), data_type=data_type
+                    ),
                 )
             )
 
-        return output  # type: ignore
+        return output  # type: ignore[reportReturnType]
 
     def add_procedure(
         self,
@@ -320,19 +323,19 @@ class RPCManager:
                     self.add_procedure(p2, name=p1, hidden=p3, signature=signature)
                 case (p1, p2, signature):
                     if Is.proc(p1) and Is.bool(p2):
-                        self.add_procedure(p1, hidden=p2, signature=signature)  # type: ignore
+                        self.add_procedure(p1, hidden=p2, signature=signature)  # type: ignore[reportArgumentType]
                     if Is.str(p1) and Is.proc(p2):
-                        self.add_procedure(p2, name=p1, signature=signature)  # type: ignore
+                        self.add_procedure(p2, name=p1, signature=signature)  # type: ignore[reportArgumentType]
                 case (p1, signature):
                     self.add_procedure(p1, signature=signature)
-                case _:  # type: ignore
-                    raise ValueError(f"Unknown procedure prototype: {t}")  # type: ignore
+                case _:  # type: ignore[reportArgumentType]
+                    raise ValueError(f"Unknown procedure prototype: {t}")  # type: ignore[reportArgumentType]
 
         return self
 
     def timer_operation(
         self,
-        _: engine.Show,
+        _: Show,
         callproc: engine.Packet.CallProcedure,
         _2: engine.IOHandle,
         _3,
@@ -362,11 +365,11 @@ class RPCManager:
 
     async def handle(
         self,
-        show: engine.Show,
+        show: Show,
         packet: engine.Packet,
         handle: engine.IOHandle,
         addr: str,
-    ) -> Result[None, str]:
+    ) -> Result[bool, str]:
         match packet:
             case engine.Packet.CallProcedure():
                 call = packet.data
@@ -374,12 +377,15 @@ class RPCManager:
                     if proc.name == call.name:
                         engine.log_debug(f"Calling procedure {call.name}")
                         # TODO - type checking for procedure arguments.
-                        return Ok(self.proc_map[proc.name](show, packet, handle, addr))
+                        engine.log_debug(
+                            f"Executed {proc.name} → {self.proc_map[proc.name](show, packet, handle, addr)}"
+                        )
+                        return Ok(True)
                 else:
                     engine.log_warning(
                         f"Cannot find procedure with name `{call.name}` in {[p.name for p in self.procedures]}. Call ignored."
                     )
-                    return Ok()
+                    return Ok(False)
             case engine.Packet.Query():
                 request = packet.data
                 match request:
@@ -387,14 +393,18 @@ class RPCManager:
                         await handle.send(
                             engine.Packet.ProcedureList(self.procedures).pack()
                         )
+                        return Ok(True)
                     case engine.Query.StateList():
                         await handle.send(
                             engine.Packet.StateList(list(self.states.values())).pack()
                         )
+                        engine.log_warning(f"{self.prefix} sent statelist")
+                        return Ok(True)
                     case engine.Query.Timer():
                         await handle.send(engine.Packet.Timer(self.timer).pack())
                     case _:
-                        pass
+                        return Ok(False)
+
             case engine.Packet.UpdateState():
                 update = packet.data
                 if update.name == "timer_json":
@@ -402,11 +412,11 @@ class RPCManager:
                     self.timer = engine.Timer.from_json(update.data.json)
                 # TODO - type checking for gamestate updates
                 engine.log_debug(
-                    f"Changing game state {update.name} to {update.data.json}"
+                    f"Changing game state: {update.name} = {update.data.json!r}"
                 )
                 try:
                     engine.log_debug(
-                        f"Broadcasting gamestate change & calling hooks: WSUpdated: {update.name} = {json.dumps(update.data.json)}"
+                        f"(WSUpdated) Broadcasting {update.name} = JSON(' {json.dumps(update.data.json, ensure_ascii=False)} ')"
                     )
                     self.states[update.name] = update
                     self.states_writable[update.name].set(
@@ -415,10 +425,12 @@ class RPCManager:
                     await SESSION_MAN.broadcast(
                         engine.Packet.State(self.states[update.name]).pack()
                     )
+                    return Ok(True)
                 except KeyError:
                     engine.log_warning(
                         f"Cannot find procedure with name `{update.name}`. Call ignored."
                     )
+                    return Ok(False)
             case _:
-                pass
-        return Ok()
+                return Ok(False)
+        return Ok(False)

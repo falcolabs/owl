@@ -8,7 +8,6 @@ pub mod timer;
 pub use {
     self::player::Player,
     self::question::{Question, QuestionBank},
-    self::show::Show,
     self::tick::Ticker,
     self::timer::Timer,
 };

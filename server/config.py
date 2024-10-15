@@ -43,7 +43,7 @@ class ConfigurationValue:
         else:
             res = inp
 
-        return res  # type: ignore
+        return res  # type: ignore[reportReturnType]
 
     def __getattr__(self, name: str) -> typing.Any:
         try:

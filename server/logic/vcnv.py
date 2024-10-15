@@ -2,6 +2,7 @@ from typing import override
 import engine
 import json
 import penguin
+import datetime
 from config import config
 
 
@@ -35,6 +36,9 @@ class VCNV(penguin.PartImplementation):
             "Thí sinh hãy chọn một hàng ngang.",
         )
         self.selected = self.rpc.use_state("selected", "")
+        self.highlighted: penguin.Writable[list[str]] = self.rpc.use_state(
+            "highlighted", []
+        )
         self.key_length = self.rpc.use_state("key_length", 69)
         self.image = self.rpc.use_state("image", "IMAGE DATA HERE")
         self.show_key = self.rpc.use_state("show_key", False)
@@ -66,18 +70,31 @@ class VCNV(penguin.PartImplementation):
                         ("verdict", engine.PortableType.STRING),
                     ],
                 ),
+                (
+                    "bell",
+                    self.bell,
+                    [
+                        ("target", engine.PortableType.STRING),
+                        ("clientTime", engine.PortableType.NUMBER),
+                    ],
+                ),
             ]
         )
 
     def update_tiles(
         self,
-        show: engine.Show,
+        show: penguin.Show,
         call: engine.Packet.CallProcedure,
         handle: engine.IOHandle,
         _2,
     ):
         target = call.data.args[0][1].as_str()
         new_status = call.data.args[1][1].as_str()
+        # TODO - make a configuration value for this
+        # Automatically clears the answer queue on changing tile state
+        self.answers.set([])
+        # Automatically clears the bell list on changing tile state
+        self.highlighted.set([])
 
         mod = self.puzzle_data.get()
         # Set the required status
@@ -88,8 +105,8 @@ class VCNV(penguin.PartImplementation):
                 if i["tag"] == target:
                     i["status"] = new_status
 
-        # Automatically disable others "selected" status
-        # if one is selected.
+        # Automatically disable others' "selected" status
+        # if one of them is selected.
         if new_status == "selected":
             for i in mod["normal"]:
                 if i["status"] == "selected" and i["tag"] != target:
@@ -119,10 +136,19 @@ class VCNV(penguin.PartImplementation):
                 i["verdict"] = verdict
         self.answers.set(mod)
 
+    def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
+        target = call.data.args[0][1].as_str()
+        engine.log_info(
+            f"{target} pressed bell on {datetime.time().isoformat("microseconds")}"
+        )
+        bell_list = self.highlighted.get()
+        bell_list.insert(0, target)
+        self.highlighted.set(bell_list)
+
     @override
     async def on_request(
         self,
-        show: engine.Show,
+        show: penguin.Show,
         packet: engine.Packet,
         handle: engine.IOHandle,
         addr: str,

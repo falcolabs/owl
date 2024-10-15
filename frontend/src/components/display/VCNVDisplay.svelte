@@ -2,16 +2,16 @@
     import { Peeker, Connection, GameMaster } from "$lib";
     import { onMount } from "svelte";
     import { readable, writable, type Readable } from "svelte/store";
-    import Load from "../../../components/Load.svelte";
-    import TitleBar from "../../../components/TitleBar.svelte";
-    import VcnvMain from "../../../components/vcnv/VCNVMain.svelte";
-    import VcnvShowAnswer from "../../../components/vcnv/VCNVShowAnswer.svelte";
-    import ScoreBar from "../../../components/ScoreBar.svelte";
+    import Load from "../Load.svelte";
+    import TitleBar from "../TitleBar.svelte";
+    import VcnvMain from "../vcnv/VCNVMain.svelte";
+    import ShowAnswer from "../ShowAnswer.svelte";
+    import ScoreBar from "../ScoreBar.svelte";
     import type { PlayerManager } from "$lib/player";
 
-    let conn: Connection;
-    let gm: GameMaster;
-    let states: Readable<any> = readable({
+    export let conn: Connection;
+    export let gm: GameMaster;
+    export let states: Readable<any> = readable({
         puzzle_data: [
             { status: "shown", content: "mrbeast", tag: "1" },
             { status: "shown", content: "trump", tag: "2" },
@@ -29,24 +29,17 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
-    let players: PlayerManager;
-
-    onMount(async () => {
-        conn = await Connection.create();
-        gm = await GameMaster.create(conn);
-        states = gm.states;
-        players = gm.players;
-    });
+    export let players: PlayerManager;
 </script>
 
 <title>Vượt chướng ngại vật - Đường đua xanh</title>
 <div class="bg">
-    <Load until={gm !== undefined && $states.__init}>
+    <Load until={$states.selected !== undefined}>
         <TitleBar activity="Vượt chướng ngại vật" />
         <div class="center-box">
             {#if $states.show_key}
                 <div class="answers">
-                    <VcnvShowAnswer {states} />
+                    <ShowAnswer {states} />
                 </div>
             {:else}
                 <div class="main">

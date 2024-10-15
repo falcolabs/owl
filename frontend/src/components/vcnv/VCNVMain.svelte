@@ -9,6 +9,7 @@
         new Map<string, Writable<{ status: string; content: string; tag: string }>>()
     );
     states.subscribe((s) => {
+        if (s.puzzle_data == undefined) return;
         if (s.final_hint) {
             if ($lines.size != 1) {
                 console.log("M");

@@ -54,21 +54,21 @@ class Result(typing.Generic[T, E]):
         """Raises an exeption if the value contained inside is of the Err variant."""
         if not self.is_ok():
             raise Exception(f"Result.unwrap() on an Err value: Err({self._value})")
-        return self._value  # type: ignore
+        return self._value  # type: ignore[reportReturnType]
 
     def expect(self, msg: str) -> T:
         """Raises an exeption with the provided message if the value contained
         inside is of the Err variant."""
         if not self.is_ok():
             raise Exception(msg)
-        return self._value  # type: ignore
+        return self._value  # type: ignore[reportReturnType]
 
     def unwrap_or(self, f: typing.Callable[[E], T]) -> T:
         """Calls the given callback if the value
         contained inside is of the Err variant."""
         if not self.is_ok():
-            return f(self._value)  # type: ignore
-        return self._value  # type: ignore
+            return f(self._value)  # type: ignore[reportReturnType]
+        return self._value  # type: ignore[reportReturnType]
 
 
 class Ok(Result[T, E]):

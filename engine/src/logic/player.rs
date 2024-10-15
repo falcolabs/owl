@@ -26,8 +26,17 @@ impl Player {
         self.handle = Some(handle);
     }
 
-    fn add_score(&mut self, additional_score: i32) -> i32 {
+    pub fn add_score(&mut self, additional_score: i32) -> i32 {
         self.score += additional_score;
         self.score
+    }
+
+    pub fn pack(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    #[staticmethod]
+    pub fn from_json(data: String) -> Self {
+        serde_json::from_str(&data).unwrap()
     }
 }

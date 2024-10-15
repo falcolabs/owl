@@ -1,4 +1,15 @@
-from typing import Any, Optional, Callable, Literal, Union, Iterable, Mapping
+from typing import (
+    Any,
+    Dict,
+    Optional,
+    Callable,
+    Literal,
+    Union,
+    Iterable,
+    Mapping,
+    override,
+)
+from warnings import deprecated  # type: ignore[reportAttributeAccessIssue]
 from abc import abstractmethod, ABC
 
 PacketData = (
@@ -9,7 +20,6 @@ PacketData = (
     | Question
     | QuestionBank
     | Query
-    | Show
     | Ticker
     | Timer
     | str
@@ -25,19 +35,27 @@ class Packet(ABC):
     deserializable to and from JSON. Only `serde@rust` may
     deserialize a `Packet`, while serializing is available
     everywhere using `.pack()` or `str()`.
+
     ---
-    **Availability:** ✓ Python, ✓ Rust, ✗ JavaScript, ✓ WASM
+    Available on: ✓ Python, ✓ Rust, ✗ JavaScript, ✓ WASM
+
+    For JavaScript, please use the `ClientPacket` API.
 
     ---
     ### Usage
     A `match` statement may be used to differentiate between these
     variants:
-    ```py
+    ```python
     match packet:
         case Packet.AuthStatus():
             ...
         case _:
             ...
+    ```
+    You may also use `isinstance()`:
+    ```python
+    if isinstance(x, Packet.AuthStatus):
+        ...
     ```
     """
 
@@ -87,12 +105,6 @@ class Packet(ABC):
 
         data: Query
         def __init__(self, data: Query): ...
-
-    class Show(Packet):
-        """A packet containing the entire show's details"""
-
-        data: Show
-        def __init__(self, data: Show): ...
 
     class Ticker(Packet):
         """A packet containing a `Ticker`. See :class:`Ticker` for more details."""
@@ -145,13 +157,32 @@ class Packet(ABC):
     class PlayerList(Packet):
         """Packet containing a list of players."""
 
-        data: str
+        data: list[Player]
         def __init__(self, data: list[Player]): ...
+
+    class PartList(Packet):
+        """Packet containing a list of players."""
+
+        data: list[PartProperties]
+        def __init__(self, data: list[PartProperties]): ...
+
+    class PlaySound(Packet):
+        """Packet containing a list of players."""
+
+        data: list[Player]
+        def __init__(self, data: str): ...
+
+    class NextAnimation(Packet):
+        """Packet containing a list of players."""
+
+        data: list[Player]
+        def __init__(self, data: str): ...
 
     data: PacketData
 
     @abstractmethod
     def __init__(self, data: PacketData): ...
+    @override
     def __str__(self) -> str: ...
     def pack(self) -> str: ...
 
@@ -169,7 +200,7 @@ class PortableValue:
     """A JSON-serialized value that may be sent and received as
     arguments for :class:`ProcedureCall`, or value for :class:`GameStateUpdate`
     ---
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
+    Available on: ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
 
     json: str
     data_type: PortableType
@@ -183,7 +214,7 @@ class ProcedureSignature:
     """The signature for a procedure.
 
     ---
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    Available on: ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
     """
 
     name: str
@@ -197,91 +228,91 @@ class ProcedureCall:
     """A procedure call.
 
     ---
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    Available on: ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
     """
 
     name: str
     args: list[tuple[str, PortableValue]]
 
+    def argno(self, n: int) -> PortableValue:
+        """Returns the argument with the provided index.
+
+        :param n: the index of the argument.
+        :return: the argument at said index.
+        """
+
+    def argname(self, n: str) -> PortableValue:
+        """Returns the argument with the provided name.
+
+        :param n: the name of the argument.
+        :return: the argument at said name.
+        """
+
+    def str_argno(self, n: int) -> str:
+        """Returns the argument with the provided index.
+
+        :param n: the index of the argument.
+        :return: the argument at said index casted to `str`.
+        """
+
+    def int_argno(self, n: int) -> int:
+        """Returns the argument with the provided index.
+
+        :param n: the index of the argument.
+        :return: the argument at said index casted to `int`.
+        """
+
+    def float_argno(self, n: int) -> float:
+        """Returns the argument with the provided index.
+
+        :param n: the index of the argument.
+        :return: the argument at said index casted to `float`.
+        """
+
+    def str_arg(self, n: str) -> str:
+        """Returns the argument with the provided name.
+
+        :param n: the name of the argument.
+        :return: the argument at said name casted to `str`.
+        """
+
+    def int_arg(self, n: str) -> int:
+        """Returns the argument with the provided name.
+
+        :param n: the name of the argument.
+        :return: the argument at said name casted to `int`.
+        """
+
+    def float_arg(self, n: str) -> float:
+        """Returns the argument with the provided name.
+
+        :param n: the name of the argument.
+        :return: the argument at said name casted to `float`.
+        """
+
 class GameState:
     """
     A game state.
 
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
+    Available on: ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM"""
 
     name: str
     data: PortableValue
 
     def __init__(self, name: str, data: PortableValue): ...
 
-class Show:
-    """An object containing all the resources available globally
-    in the show. This object should be a global variable, or otherwise
-    publicly and statically accessible.
-    ---
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
-    """
-
-    name: str
-    """The name of the show."""
-    parts: list[Part]
-    """The parts included in the show."""
-    tick_speed: int
-    """The show's tick speed."""
-    current_part: int
-    """The current part index."""
-    players: list[Player]
-    """The players present"""
-    qbank: QuestionBank
-    """All the questions the show contains"""
-    ticker: Ticker
-    """The show's ticker"""
-    timer: Timer
-    """The show's timer"""
-
-    def __init__(
-        self,
-        name: str,
-        parts: list[Part],
-        players: list[Player],
-        tick_speed: int,
-        question_bank: QuestionBank,
-    ): ...
-    @abstractmethod
-    def start(
-        self,
-        listen_on: str,
-        serve_on: str,
-        static_dir: str,
-    ):
-        """Starts the show. This is a blocking function, and will only stop
-        when the show is terminated by the user.
-
-        :param: `listen_on` the host and port for the server to listen on. Resource will be hosted on `/`, WebSocket PI on `/harlem`
-        :param: `serve_dir` where the static content will be hosted at. May contain unsolicited WebAssembly files.
-        :param: `static_dir` where the static content lives. Should contain `404.html`.
-
-        ## Usage
-        ```py
-
-        # This function will block until the show ends.
-        show.start("localhost:6942", "./public", "./static")
-        ```
-        """
-
-    @staticmethod
-    def ws_task(
-        listen_on: str,
-        serve_on: str,
-        static_dir: str,
-        call_hook: Callable[[RawRequest], None],
-    ): ...
+def ws_task(
+    listen_on: str,
+    serve_on: str,
+    static_dir: str,
+    call_hook: Callable[[RawRequest], None],
+): ...
 
 class RawRequest:
     """A raw request information. This is an internal engine type,
     so you should not use it in the game logic.
     ---
-    **Availability:** ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
+    Available on: ✓ Python, ✓ Rust, ✓ JavaScript, ✓ WASM
     """
 
     handle: IOHandle
@@ -312,10 +343,10 @@ class Part:
     def __init__(self, wrapped: object, name: str): ...
 
 class PartImplementation(ABC):
-    def on_update(self, show: Show) -> Status: ...
+    def on_update(self, show: Any) -> Status: ...
     async def on_request(
         self,
-        show: Show,
+        show: Any,
         packet: Packet,
         handle: IOHandle,
         addr: str,
@@ -333,12 +364,16 @@ class Player:
 
     def __init__(self, identifier: str, name: str, score: int) -> None: ...
     def add_score(self, additional_score: int) -> int: ...
+    def pack(self) -> str: ...
+    @staticmethod
+    def from_json(data: str) -> Player: ...
 
 class Question:
     prompt: str
-    media: str
+    media: MediaContent | None
     key: str
     score: int
+    time: int
     choices: list[str] | None
     score_false: int | None
     explaination: str | None
@@ -346,13 +381,28 @@ class Question:
     def __init__(
         self,
         prompt: str,
-        media: str,
         key: str,
         score: int,
+        time: int,
         choices: list[str],
         score_false: int,
         explaination: str,
+        media: MediaContent | None = None,
     ): ...
+    def pack(self) -> str: ...
+    @staticmethod
+    def from_json(data: str) -> Question: ...
+
+class MediaContent:
+    media_type: Literal["audio"] | Literal["image"] | Literal["video"]
+    uri: str
+
+    def __init__(
+        self,
+        media_type: Literal["audio"] | Literal["image"] | Literal["video"],
+        uri: str,
+    ) -> None: ...
+    def pack(self) -> str: ...
 
 class QuestionBank:
     question_storage: list[Question]
@@ -388,6 +438,10 @@ class QuestionBank:
     def random_n_questions(self, n: int) -> list[Question]:
         """Gets a specified number of unique random questions.
         Panics if there are no questions in the bank."""
+
+    def pack(self) -> str: ...
+    @staticmethod
+    def from_json(data: str) -> QuestionBank: ...
 
 class Timer:
     start_time: Any
@@ -467,9 +521,6 @@ class Query(ABC):
     class QuestionBank(Query):
         pass
 
-    class Show(Query):
-        pass
-
     class Ticker(Query):
         pass
 
@@ -484,6 +535,13 @@ class Query(ABC):
 
     class StateList(Query):
         pass
+
+    class PartList(Query):
+        pass
+
+    class Log(Query):
+        index: int
+        def __init__(self): ...
 
 class Color:
     BLACK: Color
@@ -532,3 +590,9 @@ def log_success(content: str): ...
 def log_info(content: str): ...
 def log_warning(content: str): ...
 def log_error(content: str): ...
+
+class LogEntry:
+    timestamp: int
+    level: int
+    logger: str
+    content: str

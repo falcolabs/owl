@@ -7,7 +7,6 @@ pub mod packet;
 pub mod part;
 pub mod player;
 pub mod question;
-pub mod show;
 pub mod status;
 pub mod tick;
 pub mod timer;
@@ -16,8 +15,7 @@ pub use {
     self::packet::*,
     self::part::{Part, PartProperties},
     self::player::Player,
-    self::question::{Question, QuestionBank},
-    self::show::Show,
+    self::question::{MediaContent, Question, QuestionBank},
     self::status::Status,
     self::tick::Ticker,
     self::timer::Timer,
