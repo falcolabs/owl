@@ -1,5 +1,5 @@
 # the main server logic of owl, an engine for making gameshows.
-# Copyright (C) 2024 Team Falco
+# Copyright (C) 2024 FalcoLabs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,14 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
 import engine
-import logic.auth
-import logic.khoidong
-import logic.vcnv
-import logic.tangtoc
-import logic.vedich
-
 import penguin
 import config
 
@@ -34,20 +27,27 @@ def main():
     if config.config().debug:
         engine.set_log_level(engine.Level.DEBUG)
 
+    import logic.auth
+    import logic.standby
+    import logic.khoidong
+    import logic.vcnv
+    import logic.tangtoc
+    import logic.vedich
+
     show = penguin.Show(
-        "Đáy xã hội 2",
+        "Đường đua xanh",
         [
-            engine.Part(logic.vedich.VeDich(), "vedich"),
-            engine.Part(logic.tangtoc.TangToc(), "tangtoc"),
-            engine.Part(logic.vcnv.VCNV(), "vcnv"),
-            engine.Part(logic.khoidong.KhoiDong(), "khoidong"),
             engine.Part(logic.auth.Auth(), "auth"),
+            engine.Part(logic.standby.Standby(), "standby"),
+            engine.Part(logic.khoidong.KhoiDong(), "khoidong"),
+            engine.Part(logic.vcnv.VCNV(), "vcnv"),
+            engine.Part(logic.tangtoc.TangToc(), "tangtoc"),
+            engine.Part(logic.vedich.VeDich(), "vedich"),
         ],
         [engine.Player(c.username, c.fullName, 0) for c in config.config().credentials],
         config.config().tickSpeed,
         qbank,
     )
-    penguin.SHOW = show
 
     show.start(
         "localhost:6942",

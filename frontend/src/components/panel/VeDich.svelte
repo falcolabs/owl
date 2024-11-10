@@ -92,22 +92,46 @@
                         </div>
                     {/each}
                 </div>
-                <div class="vertical">
-                    <h1>Question Controls</h1>
-                    <div class="horizontal">
-                        <button
-                            class="btn smol nomargin-horizontal"
-                            class:accent={$states.qid == -1}
-                            on:click={async () => await states.setNumber("qid", -1)}>unset</button
-                        >
-                        {#each $states.placement[$states.current_player_username] as qid}
+                <div class="horizontal big-gap">
+                    <div class="vertical">
+                        <h1>Question Controls</h1>
+                        <div class="horizontal">
                             <button
                                 class="btn smol nomargin-horizontal"
-                                class:accent={qid == $states.qid && qid != -1}
-                                on:click={async () => await states.setNumber("qid", qid)}
-                                >{qid == -1 ? "unset" : qid}</button
+                                class:accent={$states.qid == -1}
+                                on:click={async () => await states.setNumber("qid", -1)}
+                                >unset</button
                             >
-                        {/each}
+                            {#each $states.placement[$states.current_player_username] as qid}
+                                <button
+                                    class="btn smol nomargin-horizontal"
+                                    class:accent={qid == $states.qid && qid != -1}
+                                    on:click={async () => await states.setNumber("qid", qid)}
+                                    >{qid == -1 ? "unset" : qid}</button
+                                >
+                            {/each}
+                        </div>
+                    </div>
+                    <div class="vertical">
+                        <h1>Hope Stars</h1>
+                        <div class="horizontal">
+                            {#each $states.placement[$states.current_player_username] as qid}
+                                <button
+                                    class="btn smol nomargin-horizontal"
+                                    class:accent={$states.hope_stars.includes(qid) && qid != -1}
+                                    on:click={async () => {
+                                        let hs = $states.hope_stars;
+                                        if (hs.includes(qid)) {
+                                            const index = hs.indexOf(qid);
+                                            hs.splice(index, 1);
+                                        } else {
+                                            hs.push(qid);
+                                        }
+                                        await states.setArray("hope_stars", hs);
+                                    }}>{qid == -1 ? "unset" : qid}</button
+                                >
+                            {/each}
+                        </div>
                     </div>
                 </div>
             {:else}
@@ -170,5 +194,9 @@
         display: flex;
         flex-direction: row;
         gap: 5px;
+    }
+
+    .big-gap {
+        gap: 25px;
     }
 </style>

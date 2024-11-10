@@ -1,13 +1,11 @@
 <script lang="ts">
     import { Peeker, Connection, GameMaster, PlayerManager, StateManager } from "$lib";
-    import { type Readable } from "svelte/store";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
     import KhoiDongDisplay from "../../components/display/KhoiDongDisplay.svelte";
     import VcnvDisplay from "../../components/display/VCNVDisplay.svelte";
     import TangTocDisplay from "../../components/display/TangTocDisplay.svelte";
     import VeDichDisplay from "../../components/display/VeDichDisplay.svelte";
-    import AuthPlayer from "../../components/player/AuthPlayer.svelte";
     import Standby from "../../components/display/Standby.svelte";
 
     let conn: Connection;
@@ -29,11 +27,7 @@
 </script>
 
 <Load until={gm !== undefined && $states.__init}>
-    {#if $states.available_parts[$states.current_part] == "standby"}
-        <Standby />
-    {:else if $states.available_parts[$states.current_part] == "auth"}
-        <AuthPlayer {gm} />
-    {:else if $states.available_parts[$states.current_part] == "khoidong"}
+    {#if $states.available_parts[$states.current_part] == "khoidong"}
         <KhoiDongDisplay {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vcnv"}
         <VcnvDisplay {conn} {gm} {states} {players} />
@@ -41,5 +35,7 @@
         <TangTocDisplay {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vedich"}
         <VeDichDisplay {conn} {gm} {states} {players} />
+    {:else}
+        <Standby />
     {/if}
 </Load>

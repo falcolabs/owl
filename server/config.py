@@ -7,13 +7,13 @@ import json
 import typing
 import engine
 import collections.abc
-from typing import TypedDict, override
+from typing import Any, TypedDict, override
 
 
 class ConfigurationValue:
     def __init__(self, hive, _convert: bool = True) -> None:
         if not _convert:
-            self._hive = hive
+            self._hive: Any = hive
         else:
             self._hive = self.rec_convert(hive)
 
@@ -99,6 +99,7 @@ class ConfigHive(ConfigurationValue):
     debug: bool
     tickSpeed: int
     credentials: list[UserCredentials]
+    game: Any
 
 
 CFG_HIVE: ConfigHive

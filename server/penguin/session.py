@@ -1,10 +1,12 @@
 import random
 import engine
 
+SYS_RANDOM = random.SystemRandom()
+
 
 def _gen_token(length: int):
     return "".join(
-        random.SystemRandom().choice(
+        SYS_RANDOM.choice(
             "abcdefghilkmnopqrstuvwxyzABCDEFGHILKMNOPQRSTUVWXYZ1234567890_-+"
         )
         for _ in range(length)

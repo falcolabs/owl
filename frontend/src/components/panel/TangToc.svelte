@@ -37,16 +37,20 @@
                                 await states.setObject("media_status", status);
                             }}>{$states.media_status.visible ? "Shown" : "Hidden"}</button
                         >
-                        <button
-                            class="btn smol"
-                            class:disabled-btn={$states.media.mediaType != "video"}
-                            class:accent={!$states.media_status.playbackPaused}
-                            on:click={async () => {
-                                let status = $states.media_status;
-                                status.playbackPaused = !status.playbackPaused;
-                                await states.setObject("media_status", status);
-                            }}>{$states.media_status.playbackPaused ? "Paused" : "Playing"}</button
-                        >
+                        {#if $states.media.mediaType == "video"}
+                            <button
+                                class="btn smol"
+                                class:accent={!$states.media_status.playbackPaused}
+                                on:click={async () => {
+                                    let status = $states.media_status;
+                                    status.playbackPaused = !status.playbackPaused;
+                                    await states.setObject("media_status", status);
+                                }}
+                                >{$states.media_status.playbackPaused
+                                    ? "Paused"
+                                    : "Playing"}</button
+                            >
+                        {/if}
                     </div>
                 {:else}
                     No media available for this question.

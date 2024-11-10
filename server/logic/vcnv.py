@@ -1,11 +1,14 @@
-from typing import override
+from os import utime
+from typing import final, override
 import engine
 import json
+import utils.vcnv
 import penguin
 import datetime
 from config import config
 
 
+@final
 class VCNV(penguin.PartImplementation):
     def __init__(self) -> None:
         super().__init__()
@@ -18,7 +21,7 @@ class VCNV(penguin.PartImplementation):
             "M": 40,
         }
 
-        # TODO - obfuscate this, do not give the client the answer.
+        # TODO - SECURITY: obfuscate this, do not give the client the answer.
         self.puzzle_data = self.rpc.use_state(
             "puzzle_data",
             {
@@ -40,8 +43,11 @@ class VCNV(penguin.PartImplementation):
             "highlighted", []
         )
         self.key_length = self.rpc.use_state("key_length", 69)
-        self.image = self.rpc.use_state("image", "IMAGE DATA HERE")
+        self.image = self.rpc.use_state(
+            "image", utils.vcnv.get_imgdata(["1", "2", "3", "4", "M"])
+        )
         self.show_key = self.rpc.use_state("show_key", False)
+        self.max_time = self.rpc.use_state("max_time", 15)
         self.final_hint = self.rpc.use_state("final_hint", False)
         self.answers = self.rpc.use_state(
             "answers",
@@ -88,8 +94,8 @@ class VCNV(penguin.PartImplementation):
         handle: engine.IOHandle,
         _2,
     ):
-        target = call.data.args[0][1].as_str()
-        new_status = call.data.args[1][1].as_str()
+        target = call.data.str_argno(0)
+        new_status = call.data.str_argno(1)
         # TODO - make a configuration value for this
         # Automatically clears the answer queue on changing tile state
         self.answers.set([])
@@ -124,12 +130,23 @@ class VCNV(penguin.PartImplementation):
             self.selected.set("")
             self.prompt.set("Thí sinh hãy lựa chọn hàng ngang.")
         self.puzzle_data.set(mod)
+        self.image.set(
+            utils.vcnv.get_imgdata(
+                [
+                    "1" if mod["normal"][0]["status"] != "shown" else "",
+                    "2" if mod["normal"][1]["status"] != "shown" else "",
+                    "3" if mod["normal"][2]["status"] != "shown" else "",
+                    "4" if mod["normal"][3]["status"] != "shown" else "",
+                    "M" if mod["center"]["status"] != "shown" else "",
+                ]
+            )
+        )
 
     def verdict(
         self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2
     ):
-        target = call.data.args[0][1].as_str()
-        verdict = json.loads(call.data.args[1][1].as_str())
+        target = call.data.str_argno(0)
+        verdict = json.loads(call.data.str_argno(1))
         mod = self.answers.get()
         for i in mod:
             if i["name"] == target:
@@ -137,7 +154,7 @@ class VCNV(penguin.PartImplementation):
         self.answers.set(mod)
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
-        target = call.data.args[0][1].as_str()
+        target = call.data.str_argno(0)
         engine.log_info(
             f"{target} pressed bell on {datetime.time().isoformat("microseconds")}"
         )

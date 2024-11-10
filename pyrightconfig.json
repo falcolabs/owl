@@ -6,9 +6,9 @@
   "reportUnusedCallResult": "none",
   "reportImplicitRelativeImport": "none",
   "reportImplicitOverride": "information",
-  "reportUnusedParameter": "unused",
+  "reportUnusedParameter": false,
   "reportUnknownLambdaType": "none",
-  "reportUnusedImport": "unused",
+  "reportUnusedImport": false,
   "reportUnknownMemberType": "none",
   "reportUnknownVariableType": "none",
   "reportUnknownArgumentType": "none",
@@ -23,6 +23,7 @@
   "reportConstantRedefinition": "none",
   "reportIncompatibleVariableOverride": "none",
   "enableTypeIgnoreComments": true,
-  "reportUnusedVariable": "unused",
-  "reportImportCycles": "none"
+  "reportUnusedVariable": false,
+  "reportImportCycles": "none",
+  "reportMissingModuleSource": "none"
 }

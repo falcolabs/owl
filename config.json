@@ -26,5 +26,14 @@
       "username": "elonmusk",
       "accessKey": "chatgpt"
     }
-  ]
+  ],
+  "game": {
+    "vcnv": {
+      "qualityPercentage": 85,
+      "keyResolution": {
+        "width": 784,
+        "height": 666
+      }
+    }
+  }
 }

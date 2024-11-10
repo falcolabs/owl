@@ -31,9 +31,15 @@ export type Player = {
 export type PartProperties = {
     name: string;
 };
+
+export type MediaContent = {
+    mediaType: "video" | "image" | "audio",
+    uri: string
+}
+
 export type Question = {
     prompt: string;
-    media: string;
+    media: MediaContent;
     key: string;
     score: number;
     time: number;
@@ -73,10 +79,10 @@ export class Timer {
     startTime: ServerTime;
     pausedTime: ServerTime;
     pausedDuration: ServerDuration;
-    isPaused: boolean;
 
     constructor();
-    static from(obj: object): Timer
+    static from(obj: TimerLike): Timer
+    isPaused(): boolean;
     pause(): void;
     resume(): void;
     elapsedSecs(): number;

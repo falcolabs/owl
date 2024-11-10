@@ -1,7 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 
-export const ORG_NAME: string = "CBN Shitposter Association · THPT Chuyên Bắc Ninh";
-export const SHOW_NAME: string = "Đáy xã hội 2";
+export const ORG_NAME: string = "Đoàn trường THPT Chuyên Bắc Ninh · THPT Chuyên Bắc Ninh";
+export const SHOW_NAME: string = "Đường Đua Xanh";
 
 import type { PacketType, Packet, _PacketValue, _PacketVariant } from "client";
 type CBHandle<T extends PacketType> = (packet: Packet<T>) => void
@@ -48,7 +48,6 @@ export class Connection {
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {
             let packet: Packet<PacketType> = Peeker.ClientHandle.parse(me.data)
-            console.log(JSON.parse(me.data))
             if (packet.variant == Peeker.PacketType.Part) {
                 // @ts-ignore: can never happen
                 obj.currentPart = packet.value.name;

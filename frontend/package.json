@@ -5,9 +5,9 @@
   "scripts": {
     "compileRustProd": "wasm-pack build ./client --target bundler --out-dir ../node_modules/client --out-name client",
     "compileRustDev": "wasm-pack build ./client --target bundler --out-dir ../node_modules/client --out-name client --debug",
-    "watchRust": "cargo watch -i .gitignore -i src/ -C . -s \"bun run compileRust\"",
-    "dev": "bun run compileRustDev && vite dev --force",
-    "build": "bun run compileRustProd && vite build",
+    "watchRust": "cargo watch -i .gitignore -i src/ -C . -s \"deno run compileRust\"",
+    "dev": "deno run compileRustDev && vite dev --force",
+    "build": "deno run compileRustProd && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

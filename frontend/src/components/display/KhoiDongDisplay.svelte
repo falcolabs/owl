@@ -3,19 +3,19 @@
     import PillTag from "../PillTag.svelte";
     import ScoreBar from "../ScoreBar.svelte";
     import TitleBar from "../TitleBar.svelte";
-    import Load from "../Load.svelte";
 
-    import { goto } from "$app/navigation";
-    import { Peeker, Connection, GameMaster, type AcceptableValue, PlayerManager } from "$lib";
-    import { readable, type Readable } from "svelte/store";
+    import {
+        Connection,
+        GameMaster,
+        PlayerManager,
+        StateManager
+    } from "$lib";
+    import TimerBar from "../TimerBar.svelte";
     const STAGE_SEPERATED = 0;
     const STAGE_JOINT = 1;
     export let conn: Connection;
     export let gm: GameMaster;
-    export let states: Readable<any> = readable({
-        qid: -1,
-        current_question_content: ""
-    });
+    export let states: StateManager;
     export let players: PlayerManager;
 </script>
 
@@ -23,15 +23,20 @@
 <div class="bg">
     <TitleBar activity="Khởi động" />
     <div class="center-box">
-        <div class="box">
-            {#if $states.qid > -1}
-                <div class="qnum"><PillTag text="Câu {$states.qid + 1}" /></div>
-                <p class="prompt">{$states.current_question_content}</p>
-            {:else}
-                <div class="qnum"><PillTag text="Chuẩn bị" /></div>
-                <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
-            {/if}
-            <div class="sbar"><ScoreBar players={gm.players} {states} /></div>
+        <div class="container">
+            <div class="box">
+                {#if $states.qid > -1}
+                    <div class="qnum"><PillTag text="Câu {$states.display_qid}" /></div>
+                    <p class="prompt">{$states.current_question_content}</p>
+                {:else}
+                    <div class="qnum"><PillTag text="Chuẩn bị" /></div>
+                    <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
+                {/if}
+                <div class="sbar"><ScoreBar players={gm.players} {states} /></div>
+            </div>
+            <div class="timerbar">
+                <TimerBar {states} />
+            </div>
         </div>
     </div>
 </div>
@@ -53,11 +58,23 @@
         justify-content: center;
     }
 
-    .box {
-        padding: 3em 5em;
+    .container {
         margin-top: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-items: center;
+        gap: 15px;
+    }
+
+    .timerbar {
+        width: 95%;
+    }
+
+    .box {
         width: 60vw;
         height: 30vh;
+        padding: 3em 5em;
         text-align: justify;
         display: flex;
         flex-direction: column;

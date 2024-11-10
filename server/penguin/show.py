@@ -1,4 +1,5 @@
 from typing import override
+import typing
 import engine
 import abc
 import asyncio
@@ -11,18 +12,28 @@ from config import config
 
 SESSION_MAN = SessionManager()
 TASK_POOL: list = []
+
+# TODO - remove this
 SHOW: "Show" = None  # type: ignore[reportAssignmentType]
 
 
-class PartImplementation(abc.ABC):
-    def on_update(self, show: "Show") -> engine.Status: ...
+class PartImplementation:
+    show: "Show"
+
+    def on_ready(self, show: "Show"):
+        pass
+
+    def on_update(self, show: "Show") -> engine.Status:
+        return engine.Status.RUNNING
+
     async def on_request(
         self,
         show: "Show",
         packet: engine.Packet,
         handle: engine.IOHandle,
         addr: str,
-    ): ...
+    ):
+        pass
 
 
 # if platform.python_implementation() == "CPython" and platform.platform().startswith(
@@ -51,6 +62,8 @@ class Show:
         engine.log_debug(
             engine.mccolor(f"&1> ") + f"{req.sender}: {req.content.pack()}"
         )
+
+        # Process task pool entries
         global TASK_POOL
         for t in TASK_POOL:
             await t
@@ -98,7 +111,7 @@ class Show:
             case engine.Query.Ticker():
                 response = engine.Packet.Ticker(self.ticker)
             case engine.Query.Timer():
-                response = engine.Packet.Timer(self.timer)
+                response = engine.Packet.Timer(self.timer.get())
             case engine.Query.CurrentPart():
                 response = engine.Packet.Part(self.parts[self.current_part.get()].props)
             case engine.Query.PlayerList():
@@ -114,13 +127,10 @@ class Show:
             engine.log_debug(engine.mccolor(f"&6< ") + f"{req.sender}: {str_content}")
             await req.handle.send(str_content)
 
-        # Process task pool entries
-
     def on_req(self, req: engine.RawRequest):
         LOOP.run_until_complete(self.handle_webreq(req))
 
     def start(self, listen_on: str, serve_on: str, static_dir: str):
-
         engine.log_info("Starting show...")
         engine.ws_task(
             listen_on,
@@ -128,7 +138,12 @@ class Show:
             static_dir,
             self.on_req,
         )
-        self.ticker = engine.Ticker()
+
+        for p in self.parts:
+            p.implementation.show = self  # type: ignore[reportAttributeAccessIssue]
+            p.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
+
+        self.ticker: engine.Ticker = engine.Ticker()
         part = self.parts[self.current_part.get()]
         while True:
             status = part.implementation.on_update(self)
@@ -164,8 +179,33 @@ class Show:
         handle: engine.IOHandle,
         addr: str,
     ):
-        new_part = call.data.args[0][1].as_int()
+        new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
+
+    def timer_operation(
+        self,
+        _: "Show",
+        callproc: engine.Packet.CallProcedure,
+        _2: engine.IOHandle,
+        _3,
+    ):
+        operation: typing.Literal["start", "pause", "reset"] | str = json.loads(
+            callproc.data.argno(0).json
+        )
+        engine.log_debug(f"Processing timer operation: {operation}")
+        t = self.timer.get()
+        match operation:
+            case "start":
+                t.resume()
+            case "pause":
+                t.pause()
+                engine.log_debug(f"paused time: {t.time_elapsed()}")
+            case "reset":
+                t = engine.Timer()
+            case _:
+                engine.log_warning(f"Timer operation not found: {operation}. Ignoring.")
+
+        self.timer.set(t)
 
     def __init__(
         self,
@@ -175,13 +215,15 @@ class Show:
         tick_speed: int,
         question_bank: engine.QuestionBank,
     ):
+        global SHOW
         from .rpc import RPCManager
 
+        SHOW = self
         self.rpc: RPCManager = RPCManager("engine")
 
-        self.name = name
-        self.parts = parts
-        self.available_parts = self.rpc.use_state(
+        self.name: str = name
+        self.parts: list[engine.Part] = parts
+        self.available_parts: Writable[dict] = self.rpc.use_state(
             "available_parts", {i: v.props.name for i, v in enumerate(parts)}
         )
 
@@ -195,18 +237,32 @@ class Show:
                 engine.Player.from_json(json.dumps(i)) for i in json.loads(inp.json)
             ]
 
-        self.players = self.rpc.use_state(
+        self.players: Writable[list[engine.Player]] = self.rpc.use_state(
             "engine_players",
             players,
             serializer=_ser_players,
             deserializer=_der_players,
         )
-        self.tick_speed = tick_speed
-        self.qbank = question_bank
-        self.current_part = self.rpc.use_state("current_part", 0)
+        self.tick_speed: int = tick_speed
+        self.qbank: engine.QuestionBank = question_bank
+        self.current_part: Writable[int] = self.rpc.use_state("current_part", 0)
         self.ticker = engine.Ticker()
-        self.timer = engine.Timer()
+        self.timer: Writable[engine.Timer] = self.rpc.use_state(
+            "timer",
+            engine.Timer(),
+            serializer=lambda x: engine.PortableValue(
+                x.pack(), engine.PortableType.OBJECT
+            ),
+            deserializer=lambda x: engine.Timer.from_json(x.json),
+        )
 
         self.rpc.add_procedures(
-            [("set_part", self.set_part, [("index", engine.PortableType.NUMBER)])]
+            [
+                ("set_part", self.set_part, [("index", engine.PortableType.NUMBER)]),
+                (
+                    "timer_operation",
+                    self.timer_operation,
+                    [("operation", engine.PortableType.STRING)],
+                ),
+            ]
         )

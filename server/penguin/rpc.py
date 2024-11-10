@@ -7,7 +7,7 @@ import json
 from config import config
 from ._result import Result, Ok, Err
 from ._option import Some, Null, Option
-from .show import LOOP, SESSION_MAN, TASK_POOL, Show
+from .show import *
 from .store import Writable
 
 
@@ -140,26 +140,25 @@ class RPCManager:
             str,
             ProcedureHandler,
         ] = {}
-        self.timer = engine.Timer()
+        # self.timer = engine.Timer()
         self.states: dict[str, engine.GameState] = {
-            "timer_json": engine.GameState(
-                # TODO - move timer_json to penguin.ShowBootstrap's self.rpc
-                "timer_json",
-                engine.PortableValue(self.timer.pack(), engine.PortableType.OBJECT),
-            )
+            # "timer_json": engine.GameState(
+            #     "timer_json",
+            #     engine.PortableValue(self.timer.pack(), engine.PortableType.OBJECT),
+            # )
         }
         self.states_writable: dict[str, Writable[typing.Any]] = {}
         self.orgtype_map: dict[str, type] = {
-            "timer_json": engine.Timer,
+            # "timer_json": engine.Timer,
         }
         self.deser_map: dict[
             str, typing.Callable[[engine.PortableValue], typing.Any]
         ] = {}
-        self.add_procedure(
-            self.timer_operation,
-            signature=[("operation", engine.PortableType.STRING)],
-            name="timer_operation",
-        )
+        # self.add_procedure(
+        #     self.timer_operation,
+        #     signature=[("operation", engine.PortableType.STRING)],
+        #     name="timer_operation",
+        # )
 
     @typing.overload
     def get_state(self, name: str) -> T: ...
@@ -195,7 +194,7 @@ class RPCManager:
             name=name,
             data=pvalue,
         )
-        engine.log_debug(f"(Logic) Broadcasting {name} = JSON(' {pvalue.json} ')")
+        # engine.log_debug(f"(Logic) Broadcasting {name} = JSON(' {pvalue.json} ')")
         # original_type = self.orgtype_map[name]
         # if original_type is engine.Timer:
         #     pass
@@ -292,10 +291,10 @@ class RPCManager:
         name: str | None = None,
     ) -> "RPCManager":
         n = name if name else proc.__name__
-        if n == "timer_operation":
-            proc_ident = "engine::" + n
-        else:
-            proc_ident = self.prefix + "::" + n
+        # if n == "timer_operation":
+        #     proc_ident = "engine::" + n
+        # else:
+        proc_ident = self.prefix + "::" + n
 
         self.procedures.append(
             engine.ProcedureSignature(
@@ -333,36 +332,6 @@ class RPCManager:
 
         return self
 
-    def timer_operation(
-        self,
-        _: Show,
-        callproc: engine.Packet.CallProcedure,
-        _2: engine.IOHandle,
-        _3,
-    ):
-        operation: typing.Literal["start", "pause", "reset"] | str = json.loads(
-            callproc.data.args[0][1].json
-        )
-        engine.log_debug(f"Processing timer operation: {operation}")
-
-        match operation:
-            case "start":
-                self.timer.resume()
-            case "pause":
-                self.timer.pause()
-                engine.log_debug(f"paused time: {self.timer.time_elapsed()}")
-            case "reset":
-                self.timer = engine.Timer()
-            case _:
-                engine.log_warning(f"Timer operation not found: {operation}. Ignoring.")
-
-        self.set_state(
-            "timer_json",
-            engine.PortableValue(
-                json=self.timer.pack(), data_type=engine.PortableType.OBJECT
-            ),
-        )
-
     async def handle(
         self,
         show: Show,
@@ -382,9 +351,10 @@ class RPCManager:
                         )
                         return Ok(True)
                 else:
-                    engine.log_warning(
-                        f"Cannot find procedure with name `{call.name}` in {[p.name for p in self.procedures]}. Call ignored."
-                    )
+                    if call.name.startswith(self.prefix):
+                        engine.log_warning(
+                            f"Cannot find procedure with name `{call.name}` in {[p.name for p in self.procedures]}. Call ignored."
+                        )
                     return Ok(False)
             case engine.Packet.Query():
                 request = packet.data
@@ -401,23 +371,23 @@ class RPCManager:
                         engine.log_warning(f"{self.prefix} sent statelist")
                         return Ok(True)
                     case engine.Query.Timer():
-                        await handle.send(engine.Packet.Timer(self.timer).pack())
+                        await handle.send(engine.Packet.Timer(show.timer.get()).pack())
                     case _:
                         return Ok(False)
 
             case engine.Packet.UpdateState():
                 update = packet.data
-                if update.name == "timer_json":
-                    engine.log_debug(f"Setting timer to {update.data.json}")
-                    self.timer = engine.Timer.from_json(update.data.json)
+                # if update.name == "timer_json":
+                #     engine.log_debug(f"Setting timer to {update.data.json}")
+                #     self.timer = engine.Timer.from_json(update.data.json)
                 # TODO - type checking for gamestate updates
                 engine.log_debug(
                     f"Changing game state: {update.name} = {update.data.json!r}"
                 )
                 try:
-                    engine.log_debug(
-                        f"(WSUpdated) Broadcasting {update.name} = JSON(' {json.dumps(update.data.json, ensure_ascii=False)} ')"
-                    )
+                    # engine.log_debug(
+                    #     f"(WSUpdated) Broadcasting {update.name} = JSON(' {json.dumps(update.data.json, ensure_ascii=False)} ')"
+                    # )
                     self.states[update.name] = update
                     self.states_writable[update.name].set(
                         self.deser_map[update.name](update.data)
@@ -427,9 +397,10 @@ class RPCManager:
                     )
                     return Ok(True)
                 except KeyError:
-                    engine.log_warning(
-                        f"Cannot find procedure with name `{update.name}`. Call ignored."
-                    )
+                    if update.name.startswith(self.prefix):
+                        engine.log_warning(
+                            f"Cannot find procedure with name `{update.name}`. Call ignored."
+                        )
                     return Ok(False)
             case _:
                 return Ok(False)

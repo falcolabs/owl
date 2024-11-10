@@ -99,7 +99,13 @@
     <div>
         <p>Chọn thí sinh khởi động</p>
         <div class="bgroup-hor">
-            <button on:click={setPlayerSeperate("")} class="btn smol sep"> unset </button>
+            <button
+                on:click={setPlayerSeperate("")}
+                class="btn smol sep"
+                class:accent={$states.seperated_candidate == ""}
+            >
+                unset
+            </button>
             {#each $players as [ident, p]}
                 <button
                     on:click={setPlayerSeperate(ident)}
@@ -134,7 +140,9 @@
     <div>
         <p>Câu hỏi phần thi chung</p>
         <div class="setq">
-            <button on:click={setQuestion(-1)} class="btn smol"> prepare </button>
+            <button on:click={setQuestion(-1)} class="btn smol" class:accent={$states.qid == -1}>
+                prepare
+            </button>
             {#each $question_placement[$states.stage] as q}
                 <button
                     on:click={setQuestion(tsignore(q))}

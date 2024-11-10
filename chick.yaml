@@ -10,19 +10,19 @@ py:
 
 wasm:
   - cd frontend
-  - bun run compileRustDev
+  - deno run compileRustDev
 
 front:
   - cd frontend
-  - bun run dev
+  - deno run dev
 
 cloc:
-  - cloc . --not-match-d="(frontend/node_modules|target)"
+  - cloc . --not-match-d="(frontend/node_modules|target|frontend/.svelte-kit)"
 
 run:
   - cd engine
   - maturin develop
   - cd ../frontend
-  - bun run dev &
+  - deno run dev &
   - cd ../server
   - python3 main.py

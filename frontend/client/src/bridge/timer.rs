@@ -75,6 +75,11 @@ impl Timer {
         (base_dur - self.paused_duration).as_secs_f32()
     }
 
+    #[wasm_bindgen(js_name = isPaused)]
+    pub fn is_paused(&self) -> bool {
+        self.is_paused
+    }
+
     pub fn pack(&self) -> String {
         serde_json::to_string(self).unwrap()
     }

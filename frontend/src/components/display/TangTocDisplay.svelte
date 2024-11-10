@@ -3,12 +3,14 @@
     import TitleBar from "../TitleBar.svelte";
     import ShowAnswer from "../ShowAnswer.svelte";
     import { onMount } from "svelte";
-    import { Peeker, Connection, GameMaster } from "$lib";
+    import { Peeker, Connection, GameMaster, StateManager } from "$lib";
     import Load from "../Load.svelte";
     import ScoreBar from "../ScoreBar.svelte";
     import type { PlayerManager } from "$lib/player";
+    import BareTimer from "../BareTimer.svelte";
 
-    export let states: Readable<any> = writable({
+    // @ts-ignore
+    export let states: StateManager = writable({
         prompt: "Sắp xếp các hình minh họa vào vị trí tương ứng để hoàn thiện sơ đồ quá trình nguyên phân ở tế bào động vật",
         media: { media_type: "video", uri: "testvid.mp4" },
         show_key: false,
@@ -20,6 +22,7 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
+    let timerStore = states.timerStore;
     export let conn: Connection;
     export let gm: GameMaster;
     export let players: PlayerManager;
@@ -27,23 +30,59 @@
     let audioElement: HTMLAudioElement;
     let imageElement: HTMLImageElement;
     let previousState = 0;
+    let videoProgress = writable(1);
+    let blobs: { [key: string]: string } = {};
 
     onMount(async () => {
+        // @ts-ignore
+        states.on("preload_list", (l: any) => {
+            Object.entries(l).forEach(async (a) => {
+                let qn = JSON.parse(a[0]);
+                // @ts-ignore
+                let media = JSON.parse(a[1]);
+                if (media == null) return;
+                console.log("uri is", media);
+                let r = await fetch(media.uri);
+                blobs[media.uri] = URL.createObjectURL(await r.blob());
+            });
+        });
+
         states.subscribe(async (s) => {
-            if (!s.__init) return;
+            if (!s.__init || s.media_status === undefined) return;
             if (s.media_status.playbackPaused === previousState) return;
-            if (s.media === null) return;
+            if (s.media === null || s.media === undefined) return;
             if (s.media.mediaType == "video") {
+                if (videoElement == null) return;
                 if (!s.media_status.playbackPaused) {
                     if (videoElement.paused) {
-                        await videoElement?.play();
+                        if (videoElement.currentTime == 0) {
+                            states.setTimer(new Peeker.Timer());
+                        }
+                        await videoElement.play();
+                        $timerStore.resume();
+
+                        videoElement.onended = (ev) => {
+                            states.setTimer(new Peeker.Timer());
+                            states.setObject("media_status", {
+                                visible: true,
+                                playbackPaused: true
+                            });
+                            videoProgress.set(0);
+                        };
                     }
                 } else {
                     videoElement?.pause();
+                    $timerStore.pause();
                 }
+                states.setTimer($timerStore);
             }
             previousState = s.media_status.playbackPaused;
         });
+
+        setInterval(() => {
+            if (videoElement === null || videoElement === undefined) return;
+            videoProgress.set(1 - videoElement.currentTime / videoElement.duration);
+        }, 100);
     });
 </script>
 
@@ -65,20 +104,29 @@
                         {#if $states.media.mediaType == "video"}
                             <!-- svelte-ignore a11y-media-has-caption -->
                             <video
-                                class="mmedia"
+                                class="mmedia mobj"
                                 bind:this={videoElement}
-                                src={$states.media.uri}
+                                src={blobs[$states.media.uri]}
                             />
                         {:else if $states.media.mediaType == "image"}
-                            <img class="mmedia" src={$states.media.uri} alt="Question content" />
+                            <img
+                                class="mmedia mobj"
+                                src={blobs[$states.media.uri]}
+                                alt="Question content"
+                                bind:this={imageElement}
+                            />
                         {:else if $states.media.mediaType == "audio"}
-                            <img class="mmedia" src={$states.media.uri} alt="Question content" />
+                            <audio
+                                class="mmedia mobj"
+                                src={blobs[$states.media.uri]}
+                                bind:this={audioElement}
+                            />
                         {/if}
                     {:else}
                         <div class="media-placeholder" />
                     {/if}
                 </div>
-                <div class="timer">timer</div>
+                <div class="timer"><BareTimer progress={videoProgress} /></div>
             {/if}
         </div>
         <div class="scorebar"><ScoreBar {players} {states} /></div>
@@ -86,10 +134,16 @@
 </div>
 
 <style>
-    .media-placeholder {
+    .vp {
+        background: #000000;
         min-width: calc(50vw + 80px);
         min-height: calc(50vh + 80px);
     }
+    .mmedia {
+        max-width: calc(50vw + 80px);
+        width: calc(50vw + 80px);
+    }
+
     .scorebar {
         width: 100vw;
         display: flex;
@@ -103,6 +157,7 @@
     }
 
     .timer {
+        width: calc(50vw + 40px);
         margin-top: -10px;
     }
 
@@ -113,8 +168,9 @@
         background: var(--bg-gradient);
     }
 
-    .mmedia {
-        width: calc(50vw + 80px);
+    .mobj {
+        min-width: calc(50vw + 80px);
+        min-height: 50vh;
     }
 
     .box {

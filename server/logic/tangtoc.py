@@ -1,15 +1,17 @@
-from typing import override
+from typing import final, override
 import engine
 import json
 import penguin
 from config import config
 
 
+@final
 class TangToc(penguin.PartImplementation):
     def __init__(self) -> None:
         super().__init__()
         self.rpc = penguin.RPCManager("tangtoc")
         self.qid = self.rpc.use_state("qid", -1)
+        self.preload_list = self.rpc.use_state("preload_list", {})
         self.prompt = self.rpc.use_state(
             "prompt",
             "Sắp xếp các hình minh họa vào vị trí tương ứng để hoàn thiện sơ đồ quá trình nguyên phân ở tế bào động vật",
@@ -53,12 +55,29 @@ class TangToc(penguin.PartImplementation):
             ]
         )
 
+    @override
+    def on_ready(self, show: penguin.Show):
+        a, b, c, d = (
+            show.qbank.get_question(41).media,
+            show.qbank.get_question(42).media,
+            show.qbank.get_question(43).media,
+            show.qbank.get_question(44).media,
+        )
+        self.preload_list.set(
+            {
+                41: a.pack() if a is not None else None,
+                42: b.pack() if b is not None else None,
+                43: c.pack() if c is not None else None,
+                44: d.pack() if d is not None else None,
+            }
+        )
+
     def on_qid_change(self, qid: int):
         if qid == -1:
             self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
             self.media.set({"media_type": None, "uri": None})
             return
-        q = penguin.SHOW.qbank.get_question(qid)
+        q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
         if q.media is None:
             self.media.set(None)
@@ -68,8 +87,8 @@ class TangToc(penguin.PartImplementation):
     def verdict(
         self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2
     ):
-        target = call.data.args[0][1].as_str()
-        verdict = json.loads(call.data.args[1][1].as_str())
+        target = call.data.str_argno(0)
+        verdict = json.loads(call.data.str_argno(1))
         mod = self.answers.get()
         for i in mod:
             if i["name"] == target:

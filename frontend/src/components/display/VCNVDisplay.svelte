@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { Peeker, Connection, GameMaster } from "$lib";
-    import { onMount } from "svelte";
+    import { Peeker, Connection, GameMaster, StateManager } from "$lib";
     import { readable, writable, type Readable } from "svelte/store";
     import Load from "../Load.svelte";
     import TitleBar from "../TitleBar.svelte";
@@ -11,7 +10,8 @@
 
     export let conn: Connection;
     export let gm: GameMaster;
-    export let states: Readable<any> = readable({
+    // @ts-ignore
+    export let states: StateManager = readable({
         puzzle_data: [
             { status: "shown", content: "mrbeast", tag: "1" },
             { status: "shown", content: "trump", tag: "2" },

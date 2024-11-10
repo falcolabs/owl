@@ -1,5 +1,6 @@
 <script lang="ts">
     import { type Readable } from "svelte/store";
+    import Load from "../Load.svelte";
 
     export let states: Readable<any>;
 </script>

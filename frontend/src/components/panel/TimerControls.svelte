@@ -1,29 +1,53 @@
 <script lang="ts">
-    import { CallProcedure, Connection } from "$lib";
-    import { type Readable } from "svelte/store";
+    import { CallProcedure, Connection, StateManager } from "$lib";
+    import type { Timer } from "client";
+    import { type Readable, type Writable } from "svelte/store";
 
     export let conn: Connection;
+    export let timer: Writable<Timer>;
     export let elapsed: Readable<any>;
+
 </script>
 
 <div>
     <h1>Timer Controls</h1>
-    <p>Time Elapsed: <span class="code">&nbsp{$elapsed}</span></p>
+    <p>
+        Time Left: <span class="code"
+            >{$timer.isPaused() ? "(PAUSED)" : "(RUNNING)"}&nbsp{$elapsed}</span
+        >
+    </p>
     <div class="bgroup-hor">
-        {#each ["start", "pause", "reset"] as ops}
-            <button
-                on:click={async () => {
-                    await conn.send(
-                        CallProcedure.name("engine::timer_operation")
-                            .string("operation", ops)
-                            .build()
-                    );
-                }}
-                class="btn"
-            >
-                {ops}
-            </button>
-        {/each}
+        {#if $elapsed === "0"}
+            {#each ["reset", "pause"] as ops}
+                <button
+                    on:click={async () => {
+                        await conn.send(
+                            CallProcedure.name("engine::timer_operation")
+                                .string("operation", ops)
+                                .build()
+                        );
+                    }}
+                    class="btn"
+                >
+                    {ops}
+                </button>
+            {/each}
+        {:else}
+            {#each ["start", "pause", "reset"] as ops}
+                <button
+                    on:click={async () => {
+                        await conn.send(
+                            CallProcedure.name("engine::timer_operation")
+                                .string("operation", ops)
+                                .build()
+                        );
+                    }}
+                    class="btn"
+                >
+                    {ops}
+                </button>
+            {/each}
+        {/if}
     </div>
 </div>
 

@@ -22,7 +22,7 @@ JavaScript is available (see `engine/engine.pyi` and the generated
 
 ## Hacking
 * Install Rust using rustup and use cargo to run the server.
-* Install a JavaScript runtime, either Bun or Node.
+* Install a JavaScript runtime, like Deno, Bun, or Node.
 * Install a Python implementation, preferably PyPy or CPython.
   Install maturin, a Python library which automatically
   generates Python bindings.
@@ -45,7 +45,7 @@ See Hacking (above) for requirements. After that, the project may be built. Note
 ### For `gang`
   * For client, use `gang front`. The Rust module will be automatically
     compiled and bundled, and hot-reload enabled Vite starts serving on
-    localhost:5173/.
+    `localhost:5173`.
   * For server, use `gang run`. The Rust module will be compiled,
     the Python binding generated, the wheel built and installed automatically.
     `server/main.py` is subsequenly called, with `server/` as current directory.

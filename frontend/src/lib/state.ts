@@ -22,10 +22,10 @@ export class StateManager implements Readable<any> {
         obj.updateListeners = []
 
         let def;
-        if (obj.store.timer_json === undefined) {
+        if (obj.store.timer === undefined) {
             def = new Peeker.Timer();
         } else {
-            def = Peeker.Timer.from(obj.store.timer_json);
+            def = Peeker.Timer.from(obj.store.timer);
         }
         obj.timerStore = writable(def);
 
@@ -52,8 +52,8 @@ export class StateManager implements Readable<any> {
             }
         });
         this.store[state.name] = JSON.parse(state.data.data);
-        if (state.name == "timer_json") {
-            this.timerStore.set(Peeker.Timer.from(this.store.timer_json))
+        if (state.name == "timer") {
+            this.timerStore.set(Peeker.Timer.from(this.store.timer))
         }
     }
 
@@ -127,6 +127,6 @@ export class StateManager implements Readable<any> {
     }
 
     async setTimer(t: Timer) {
-        await this.connection.send(Push.create("timer_json", t.pack(), Peeker.PortableType.OBJECT));
+        await this.connection.send(Push.create("timer", JSON.parse(t.pack()), Peeker.PortableType.OBJECT));
     }
 }

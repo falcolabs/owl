@@ -8,7 +8,6 @@
     export let conn: Connection;
 
     const isTile = (tile: string, s: string): boolean => {
-        console.log(tile, s);
         if (tile == "M") {
             return $states.puzzle_data.center.status == s;
         } else {
@@ -145,5 +144,9 @@
 
     .code {
         font-family: var(--font-monospace);
+    }
+
+    h1 {
+        font-weight: bold;
     }
 </style>

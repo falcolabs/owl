@@ -1,4 +1,4 @@
-from typing import override
+from typing import final, override
 import engine
 import penguin
 
@@ -8,6 +8,7 @@ STAGE_JOINT = 1
 """Phần thi chung"""
 
 
+@final
 class KhoiDong(penguin.PartImplementation):
 
     def __init__(self) -> None:
@@ -34,6 +35,8 @@ class KhoiDong(penguin.PartImplementation):
         )
         self.qid = self.rpc.use_state("qid", -1)
         """Câu hỏi hiện tại."""
+        self.display_qid = self.rpc.use_state("display_qid", "Chuẩn bị")
+        self.max_time = self.rpc.use_state("max_time", 3)
         self.qid.subscribe(self.on_qid_change)
         self.highlighted = self.rpc.use_state("highlighted", [])
         self.seperated_candidate = self.rpc.use_state("seperated_candidate", "")
@@ -47,7 +50,7 @@ class KhoiDong(penguin.PartImplementation):
                 (
                     "ring_bell",
                     lambda _, callprod, _2, _3: self.joint_bell.set(
-                        callprod.data.args[0][1].as_str()
+                        callprod.data.str_argno(0)
                     ),
                     [],
                 ),
@@ -76,26 +79,32 @@ class KhoiDong(penguin.PartImplementation):
     def _joint(self, _show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
 
-    def on_qid_change(self, _: engine.PortableValue):
-        if self.qid.get() == -1:
+    def on_qid_change(self, qid: int):
+        if qid == -1:
             self.current_question_content.set(
                 "Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút."
             )
+            self.display_qid.set("Chuẩn bị")
+            self.max_time.set(3)
             return
-        self.current_question_content.set(
-            penguin.SHOW.qbank.get_question(self.qid.get()).prompt
-        )
+        q = penguin.SHOW.qbank.get_question(qid)
+        self.current_question_content.set(q.prompt)
+        self.display_qid.set(str((qid % 6) + 1))
+        self.max_time.set(q.time)
+
         # TODO - configuration entry for this
         # automatically clearing the bell queue when question changes
         self.joint_bell.set("")
         if self.stage.get() == STAGE_SEPERATED:
             self.highlighted.set(
                 [
-                    self.seperated_candidate,
+                    self.seperated_candidate.get(),
                 ]
             )
         else:
             self.highlighted.set([])
+        # automatically resets timer
+        penguin.SHOW.timer.set(engine.Timer())
 
     @override
     def on_update(self, show: penguin.Show) -> engine.Status:

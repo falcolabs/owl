@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Connection, GameMaster, StateManager, Peeker } from "$lib";
+    import { Connection, GameMaster, StateManager, Peeker, CallProcedure } from "$lib";
     import type { Timer, Player } from "client";
     import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
@@ -26,12 +26,29 @@
         states = gm.states;
         players = gm.players;
         timer = states.timerStore;
-        setInterval(() => {
-            $elapsed = $timer.elapsedSecs().toFixed(2);
+
+        setInterval(async () => {
+            let e = $timer.elapsedSecs();
+            if ($states.max_time !== undefined) {
+                if ($states.max_time - e <= 0) {
+                    $elapsed = "0";
+                    if (!$timer.isPaused()) {
+                        await conn.send(
+                            CallProcedure.name("engine::timer_operation")
+                                .string("operation", "pause")
+                                .build()
+                        );
+                    }
+                } else {
+                    $elapsed = ($states.max_time - e).toFixed(2);
+                }
+            } else {
+                $elapsed = `Video progress: ${e.toFixed(2)}`;
+            }
         }, 100);
 
         conn.on(Peeker.PacketType.State, async (update) => {
-            console.log(`Updated ${update.value.name}`)
+            console.log(`Updated ${update.value.name}`);
             if (update.value.name === "current_part") {
                 await gm.updateAll();
             }
@@ -46,7 +63,7 @@
             <ScoreBar {players} {states} />
             <div class="horizontal">
                 <div>
-                    <TimerControls {elapsed} {conn} />
+                    <TimerControls {elapsed} timer={states.timerStore} {conn} />
                     {#if $states.available_parts[$states.current_part] == "khoidong"}
                         <KhoiDong {states} {conn} {players} />
                     {:else if $states.available_parts[$states.current_part] == "vcnv"}

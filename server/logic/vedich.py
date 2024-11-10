@@ -1,4 +1,4 @@
-from typing import override
+from typing import final, override
 import engine
 import datetime
 import penguin
@@ -10,6 +10,7 @@ STAGE_COMPETE = 1
 """Phần thi của thí sinh"""
 
 
+@final
 class VeDich(penguin.PartImplementation):
     def __init__(self) -> None:
         super().__init__()
@@ -52,6 +53,8 @@ class VeDich(penguin.PartImplementation):
         self.current_player_username = self.rpc.use_state("current_player_username", "")
         self.highlighted = self.rpc.use_state("highlighted", [])
         self.bell_player = self.rpc.use_state("bell_player", "")
+        self.max_time = self.rpc.use_state("max_time", 15)
+        self.hope_stars = self.rpc.use_state("hope_stars", [])
         self.prompt = self.rpc.use_state("prompt", "")
         self.stage = self.rpc.use_state("stage", STAGE_CHOOSE)
         self.qid = self.rpc.use_state("qid", -1)
@@ -98,7 +101,8 @@ class VeDich(penguin.PartImplementation):
         if qid == -1:
             self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
             return
-        self.prompt.set(penguin.SHOW.qbank.get_question(qid).prompt)
+        q = self.show.qbank.get_question(qid)
+        self.prompt.set(q.prompt)
         # TODO - add configuration entry for this
         # clears bell list automatically on question change.
         self.bell_player.set("")
@@ -109,13 +113,15 @@ class VeDich(penguin.PartImplementation):
                 ]
             )
         )
+        self.max_time.set(q.time)
+        self.show.timer.set(engine.Timer())
 
     def set_choice(
         self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2
     ):
-        target = call.data.args[0][1].as_str()
-        slot = call.data.args[1][1].as_int()
-        to = call.data.args[2][1].as_int()
+        target = call.data.str_argno(0)
+        slot = call.data.int_argno(1)
+        to = call.data.int_argno(2)
         try:
             c = self.package.get()
             c[target][slot] = to
@@ -129,8 +135,8 @@ class VeDich(penguin.PartImplementation):
             )
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
-        target = call.data.args[0][1].as_str()
-        clientTime = call.data.args[1][1].as_str()
+        target = call.data.str_argno(0)
+        clientTime = call.data.str_argno(1)
         if self.bell_player != "":
             engine.log_info(
                 f"{target} tried to ring bell, being late to the game. {datetime.time().isoformat("microseconds")}"

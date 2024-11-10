@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Peeker, Connection, GameMaster, PlayerManager, SHOW_NAME, ORG_NAME } from "$lib";
-    import { type Readable } from "svelte/store";
+    import { writable, type Readable, type Writable } from "svelte/store";
     import type { PacketType, Packet } from "client";
     import { onMount } from "svelte";
     import TitleBar from "../TitleBar.svelte";
@@ -8,36 +8,15 @@
 
     let username: HTMLInputElement;
     let accessKey: HTMLInputElement;
-    let conn: Connection;
-    let gm: GameMaster;
-    let players: PlayerManager;
-    let states: Readable<any>;
-    let unavailable: boolean = false;
-    let authenticated: boolean = false;
+    export let gm: GameMaster;
+    let authenticated = writable(false);
 
     onMount(async () => {
-        conn = await Connection.create();
-        gm = await GameMaster.create(conn);
-        states = gm.states;
-
-        conn.on(Peeker.PacketType.AuthStatus, (packet) => {
-            if (packet.value.success) {
-                //     console.log("redirecting");
-                //     goto(`/game/khoidong?token=${packet.value.token}`).then(() => {
-                //         console.error("Failed to redirect to target.");
-                //     });
-                authenticated = true;
-            }
-        });
+        authenticated = gm.isAuthenticated;
     });
 
     const click = async () => {
-        await conn.send(
-            new Peeker.Packet(Peeker.PacketType.CommenceSession, {
-                username: username.value,
-                accessKey: accessKey.value
-            })
-        );
+        await gm.authenticate(username.value, accessKey.value);
     };
 </script>
 
@@ -56,7 +35,7 @@
                 <input type="password" class="inp" bind:this={accessKey} />
             </div>
             <div class="pillcon">
-                {#if authenticated}
+                {#if $authenticated}
                     <div class="confspot">Đã được ủy quyền.<br />Phần thi sẽ sớm bắt đầu.</div>
                 {:else}
                     <button class="pill confspot" on:click={click}>Bắt đầu</button>

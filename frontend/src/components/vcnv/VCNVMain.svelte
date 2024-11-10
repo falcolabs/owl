@@ -3,7 +3,8 @@
     import PillTag from "../PillTag.svelte";
     import type { StateManager } from "$lib";
     import { writable, type Readable, type Writable } from "svelte/store";
-    export let states: Readable<any>;
+    import TimerBar from "../TimerBar.svelte";
+    export let states: StateManager;
 
     let lines = writable(
         new Map<string, Writable<{ status: string; content: string; tag: string }>>()
@@ -21,7 +22,6 @@
             }
         } else {
             if ($lines.size != 4) {
-                console.log("not M");
                 let o = new Map();
                 for (let entry of $states.puzzle_data.normal) {
                     o.set(entry.tag, writable(entry));
@@ -48,12 +48,12 @@
                 <PillTag text={$states.selected != "" ? "Hàng 1" : "Lựa chọn"} />
             </div>
             <p class="prompt">{$states.prompt}</p>
-            <div class="timerbar">timerbar</div>
+            <div class="timerbar"><TimerBar {states} /></div>
         </div>
     </div>
     <div class="picontainer">
         <div class="annc">CHƯỚNG NGẠI VẬT CÓ {$states.key_length} CHỮ CÁI</div>
-        <img src="data:image/png;base64, {$states.image}" class="picture" alt="" />
+        <img src="data:image/webp;base64, {$states.image}" class="picture" alt="" />
     </div>
 </div>
 
@@ -63,6 +63,7 @@
     }
 
     .annc {
+        width: 100%;
         height: 60px;
         background-color: var(--accent);
         border-radius: var(--radius-1);
@@ -77,6 +78,7 @@
         display: flex;
         flex-direction: row;
         gap: 60px;
+        transform: translateY(-1.5rem);
     }
 
     .qbox {
@@ -92,6 +94,8 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
+        width: max-content;
+        width: 40vw;
     }
 
     .timerbar {
@@ -100,8 +104,10 @@
     }
 
     .picture {
+        object-fit: cover;
         box-shadow: 7px 10px 33px 3px #00000040;
         height: 100%;
+
         border-radius: var(--radius-1);
         overflow: hidden;
     }

@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@sveltejs/kit": "npm:@sveltejs/kit@^2.8.0"
+  }
+}

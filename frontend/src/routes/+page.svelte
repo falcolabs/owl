@@ -1,5 +1,6 @@
 <script>
-    import AuthPlayer from "../components/player/AuthPlayer.svelte";
+    import Standby from "../components/display/Standby.svelte";
+
 </script>
 
-<AuthPlayer />
+<Standby />

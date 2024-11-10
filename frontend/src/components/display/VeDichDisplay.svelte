@@ -1,18 +1,19 @@
 <script lang="ts">
     import TitleBar from "../TitleBar.svelte";
     import PackageChooser from "../vedich/PackageChooser.svelte";
-    import { type Readable, writable } from "svelte/store";
+    import { writable } from "svelte/store";
     import PillTag from "../PillTag.svelte";
     import Load from "../Load.svelte";
-    import { Peeker, Connection, GameMaster, PlayerManager } from "$lib";
-    import { onMount } from "svelte";
+    import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import ScoreBar from "../ScoreBar.svelte";
+    import TimerBar from "../TimerBar.svelte";
     const STAGE_CHOOSE: number = 0;
     const STAGE_COMPETE: number = 1;
 
     export let conn: Connection;
     export let gm: GameMaster;
-    export let states: Readable<any> = writable({
+    // @ts-ignore
+    export let states: StateManager = writable({
         package: {
             mrbeast: [20, 30, 20],
             trump: [20, 30, 20],
@@ -29,7 +30,7 @@
 
 <title>Về đích - Đường đua xanh</title>
 <div class="bg">
-    <Load until={gm !== undefined}>
+    <Load until={gm !== undefined && $states.package !== undefined}>
         <TitleBar activity="Về đích" />
         <div class="center-box">
             {#if $states.stage == STAGE_CHOOSE}
@@ -56,6 +57,7 @@
                         </p>
                     {/if}
                 </div>
+                <div class="timerbar"><TimerBar {states} /></div>
             {/if}
         </div>
         <div class="scorebar"><ScoreBar {players} {states} /></div>
@@ -83,6 +85,11 @@
         width: 100vw;
         display: flex;
         justify-content: center;
+    }
+
+    .timerbar {
+        width: 70vw;
+        margin-top: 15px;
     }
 
     .qnum {
