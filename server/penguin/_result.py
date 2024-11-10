@@ -41,7 +41,7 @@ class Result(typing.Generic[T, E]):
     """Rust-like Error handling primitive."""
 
     _value: T | E
-    __match_args__ = ("value",)
+    __match_args__: tuple[str] = ("value",)
 
     def __init__(self, value: T | E) -> None:
         self._value = value
@@ -71,6 +71,7 @@ class Result(typing.Generic[T, E]):
         return self._value  # type: ignore[reportReturnType]
 
 
+@typing.final
 class Ok(Result[T, E]):
 
     def __init__(self, value: T = None) -> None:
@@ -81,6 +82,7 @@ class Ok(Result[T, E]):
         return True
 
 
+@typing.final
 class Err(Result[T, E]):
 
     def __init__(self, value=None) -> None:

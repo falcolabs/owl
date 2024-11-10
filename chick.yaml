@@ -17,7 +17,7 @@ front:
   - deno run dev
 
 cloc:
-  - cloc . --not-match-d="(frontend/node_modules|target|frontend/.svelte-kit)"
+  - cloc $(git ls-files)
 
 run:
   - cd engine

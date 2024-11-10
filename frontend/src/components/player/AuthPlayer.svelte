@@ -15,6 +15,10 @@
         authenticated = gm.isAuthenticated;
     });
 
+    authenticated.subscribe((isAuth) => {
+        console.log(gm.authToken);
+    });
+
     const click = async () => {
         await gm.authenticate(username.value, accessKey.value);
     };

@@ -130,11 +130,12 @@ class Is:
         return isinstance(v, bool)
 
 
+@typing.final
 class RPCManager:
     """Listens to & manages Remote Procedure Calls and updating GameState"""
 
     def __init__(self, prefix: str = "engine") -> None:
-        self.prefix = prefix
+        self.prefix: str = prefix
         self.procedures: list[engine.ProcedureSignature] = []
         self.proc_map: dict[
             str,

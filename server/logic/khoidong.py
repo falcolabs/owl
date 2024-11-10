@@ -87,7 +87,7 @@ class KhoiDong(penguin.PartImplementation):
             self.display_qid.set("Chuẩn bị")
             self.max_time.set(3)
             return
-        q = penguin.SHOW.qbank.get_question(qid)
+        q = self.show.qbank.get_question(qid)
         self.current_question_content.set(q.prompt)
         self.display_qid.set(str((qid % 6) + 1))
         self.max_time.set(q.time)
@@ -104,7 +104,7 @@ class KhoiDong(penguin.PartImplementation):
         else:
             self.highlighted.set([])
         # automatically resets timer
-        penguin.SHOW.timer.set(engine.Timer())
+        self.show.timer.set(engine.Timer())
 
     @override
     def on_update(self, show: penguin.Show) -> engine.Status:

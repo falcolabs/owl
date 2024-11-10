@@ -13,9 +13,6 @@ from config import config
 SESSION_MAN = SessionManager()
 TASK_POOL: list = []
 
-# TODO - remove this
-SHOW: "Show" = None  # type: ignore[reportAssignmentType]
-
 
 class PartImplementation:
     show: "Show"
@@ -215,10 +212,8 @@ class Show:
         tick_speed: int,
         question_bank: engine.QuestionBank,
     ):
-        global SHOW
         from .rpc import RPCManager
 
-        SHOW = self
         self.rpc: RPCManager = RPCManager("engine")
 
         self.name: str = name

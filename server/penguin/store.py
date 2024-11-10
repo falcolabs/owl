@@ -5,8 +5,8 @@ T = typing.TypeVar("T")
 
 class Readable(typing.Generic[T]):
     def __init__(self, initial_value: T) -> None:
-        self._subscribers = []
-        self._value = initial_value
+        self._subscribers: list[typing.Callable[[T], None]] = []
+        self._value: T = initial_value
 
     @property
     def inner(self) -> T:
@@ -63,6 +63,6 @@ class Writable(Readable[T]):
 
     def set(self, new_value: T):
         """Changes the contained value and notify the listeners."""
-        self._value = new_value
+        self._value: T = new_value
         for cb in self._subscribers:
             cb(self._value)
