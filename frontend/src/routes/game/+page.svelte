@@ -9,6 +9,7 @@
     import VeDichDisplay from "../../components/display/VeDichDisplay.svelte";
     import AuthPlayer from "../../components/player/AuthPlayer.svelte";
     import Standby from "../../components/display/Standby.svelte";
+    import KhoiDong from "../../components/player/KhoiDong.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -34,7 +35,7 @@
     {:else if $states.available_parts[$states.current_part] == "auth"}
         <AuthPlayer {gm} />
     {:else if $states.available_parts[$states.current_part] == "khoidong"}
-        <KhoiDongDisplay {conn} {gm} {states} {players} />
+        <KhoiDong {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vcnv"}
         <VcnvDisplay {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "tangtoc"}

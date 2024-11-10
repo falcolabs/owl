@@ -6,13 +6,15 @@
 </script>
 
 <div class="bar">
-    {#each $players.entries() as [_, player]}
-        <ScorePill
-            activated={$states.highlighted == player.identifier}
-            name={player.name}
-            score={player.score}
-        />
-    {/each}
+    {#if $states.highlighted !== undefined}
+        {#each $players.entries() as [_, player]}
+            <ScorePill
+                activated={$states.highlighted.includes(player.identifier)}
+                name={player.name}
+                score={player.score}
+            />
+        {/each}
+    {/if}
 </div>
 
 <style>

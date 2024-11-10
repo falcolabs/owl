@@ -1,16 +1,6 @@
-import random
 import engine
-
-SYS_RANDOM = random.SystemRandom()
-
-
-def _gen_token(length: int):
-    return "".join(
-        SYS_RANDOM.choice(
-            "abcdefghilkmnopqrstuvwxyzABCDEFGHILKMNOPQRSTUVWXYZ1234567890_-+"
-        )
-        for _ in range(length)
-    )
+from ._option import Option, Some, Null
+from utils.crypt import gen_token
 
 
 class SessionManager:
@@ -27,7 +17,7 @@ class SessionManager:
 
     def register_session(self, handle: engine.IOHandle) -> str:
         if handle.addr not in self.active_addr:
-            token = _gen_token(32)
+            token = gen_token(32)
             self.active_sessions[handle] = token
             self.active_addr.append(handle.addr)
             return token
@@ -41,23 +31,43 @@ class SessionManager:
     def link_player(self, identifier: str, handle: engine.IOHandle) -> str:
         token = self.register_session(handle)
         self.player_map[identifier] = token
+        print(f"Linked {identifier} -> {token}")
         return token
+
+    def playername(self, token: str) -> Option[str]:
+        for ident, t in self.player_map.items():
+            if t == token:
+                return Some(ident)
+        return Null()
 
     def purge(self, handle: engine.IOHandle):
         try:
             del self.active_addr[self.active_addr.index(handle.addr)]
         except ValueError:
             pass
+
+        remove_list = []
         for ident, ptok in self.player_map.items():
             for h, stok in self.active_sessions.items():
                 if stok == ptok and h.addr == handle.addr:
-                    del self.player_map[ident]
-                    del self.active_sessions[handle]
+                    remove_list.append((ident, handle))
                     break
 
+        for ident, handle in remove_list:
+            try:
+                del self.player_map[ident]
+                del self.active_sessions[handle]
+                print(f"Purged {ident}")
+            except KeyError:
+                pass
+
     async def broadcast(self, message: str):
+        purgelist = []
         for handle in self.active_sessions:
             try:
                 await handle.send(message)
             except ConnectionResetError:
-                self.purge(handle)
+                purgelist.append(handle)
+
+        for handle in purgelist:
+            self.purge(handle)

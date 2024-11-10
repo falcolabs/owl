@@ -80,6 +80,8 @@ pub fn log_str<StringLike: AsRef<str>>(level: Level, content: StringLike) -> Str
         return String::new();
     }
     let time = Local::now();
+    // TODO - chick-like log formatting
+    // TODO - force log clients to specify name using a Logger instance.
     let result = format!(
         "{}[{} {}] {}{}\n",
         level.get_color().as_str(),

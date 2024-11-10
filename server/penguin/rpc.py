@@ -94,6 +94,7 @@ def pack_portable_value(
 
 
 ProcedureHandler = typing.Callable[
+    # TODO - make the last argument the session ID
     [Show, engine.Packet.CallProcedure, engine.IOHandle, str],
     None,
 ]
@@ -393,6 +394,7 @@ class RPCManager:
                     self.states_writable[update.name].set(
                         self.deser_map[update.name](update.data)
                     )
+                    print(SESSION_MAN.active_addr)
                     await SESSION_MAN.broadcast(
                         engine.Packet.State(self.states[update.name]).pack()
                     )

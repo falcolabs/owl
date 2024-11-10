@@ -26,10 +26,28 @@ export class GameMaster {
             obj.partName.set(packetPart.value.name);
         })
 
+        obj.states.onready = (states) => {
+            let ad = window.sessionStorage.getItem("authData");
+            if (ad !== null && ad !== "") {
+                let adt = JSON.parse(ad);
+                if (adt.sid == states.sid) {
+                    obj.authToken = adt.token;
+                    obj.isAuthenticated.set(true);
+                } else {
+                    window.sessionStorage.removeItem("authData")
+                }
+            }
+        }
+
         obj.connection.on(Peeker.PacketType.AuthStatus, (packet) => {
             if (packet.value.success) {
                 obj.authToken = packet.value.token;
                 obj.isAuthenticated.set(true);
+                window.sessionStorage.setItem("authData", JSON.stringify({
+                    "sid": obj.states.get("sid"),
+                    "token": packet.value.token
+                }))
+
             }
         });
 

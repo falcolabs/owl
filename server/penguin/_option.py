@@ -10,7 +10,7 @@ class Option(typing.Generic[T]):
     """Rust-like None handling primitive."""
 
     _value: T | None
-    __match_args__: tuple[str] = ("value",)
+    __match_args__: tuple[str] = ("_value",)
 
     def __init__(self, value: T | None):
         self._value = value
@@ -42,6 +42,7 @@ class Option(typing.Generic[T]):
 
 @typing.final
 class Some(Option[T]):
+    __match_args__: tuple[str] = ("_value",)
 
     def __init__(self, value: T):
         if value is None:

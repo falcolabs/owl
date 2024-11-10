@@ -86,6 +86,17 @@
         >
             Câu hỏi tiếp theo
         </button>
+        <button
+            class="btn"
+            on:click={async () => {
+                if ($states.stage == STAGE_JOINT) {
+                    await states.setString("joint_bell", "");
+                    await states.setArray("highlighted", []);
+                }
+            }}
+        >
+            Xóa chuông
+        </button>
         {#if $states.stage == STAGE_SEPERATED}
             <button on:click={setStage(STAGE_JOINT)} class="btn"> Phần thi riêng </button>
         {:else}

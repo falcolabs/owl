@@ -6,8 +6,8 @@
     import TitleBar from "../TitleBar.svelte";
     import { goto } from "$app/navigation";
 
-    let username: HTMLInputElement;
-    let accessKey: HTMLInputElement;
+    let username = "";
+    let accessKey = "";
     export let gm: GameMaster;
     let authenticated = writable(false);
 
@@ -15,12 +15,8 @@
         authenticated = gm.isAuthenticated;
     });
 
-    authenticated.subscribe((isAuth) => {
-        console.log(gm.authToken);
-    });
-
     const click = async () => {
-        await gm.authenticate(username.value, accessKey.value);
+        await gm.authenticate(username, accessKey);
     };
 </script>
 
@@ -29,25 +25,27 @@
     <TitleBar activity="Ủy quyền dự thi" />
     <div class="center">
         <div class="box">
-            <h1 class="prompt plabel">Ủy quyền dự thi</h1>
-            <div class="inpgroup">
-                <p class="tag">Mã thí sinh</p>
-                <input type="text" class="inp" bind:this={username} />
-            </div>
-            <div class="inpgroup">
-                <p class="tag">Khóa truy cập</p>
-                <input type="password" class="inp" bind:this={accessKey} />
-            </div>
-            <div class="pillcon">
-                {#if $authenticated}
-                    <div class="confspot">Đã được ủy quyền.<br />Phần thi sẽ sớm bắt đầu.</div>
-                {:else}
-                    <button class="pill confspot" on:click={click}>Bắt đầu</button>
-                {/if}
-                <p class="cpy">
-                    Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.
-                </p>
-            </div>
+            <form on:submit|preventDefault={async () => {}}>
+                <h1 class="prompt plabel">Ủy quyền dự thi</h1>
+                <div class="inpgroup">
+                    <p class="tag">Mã thí sinh</p>
+                    <input type="text" class="inp" bind:value={username} />
+                </div>
+                <div class="inpgroup">
+                    <p class="tag">Khóa truy cập</p>
+                    <input type="password" class="inp" bind:value={accessKey} />
+                </div>
+                <div class="pillcon">
+                    {#if $authenticated}
+                        <div class="confspot">Đã được ủy quyền.<br />Phần thi sẽ sớm bắt đầu.</div>
+                    {:else}
+                        <button class="pill confspot" on:click={click}>Bắt đầu</button>
+                    {/if}
+                    <p class="cpy">
+                        Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
 </div>

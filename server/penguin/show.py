@@ -1,4 +1,4 @@
-from typing import override
+from typing import final, override
 import typing
 import engine
 import abc
@@ -6,6 +6,7 @@ import asyncio
 import json
 from .session import SessionManager
 from .store import Writable
+from utils.crypt import gen_token
 
 
 from config import config
@@ -16,6 +17,7 @@ TASK_POOL: list = []
 
 class PartImplementation:
     show: "Show"
+    session_manager: SessionManager
 
     def on_ready(self, show: "Show"):
         pass
@@ -54,11 +56,13 @@ class PartImplementation:
 LOOP = asyncio.new_event_loop()
 
 
+@final
 class Show:
     async def handle_webreq(self, req: engine.RawRequest):
         engine.log_debug(
             engine.mccolor(f"&1> ") + f"{req.sender}: {req.content.pack()}"
         )
+        SESSION_MAN.register_session(req.handle)
 
         # Process task pool entries
         global TASK_POOL
@@ -70,25 +74,26 @@ class Show:
         if not isinstance(req.content, engine.Packet.Query):
             if isinstance(req.content, engine.Packet.CommenceSession):
                 for detail in config().credentials:
-                    if (detail.username, detail.accessKey) != (
+                    if (detail.username, detail.accessKey) == (
                         req.content.data.username,
                         req.content.data.access_key,
                     ):
+                        token = SESSION_MAN.link_player(detail.username, req.handle)
                         response = engine.Packet.AuthStatus(
-                            engine.AuthenticationStatus(
-                                False, "Authentication failed: invalid credentials.", ""
-                            )
+                            engine.AuthenticationStatus(True, "Authenticated.", token)
                         )
-                        return
-                token = SESSION_MAN.link_player(detail.username, req.handle)  # type: ignore[reportPossiblyUnboundVariable]
-                response = engine.Packet.AuthStatus(
-                    engine.AuthenticationStatus(True, "Authenticated.", token)
-                )
-            if isinstance(req.content, engine.Packet.Unknown):
-                if req.content.data == "CONNECTION INITIATED":
-                    SESSION_MAN.register_session(req.handle)
-                if req.content.data == "CONNECTION HALTED":
-                    SESSION_MAN.purge(req.handle)
+                        break
+                else:
+                    response = engine.Packet.AuthStatus(
+                        engine.AuthenticationStatus(
+                            False, "Authentication failed: invalid credentials.", ""
+                        )
+                    )
+            # if isinstance(req.content, engine.Packet.Unknown):
+            #     if req.content.data == "CONNECTION INITIATED":
+            #         SESSION_MAN.register_session(req.handle)
+            #     if req.content.data == "CONNECTION HALTED":
+            #         SESSION_MAN.purge(req.handle)
         res_req = req.content.data
         match res_req:
             case engine.Query.Player():
@@ -138,11 +143,13 @@ class Show:
 
         for p in self.parts:
             p.implementation.show = self  # type: ignore[reportAttributeAccessIssue]
+            p.implementation.session_manager = SESSION_MAN  # type: ignore[reportAttributeAccessIssue]
             p.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
 
         self.ticker: engine.Ticker = engine.Ticker()
         part = self.parts[self.current_part.get()]
         while True:
+            # TODO - remove this if there are no parts that require a loop
             status = part.implementation.on_update(self)
             match status:
                 case engine.Status.STOP:
@@ -242,6 +249,8 @@ class Show:
         self.qbank: engine.QuestionBank = question_bank
         self.current_part: Writable[int] = self.rpc.use_state("current_part", 0)
         self.ticker = engine.Ticker()
+        self.sid: Writable[str] = self.rpc.use_state("sid", gen_token(8))
+        self.session_manager = SessionManager()
         self.timer: Writable[engine.Timer] = self.rpc.use_state(
             "timer",
             engine.Timer(),

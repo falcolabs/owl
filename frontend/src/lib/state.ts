@@ -11,6 +11,7 @@ export class StateManager implements Readable<any> {
     timerStore!: Writable<Timer>
 
     public store!: any /* { [key: string]: AcceptableValue }*/
+    public onready: (store: { [key: string]: AcceptableValue }) => void = (_) => { }
 
     static async create(connection: Connection): Promise<StateManager> {
         let obj = new StateManager();
@@ -34,6 +35,7 @@ export class StateManager implements Readable<any> {
                 obj.handleState(state)
             })
             obj.store.__init = true
+            obj.onready(obj.store)
             obj.updateListeners.forEach((cb) => cb(obj.store));
         })
 

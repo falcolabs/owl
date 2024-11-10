@@ -1,3 +1,4 @@
+from audioop import add
 from typing import final, override
 import engine
 import penguin
@@ -38,7 +39,9 @@ class KhoiDong(penguin.PartImplementation):
         self.display_qid = self.rpc.use_state("display_qid", "Chuẩn bị")
         self.max_time = self.rpc.use_state("max_time", 3)
         self.qid.subscribe(self.on_qid_change)
-        self.highlighted = self.rpc.use_state("highlighted", [])
+        self.highlighted: penguin.Writable[list[str]] = self.rpc.use_state(
+            "highlighted", []
+        )
         self.seperated_candidate = self.rpc.use_state("seperated_candidate", "")
         """Username của thí sinh lượt thi hiện tại trong phần thi riêng"""
         self.joint_bell = self.rpc.use_state("joint_bell", "")
@@ -49,10 +52,8 @@ class KhoiDong(penguin.PartImplementation):
                 ("setstage_joint", lambda *_: self.stage.set(STAGE_JOINT), []),
                 (
                     "ring_bell",
-                    lambda _, callprod, _2, _3: self.joint_bell.set(
-                        callprod.data.str_argno(0)
-                    ),
-                    [],
+                    self.ring_bell,
+                    [("token", engine.PortableType.STRING)],
                 ),
                 ("next_question", lambda *_: self.qid.set(self.qid.get() + 1), []),
             ]
@@ -78,6 +79,31 @@ class KhoiDong(penguin.PartImplementation):
 
     def _joint(self, _show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
+
+    def ring_bell(
+        self,
+        show: penguin.Show,
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr: str,
+    ):
+        # TODO - SECURITY: uses the addr (see rpc.py:97) to distinguish the bell ringer,
+        # not the call's argument
+        ringer_token = call.data.str_argno(0)
+        match self.session_manager.playername(ringer_token):
+            case penguin.option.Some(name):  # type: ignore[reportUnnecessaryComparison]
+                if self.joint_bell.get() == "":
+                    self.joint_bell.set(name)  # type: ignore[reportUnreachable]
+                    engine.log_info(f"rang the bell: {self.joint_bell.get()}")
+                else:
+                    engine.log_info(f"{name} ringed the bell late.")  # type: ignore[reportUnreachable]
+
+            case penguin.Null():
+                engine.log_warning(
+                    f"Player with token {ringer_token}@{addr} tried to ring bell, but could not identify them. {self.session_manager.player_map}"
+                )
+            case _:
+                pass
 
     def on_qid_change(self, qid: int):
         if qid == -1:
