@@ -21,7 +21,7 @@
         <div class="center-box">
             {#if $states.show_key}
                 <div class="answers">
-                    <ShowAnswer {states} />
+                    <ShowAnswer {states} {players} />
                 </div>
             {:else}
                 <div class="main">

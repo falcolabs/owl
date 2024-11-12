@@ -44,9 +44,8 @@
                     {#if $states.qid > -1}
                         <div class="qnum">
                             <PillTag
-                                text="Câu {$states.placement[
-                                    $states.current_player_username
-                                ].indexOf($states.qid) + 1}"
+                                text={`Câu ${$states.placement[$states.current_player_username].indexOf($states.qid) + 1}` +
+                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "")}
                             />
                         </div>
                         <p class="prompt">{$states.prompt}</p>

@@ -3,6 +3,15 @@ import engine
 import json
 import penguin
 from config import config
+import typing
+from penguin import Some, Null
+
+
+class PlayerAnswer(typing.TypedDict):
+    time: float
+    name: str
+    content: str
+    verdict: bool
 
 
 @final
@@ -16,6 +25,8 @@ class TangToc(penguin.PartImplementation):
             "prompt",
             "Sắp xếp các hình minh họa vào vị trí tương ứng để hoàn thiện sơ đồ quá trình nguyên phân ở tế bào động vật",
         )
+        self.highlighted = self.rpc.use_state("highlighted", [])
+        self.DEFAULT_ANSWERS: list[PlayerAnswer] = []
         self.media = self.rpc.use_state(
             "media",
             None,
@@ -34,16 +45,20 @@ class TangToc(penguin.PartImplementation):
         )
         self.answers = self.rpc.use_state(
             "answers",
-            [
-                {"time": 29.5, "name": "MrBeast", "content": "IELT", "verdict": None},
-                {"time": 1.3, "name": "Joe Biden", "content": "O-O-O", "verdict": True},
-                {"time": 69.42, "name": "Trump", "content": "d4d5", "verdict": False},
-                {"time": 2, "name": "herobrine", "content": "sasfsf", "verdict": None},
-            ],
+            [],
         )
         self.qid.subscribe(self.on_qid_change)
         self.rpc.add_procedures(
             [
+                (
+                    "submit_answer",
+                    self.submit_answer,
+                    [
+                        ("answer", engine.PortableType.STRING),
+                        ("token", engine.PortableType.STRING),
+                        ("time", engine.PortableType.NUMBER),
+                    ],
+                ),
                 (
                     "verdict",
                     self.verdict,
@@ -51,9 +66,54 @@ class TangToc(penguin.PartImplementation):
                         ("target", engine.PortableType.STRING),
                         ("verdict", engine.PortableType.STRING),
                     ],
-                )
+                ),
             ]
         )
+
+    def submit_answer(
+        self,
+        show: penguin.Show,
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr,
+    ):
+        answer, token, time = (
+            call.data.str_argno(0),
+            call.data.str_argno(1),
+            call.data.float_argno(2),
+        )
+        print(self.show.session_manager.player_map)
+        match self.show.session_manager.playername(token):
+            case Some(name):
+                elapsed: float = self.show.timer.get().time_elapsed().total_seconds()
+                engine.log_info(
+                    f"Timing mismatch report: client: {time:.4f}, server:{elapsed:.4f}, delta: ±{abs(elapsed-time):.4f}"
+                )
+                anslist = self.answers.get()
+                output = anslist.copy()
+                for i, a in enumerate(anslist):
+                    if a["name"] == name:
+                        output[i] = {
+                            "time": elapsed,
+                            "name": name,
+                            "content": answer,
+                            "verdict": False,
+                        }
+                        break
+                else:
+                    output.append(
+                        {
+                            "time": elapsed,
+                            "name": name,
+                            "content": answer,
+                            "verdict": False,
+                        }
+                    )
+                self.answers.set(output)
+            case Null():
+                engine.log_warning(
+                    f"Unidentified player {token}@{addr} tried to submit answer. Ignored."
+                )
 
     @override
     def on_ready(self, show: penguin.Show):
@@ -71,6 +131,10 @@ class TangToc(penguin.PartImplementation):
                 44: d.pack() if d is not None else None,
             }
         )
+        self.DEFAULT_ANSWERS = [
+            {"time": 30, "name": p.identifier, "content": "", "verdict": False}
+            for p in show.players.get()
+        ]
 
     def on_qid_change(self, qid: int):
         if qid == -1:
@@ -79,6 +143,7 @@ class TangToc(penguin.PartImplementation):
             return
         q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
+        self.answers.set(self.DEFAULT_ANSWERS)
         if q.media is None:
             self.media.set(None)
         else:

@@ -39,7 +39,7 @@
         <div class="center-box">
             {#if $states.show_key}
                 <div class="answers">
-                    <ShowAnswer {states} />
+                    <ShowAnswer {states} {players} />
                 </div>
             {:else}
                 <div class="main">
@@ -52,7 +52,6 @@
 </div>
 
 <style>
-
     .bg {
         width: 100vw;
         height: 100vh;

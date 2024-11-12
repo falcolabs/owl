@@ -1,7 +1,7 @@
 from typing import final, override
 import engine
 import json
-from penguin._option import Some, Null
+from penguin import Some, Null
 import utils.vcnv
 import penguin
 from config import config

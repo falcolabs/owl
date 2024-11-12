@@ -40,7 +40,9 @@ export class PlayerManager implements Readable<Map<string, Player>> {
         this.updateListeners.splice(index, 1);
     }
 
-    name(identifier: string): Player | undefined {
+    name(identifier: string): Player {
+        // TODO - make this | undefined
+        // @ts-ignore
         return this.storage.get(identifier);
     }
 

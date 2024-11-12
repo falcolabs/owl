@@ -3,12 +3,12 @@
     import { type Readable } from "svelte/store";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
-    import TangTocDisplay from "../../components/display/TangTocDisplay.svelte";
     import VeDichDisplay from "../../components/display/VeDichDisplay.svelte";
     import AuthPlayer from "../../components/player/AuthPlayer.svelte";
     import Standby from "../../components/display/Standby.svelte";
     import KhoiDong from "../../components/player/KhoiDong.svelte";
     import Vcnv from "../../components/player/VCNV.svelte";
+    import TangToc from "../../components/player/TangToc.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -39,7 +39,7 @@
     {:else if $states.available_parts[$states.current_part] == "vcnv"}
         <Vcnv {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-        <TangTocDisplay {conn} {gm} {states} {players} />
+        <TangToc {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vedich"}
         <VeDichDisplay {conn} {gm} {states} {players} />
     {/if}

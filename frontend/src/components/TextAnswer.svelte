@@ -12,7 +12,11 @@
         <PillTag text={name} />
     </div>
     <div class="answerbox box">
-        <p class="prompt">{content}</p>
+        {#if content != ""}
+            <p class="prompt">{content}</p>
+        {:else}
+            <p class="prompt">&nbsp</p>
+        {/if}
         <span class="time">{time.toFixed(2).padStart(5, "0")}</span>
     </div>
 </div>
@@ -21,7 +25,6 @@
     .wrong {
         opacity: 40%;
     }
-
 
     .time {
         /* position: absolute; */
@@ -50,5 +53,4 @@
     .nametag {
         transform: translateY(-40px) translateX(-20px);
     }
-
 </style>
