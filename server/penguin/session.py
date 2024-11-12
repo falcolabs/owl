@@ -1,6 +1,7 @@
 import engine
 from ._option import Option, Some, Null
 from utils.crypt import gen_token
+import traceback
 
 
 class SessionManager:
@@ -55,9 +56,10 @@ class SessionManager:
 
         for ident, handle in remove_list:
             try:
-                del self.player_map[ident]
+                # del self.player_map[ident]
                 del self.active_sessions[handle]
                 print(f"Purged {ident}")
+                traceback.print_stack()
             except KeyError:
                 pass
 
@@ -66,7 +68,7 @@ class SessionManager:
         for handle in self.active_sessions:
             try:
                 await handle.send(message)
-            except ConnectionResetError:
+            except ConnectionResetError as e:
                 purgelist.append(handle)
 
         for handle in purgelist:

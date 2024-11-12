@@ -25,5 +25,5 @@
   "enableTypeIgnoreComments": true,
   "reportUnusedVariable": false,
   "reportImportCycles": "none",
-  "reportMissingModuleSource": "none"
+  "reportMissingModuleSource": "none",
 }

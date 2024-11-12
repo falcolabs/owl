@@ -62,7 +62,7 @@ class Show:
         engine.log_debug(
             engine.mccolor(f"&1> ") + f"{req.sender}: {req.content.pack()}"
         )
-        SESSION_MAN.register_session(req.handle)
+        self.session_manager.register_session(req.handle)
 
         # Process task pool entries
         global TASK_POOL
@@ -78,7 +78,10 @@ class Show:
                         req.content.data.username,
                         req.content.data.access_key,
                     ):
-                        token = SESSION_MAN.link_player(detail.username, req.handle)
+                        token = self.session_manager.link_player(
+                            detail.username, req.handle
+                        )
+                        print(self.session_manager.player_map)
                         response = engine.Packet.AuthStatus(
                             engine.AuthenticationStatus(True, "Authenticated.", token)
                         )
@@ -89,11 +92,11 @@ class Show:
                             False, "Authentication failed: invalid credentials.", ""
                         )
                     )
-            # if isinstance(req.content, engine.Packet.Unknown):
-            #     if req.content.data == "CONNECTION INITIATED":
-            #         SESSION_MAN.register_session(req.handle)
-            #     if req.content.data == "CONNECTION HALTED":
-            #         SESSION_MAN.purge(req.handle)
+            if isinstance(req.content, engine.Packet.Unknown):
+                if req.content.data == "CONNECTION INITIATED":
+                    self.session_manager.register_session(req.handle)
+                if req.content.data == "CONNECTION HALTED":
+                    self.session_manager.purge(req.handle)
         res_req = req.content.data
         match res_req:
             case engine.Query.Player():
@@ -221,6 +224,7 @@ class Show:
     ):
         from .rpc import RPCManager
 
+        global SESSION_MAN
         self.rpc: RPCManager = RPCManager("engine")
 
         self.name: str = name
@@ -250,7 +254,7 @@ class Show:
         self.current_part: Writable[int] = self.rpc.use_state("current_part", 0)
         self.ticker = engine.Ticker()
         self.sid: Writable[str] = self.rpc.use_state("sid", gen_token(8))
-        self.session_manager = SessionManager()
+        self.session_manager = SESSION_MAN
         self.timer: Writable[engine.Timer] = self.rpc.use_state(
             "timer",
             engine.Timer(),

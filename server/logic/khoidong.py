@@ -2,6 +2,7 @@ from audioop import add
 from typing import final, override
 import engine
 import penguin
+from penguin import Some, Null
 
 STAGE_SEPERATED = 0
 """Phần thi riêng"""
@@ -91,19 +92,17 @@ class KhoiDong(penguin.PartImplementation):
         # not the call's argument
         ringer_token = call.data.str_argno(0)
         match self.session_manager.playername(ringer_token):
-            case penguin.option.Some(name):  # type: ignore[reportUnnecessaryComparison]
+            case Some(name):
                 if self.joint_bell.get() == "":
-                    self.joint_bell.set(name)  # type: ignore[reportUnreachable]
+                    self.joint_bell.set(name)
                     engine.log_info(f"rang the bell: {self.joint_bell.get()}")
                 else:
-                    engine.log_info(f"{name} ringed the bell late.")  # type: ignore[reportUnreachable]
+                    engine.log_info(f"{name} ringed the bell late.")
 
-            case penguin.Null():
+            case Null():
                 engine.log_warning(
                     f"Player with token {ringer_token}@{addr} tried to ring bell, but could not identify them. {self.session_manager.player_map}"
                 )
-            case _:
-                pass
 
     def on_qid_change(self, qid: int):
         if qid == -1:

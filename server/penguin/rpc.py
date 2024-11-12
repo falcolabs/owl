@@ -394,8 +394,8 @@ class RPCManager:
                     self.states_writable[update.name].set(
                         self.deser_map[update.name](update.data)
                     )
-                    print(SESSION_MAN.active_addr)
-                    await SESSION_MAN.broadcast(
+                    print(show.session_manager.active_addr)
+                    await show.session_manager.broadcast(
                         engine.Packet.State(self.states[update.name]).pack()
                     )
                     return Ok(True)

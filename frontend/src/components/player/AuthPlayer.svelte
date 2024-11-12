@@ -1,10 +1,8 @@
 <script lang="ts">
-    import { Peeker, Connection, GameMaster, PlayerManager, SHOW_NAME, ORG_NAME } from "$lib";
-    import { writable, type Readable, type Writable } from "svelte/store";
-    import type { PacketType, Packet } from "client";
+    import { GameMaster, SHOW_NAME, ORG_NAME } from "$lib";
+    import { writable } from "svelte/store";
     import { onMount } from "svelte";
     import TitleBar from "../TitleBar.svelte";
-    import { goto } from "$app/navigation";
 
     let username = "";
     let accessKey = "";
@@ -27,18 +25,19 @@
         <div class="box">
             <form on:submit|preventDefault={async () => {}}>
                 <h1 class="prompt plabel">Ủy quyền dự thi</h1>
-                <div class="inpgroup">
-                    <p class="tag">Mã thí sinh</p>
-                    <input type="text" class="inp" bind:value={username} />
-                </div>
-                <div class="inpgroup">
-                    <p class="tag">Khóa truy cập</p>
-                    <input type="password" class="inp" bind:value={accessKey} />
-                </div>
+
                 <div class="pillcon">
                     {#if $authenticated}
                         <div class="confspot">Đã được ủy quyền.<br />Phần thi sẽ sớm bắt đầu.</div>
                     {:else}
+                        <div class="inpgroup">
+                            <p class="tag">Mã thí sinh</p>
+                            <input type="text" class="inp" bind:value={username} />
+                        </div>
+                        <div class="inpgroup">
+                            <p class="tag">Khóa truy cập</p>
+                            <input type="password" class="inp" bind:value={accessKey} />
+                        </div>
                         <button class="pill confspot" on:click={click}>Bắt đầu</button>
                     {/if}
                     <p class="cpy">
@@ -57,10 +56,6 @@
         color: #888ebf;
         margin-bottom: -30px;
         width: 30rem;
-    }
-
-    .inp {
-        transition: 100ms ease-in;
     }
 
     .pill {

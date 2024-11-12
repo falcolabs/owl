@@ -1,11 +1,20 @@
-from os import utime
 from typing import final, override
 import engine
 import json
+from penguin._option import Some, Null
 import utils.vcnv
 import penguin
-import datetime
 from config import config
+import datetime
+import time
+import typing
+
+
+class PlayerAnswer(typing.TypedDict):
+    time: float
+    name: str
+    content: str
+    verdict: bool
 
 
 @final
@@ -20,6 +29,8 @@ class VCNV(penguin.PartImplementation):
             "4": 38,
             "M": 40,
         }
+
+        self.DEFAULT_ANSWERS: list[PlayerAnswer] = []
 
         # TODO - SECURITY: obfuscate this, do not give the client the answer.
         self.puzzle_data = self.rpc.use_state(
@@ -49,17 +60,21 @@ class VCNV(penguin.PartImplementation):
         self.show_key = self.rpc.use_state("show_key", False)
         self.max_time = self.rpc.use_state("max_time", 15)
         self.final_hint = self.rpc.use_state("final_hint", False)
-        self.answers = self.rpc.use_state(
+        self.answers: penguin.Writable[list[PlayerAnswer]] = self.rpc.use_state(
             "answers",
-            [
-                {"time": 29.5, "name": "MrBeast", "content": "IELT", "verdict": None},
-                {"time": 1.3, "name": "Joe Biden", "content": "O-O-O", "verdict": True},
-                {"time": 69.42, "name": "Trump", "content": "d4d5", "verdict": False},
-                {"time": 2, "name": "herobrine", "content": "sasfsf", "verdict": None},
-            ],
+            [],
         )
         self.rpc.add_procedures(
             [
+                (
+                    "submit_answer",
+                    self.submit_answer,
+                    [
+                        ("answer", engine.PortableType.STRING),
+                        ("token", engine.PortableType.STRING),
+                        ("time", engine.PortableType.NUMBER),
+                    ],
+                ),
                 (
                     "update_tiles",
                     self.update_tiles,
@@ -87,6 +102,58 @@ class VCNV(penguin.PartImplementation):
             ]
         )
 
+    @override
+    def on_ready(self, show: penguin.Show):
+        self.DEFAULT_ANSWERS = [
+            {"time": 30, "name": p.identifier, "content": "", "verdict": False}
+            for p in show.players.get()
+        ]
+
+    def submit_answer(
+        self,
+        show: penguin.Show,
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr,
+    ):
+        answer, token, time = (
+            call.data.str_argno(0),
+            call.data.str_argno(1),
+            call.data.float_argno(2),
+        )
+        print(self.show.session_manager.player_map)
+        match self.show.session_manager.playername(token):
+            case Some(name):
+                elapsed: float = self.show.timer.get().time_elapsed().total_seconds()
+                engine.log_info(
+                    f"Timing mismatch report: client: {time:.4f}, server:{elapsed:.4f}, delta: ±{abs(elapsed-time):.4f}"
+                )
+                anslist = self.answers.get()
+                output = anslist.copy()
+                for i, a in enumerate(anslist):
+                    if a["name"] == name:
+                        output[i] = {  # type: ignore[reportArgumentType]
+                            "time": elapsed,
+                            "name": name,
+                            "content": answer,
+                            "verdict": False,
+                        }
+                        break
+                else:
+                    output.append(
+                        {
+                            "time": elapsed,
+                            "name": name,
+                            "content": answer,
+                            "verdict": False,
+                        }
+                    )
+                self.answers.set(output)
+            case Null():
+                engine.log_warning(
+                    f"Unidentified player {token}@{addr} tried to submit answer. Ignored."
+                )
+
     def update_tiles(
         self,
         show: penguin.Show,
@@ -98,7 +165,7 @@ class VCNV(penguin.PartImplementation):
         new_status = call.data.str_argno(1)
         # TODO - make a configuration value for this
         # Automatically clears the answer queue on changing tile state
-        self.answers.set([])
+        self.answers.set(self.DEFAULT_ANSWERS)
         # Automatically clears the bell list on changing tile state
         self.highlighted.set([])
 

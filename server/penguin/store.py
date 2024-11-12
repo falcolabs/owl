@@ -61,6 +61,7 @@ class Writable(Readable[T]):
     def set_inner(self, value: T):
         return self.set(value)
 
+    # TODO - change all of this method usages to .inner
     def set(self, new_value: T):
         """Changes the contained value and notify the listeners."""
         self._value: T = new_value

@@ -3,13 +3,12 @@
     import { type Readable } from "svelte/store";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
-    import KhoiDongDisplay from "../../components/display/KhoiDongDisplay.svelte";
-    import VcnvDisplay from "../../components/display/VCNVDisplay.svelte";
     import TangTocDisplay from "../../components/display/TangTocDisplay.svelte";
     import VeDichDisplay from "../../components/display/VeDichDisplay.svelte";
     import AuthPlayer from "../../components/player/AuthPlayer.svelte";
     import Standby from "../../components/display/Standby.svelte";
     import KhoiDong from "../../components/player/KhoiDong.svelte";
+    import Vcnv from "../../components/player/VCNV.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -33,11 +32,12 @@
     {#if $states.available_parts[$states.current_part] == "standby"}
         <Standby />
     {:else if $states.available_parts[$states.current_part] == "auth"}
+        <!-- TODO - SECURITY: make this login portal always show up when unauthenticated -->
         <AuthPlayer {gm} />
     {:else if $states.available_parts[$states.current_part] == "khoidong"}
         <KhoiDong {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vcnv"}
-        <VcnvDisplay {conn} {gm} {states} {players} />
+        <Vcnv {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "tangtoc"}
         <TangTocDisplay {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vedich"}

@@ -1,3 +1,4 @@
+import datetime
 from typing import (
     Any,
     Dict,
@@ -444,9 +445,9 @@ class QuestionBank:
     def from_json(data: str) -> QuestionBank: ...
 
 class Timer:
-    start_time: Any
-    paused_time: Any
-    paused_duration: Any
+    start_time: datetime.datetime
+    paused_time: datetime.datetime
+    paused_duration: datetime.timedelta
     is_paused: bool
 
     def __init__(self):
@@ -458,7 +459,7 @@ class Timer:
     def resume(self) -> None:
         """Resumes the timer."""
 
-    def time_elapsed(self) -> Any:
+    def time_elapsed(self) -> datetime.timedelta:
         """Gets the time elapsed from the calling of `start()`,
         minus the pauses."""
 
@@ -467,7 +468,7 @@ class Timer:
     def from_json(target: str) -> Timer: ...
 
 class Ticker:
-    last_tick: Any
+    last_tick: datetime.datetime
 
     def tick(self, tick_speed: int):
         """Ensures the tick speed is met."""

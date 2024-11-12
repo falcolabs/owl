@@ -13,7 +13,8 @@ export class GameMaster {
     public players!: PlayerManager;
     public partName!: Writable<string>;
     public isAuthenticated!: Writable<boolean>;
-    public authToken?: string;
+    public authToken!: string;
+    public username: string = "";
 
     static async create(connection: Connection): Promise<GameMaster> {
         let obj = new GameMaster();
@@ -33,6 +34,7 @@ export class GameMaster {
                 if (adt.sid == states.sid) {
                     obj.authToken = adt.token;
                     obj.isAuthenticated.set(true);
+                    obj.username = adt.username;
                 } else {
                     window.sessionStorage.removeItem("authData")
                 }
@@ -45,7 +47,8 @@ export class GameMaster {
                 obj.isAuthenticated.set(true);
                 window.sessionStorage.setItem("authData", JSON.stringify({
                     "sid": obj.states.get("sid"),
-                    "token": packet.value.token
+                    "token": packet.value.token,
+                    "username": obj.username
                 }))
 
             }
@@ -61,6 +64,7 @@ export class GameMaster {
     }
 
     async authenticate(username: string, accessKey: string) {
+        this.username = username;
         await this.connection.send(
             new Peeker.Packet(Peeker.PacketType.CommenceSession, {
                 username: username,

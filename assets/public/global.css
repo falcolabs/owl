@@ -60,18 +60,30 @@
 
 .inp {
     border-radius: 18px;
-    border: solid 1px #6a72b4;
+    border: solid 2px #6a72b4;
     background-color: #434a82;
     padding: 20px 27px;
     color: var(--text);
     font-family: var(--font);
     font-weight: bold;
     font-size: var(--font-normal);
+    transition: 100ms ease-in;
 }
 
-.inp:focus {
+.inp:hover, .inp:focus {
     outline: none;
-    border: solid 1px var(--accent);
+    border: solid 2px var(--accent);
+}
+
+.inp::placeholder {
+    color: var(--text-2);
+    /* Firefox */
+    opacity: 1;
+}
+
+/* Edge 12 -18 */
+.inp::-ms-input-placeholder {
+    color: var(--text-2);
 }
 
 .noselect {
