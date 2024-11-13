@@ -42,15 +42,16 @@ directories:
 Building
 --------
 See Hacking (above) for requirements. After that, the project may be built. Note that the Python bindings is automatically built by Actions and can be found [here](https://github.com/falcolabs/owl/actions) (`Michaelsoft Binbows` for Windows, `Penguin` for Linux),
-### For `gang`
-  * For client, use `gang front`. The Rust module will be automatically
+### For `chick`
+  * See the [chick project](https://github.com/falcolabs/chick).
+  * For client, use `chick front`. The Rust module will be automatically
     compiled and bundled, and hot-reload enabled Vite starts serving on
     `localhost:5173`.
-  * For server, use `gang run`. The Rust module will be compiled,
+  * For server, use `chick run`. The Rust module will be compiled,
     the Python binding generated, the wheel built and installed automatically.
     `server/main.py` is subsequenly called, with `server/` as current directory.
 
-### Non-`gang`
+### Other build tools
   * For client, use any JavaScript runtime to invoke `compileRustDev` in `package.json`, like `bun run dev`, `npm run dev`, `yarn dev`, etc.
   * For server, compile the Python bindings with `maturin develop` (or if you want a `.whl` file, use `maturin build -o <name>`). Change your directory into `server/`, and run `main.py`.
 
