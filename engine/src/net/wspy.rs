@@ -16,7 +16,7 @@ use pyo3::prelude::*;
 use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 use tokio::fs;
 use tokio::sync::Mutex;
-use tower::ServiceExt;
+use tower::util::ServiceExt;
 use tower_http::services::ServeDir;
 
 pub type MessageHandler = std::sync::mpsc::Sender<RawRequest>;

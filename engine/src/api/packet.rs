@@ -46,6 +46,7 @@ pub enum Packet {
 }
 
 impl Packet {
+    #[deprecated]
     pub fn into_packet<T: 'static>(name: String, data: T) -> Packet {
         // WARNING: HAZMAT SUIT REQUIRED - UNSAFE HELL
         unsafe {

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Peeker, Connection, GameMaster, StateManager } from "$lib";
+    import { Peeker, Connection, GameMaster, StateManager, CallProcedure } from "$lib";
     import { readable, writable, type Readable } from "svelte/store";
     import Load from "../Load.svelte";
     import TitleBar from "../TitleBar.svelte";
@@ -28,8 +28,17 @@
                     <VcnvMain {states} {conn} {gm} />
                 </div>
             {/if}
+            <div class="bottom">
+                <button
+                    class="btn answercnv"
+                    class:activated={$states.highlighted.includes(gm.username)}
+                    on:click={async () => {
+                        await conn.send(CallProcedure.name("vcnv::bell").string("token", gm.authToken).number("timeMs", Date.now()).build());
+                    }}>Chuông trả lời CNV</button
+                >
+                <ScoreBar {players} {states} />
+            </div>
         </div>
-        <div class="bottom"><ScoreBar {players} {states} /></div>
     </Load>
 </div>
 
@@ -41,6 +50,29 @@
         background: var(--bg-gradient);
     }
 
+    .btn {
+        font-family: var(--font);
+        font-size: var(--font-normal);
+        color: var(--text);
+        padding: 1rem;
+        margin-left: 0;
+        user-select: none;
+        cursor: pointer;
+        background-color: var(--bg-dark-2);
+        border: 2px var(--accent) solid;
+        border-radius: var(--radius-1);
+        transition: 100ms ease-in-out;
+        width: fit-content;
+    }
+
+    .activated {
+        background-color: var(--accent);
+    }
+
+    .btn:hover {
+        background-color: var(--accent);
+    }
+
     .center-box {
         display: flex;
         align-items: center;
@@ -48,15 +80,14 @@
         width: 100vw;
         height: 100vh;
         flex-direction: column;
-        transform: translateY(2rem);
+        transform: translateY(4rem);
     }
 
     .bottom {
-        position: absolute;
-        transform: translateY(-5rem);
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100vw;
+        gap: 15vw;
     }
 </style>

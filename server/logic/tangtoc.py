@@ -23,7 +23,7 @@ class TangToc(penguin.PartImplementation):
         self.preload_list = self.rpc.use_state("preload_list", {})
         self.prompt = self.rpc.use_state(
             "prompt",
-            "Sắp xếp các hình minh họa vào vị trí tương ứng để hoàn thiện sơ đồ quá trình nguyên phân ở tế bào động vật",
+            "Các thí sinh hãy chuẩn bị",
         )
         self.highlighted = self.rpc.use_state("highlighted", [])
         self.DEFAULT_ANSWERS: list[PlayerAnswer] = []

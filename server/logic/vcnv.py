@@ -95,8 +95,8 @@ class VCNV(penguin.PartImplementation):
                     "bell",
                     self.bell,
                     [
-                        ("target", engine.PortableType.STRING),
-                        ("clientTime", engine.PortableType.NUMBER),
+                        ("token", engine.PortableType.STRING),
+                        ("timeMs", engine.PortableType.NUMBER),
                     ],
                 ),
             ]
@@ -222,6 +222,7 @@ class VCNV(penguin.PartImplementation):
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
         target = call.data.str_argno(0)
+        # TODO - check timeMs also
         engine.log_info(
             f"{target} pressed bell on {datetime.time().isoformat("microseconds")}"
         )

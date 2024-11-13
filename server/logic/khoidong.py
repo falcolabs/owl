@@ -75,6 +75,9 @@ class KhoiDong(penguin.PartImplementation):
             )
         )
 
+        # Resets the highlighted list when game stage is changed.
+        self.stage.subscribe(lambda _: self.highlighted.set([]))
+
     def _seperated(self, _show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
 

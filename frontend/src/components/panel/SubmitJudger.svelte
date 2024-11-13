@@ -25,7 +25,7 @@
                 <div class="vertical">
                     {#each $states.answers as { name, verdict }}
                         <div class="horizontal">
-                            {#each [true, false, null] as r}
+                            {#each [true, false] as r}
                                 <button
                                     class="btn smol code"
                                     class:accent={verdict == r}

@@ -3,10 +3,9 @@ name = "client"
 version = "2.0.0"
 authors = [
     "Nguyễn Tri Phương <triph@teamfalco.org>",
-    "Nguyễn Thế Việt <duchiru@teamfalco.org>",
 ]
 license = "GPL-3.0"
-repository = "https://github.com/teamfalco/owl"
+repository = "https://github.com/falcolabs/owl"
 edition = "2021"
 
 [lib]

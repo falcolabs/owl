@@ -4,7 +4,6 @@
     import { CallProcedure, GameMaster, type Connection, type StateManager } from "$lib";
     import { writable, type Writable } from "svelte/store";
     import TimerBar from "../TimerBar.svelte";
-    import { onMount } from "svelte";
 
     export let conn: Connection;
     export let gm: GameMaster;
