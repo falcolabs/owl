@@ -1,7 +1,7 @@
 # Sounds
 Put your sound files here. The show will play the sounds located in this directory. Your files shoudd be in WebM format with Opus encoding. Use the script provided if you want to convert into that format using `ffmpeg`.
 
-|Part|Name (without file extension)   |Purpose   |Sample (O22)|
+|Part|Name (without file extension)   |Purpose   |Sample (O24)|
 |-------|----|----------|------------|
 |Mở đầu|`op-introduction`|Nhạc giới thiệu cuộc thi|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/Gi%E1%BB%9Bi_thi%E1%BB%87u_cu%E1%BB%99c_thi_O22.mp3/revision/latest?cb=20231228154537&path-prefix=vi)|
 |Mở đầu|`op-introducecontestants`|Nhạc giới thiệu thí sinh|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/61/Gi%E1%BB%9Bi_thi%E1%BB%87u_th%C3%AD_sinh_O9.ogg/revision/latest?cb=20240411120804&path-prefix=vi)|
@@ -24,3 +24,12 @@ Put your sound files here. The show will play the sounds located in this directo
 |VCNV|`vcnv-incorrect`|Không thí sinh nào trả lời đúng hàng ngang/sai CNV|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/74/K%C4%90_sai_O7.mp3/revision/latest?cb=20230827122808&path-prefix=vi)|
 |VCNV|`vcnv-bell`|Thí sinh bấm chuông trả lời CNV|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/38/VCNV_t%C3%ADn_hi%E1%BB%87u_tr%E1%BA%A3_l%E1%BB%9Di_left_O11.mp3/revision/latest?cb=20210905110033&path-prefix=vi)|
 |VCNV|`vcnv-bellcorrect`|Thí sinh trả lời CNV chính xác|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ae/VCNV_%C4%91%C3%BAng_ch%C6%B0%E1%BB%9Bng_ng%E1%BA%A1i_v%E1%BA%ADt_left_O7.mp3/revision/latest?cb=20210209144639&path-prefix=vi)|
+|Tăng tốc|`tangtoc-start`|Bắt đầu phần thi tăng tốc|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/a4/TT_b%E1%BA%AFt_%C4%91%E1%BA%A7u_O22.mp3/revision/latest?cb=20221126152658&path-prefix=vi)|
+|Tăng tốc|`tangtoc-revealquestion`|Mở ô câu hỏi phần thi tăng tốc|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/f/f2/TT_m%E1%BB%9F_c%C3%A2u_h%E1%BB%8Fi_left_O11.mp3/revision/latest?cb=20220312043027&path-prefix=vi)|
+|Tăng tốc|`tangtoc-10secs`|Nhạc đếm giờ 10s|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/72/TT_10s_right_O22.mp3/revision/latest?cb=20230209064004&path-prefix=vi)|
+|Tăng tốc|`tangtoc-20secs`|Nhạc đếm giờ 20s|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/d/dc/TT_20s_right_O22.mp3/revision/latest?cb=20230209064212&path-prefix=vi)|
+|Tăng tốc|`tangtoc-30secs`|Nhạc đếm giờ 30s|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/9/90/TT_30s_right_O22.mp3/revision/latest?cb=20230724145511&path-prefix=vi)|
+|Tăng tốc|`tangtoc-40secs`|Nhạc đếm giờ 40s|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/TT_40s_right_O22.mp3/revision/latest?cb=20230209064620&path-prefix=vi)|
+|Tăng tốc|`tangtoc-showanswers`|Nhạc hiện đáp án|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/71/TT_m%E1%BB%9F_%C4%91%C3%A1p_%C3%A1n_right_O11.mp3/revision/latest?cb=20220711041228&path-prefix=vi)|
+|Tăng tốc|`tangtoc-correct`|Có thí sinh trả lời đúng|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/bd/K%C4%90_ho%C3%A0n_th%C3%A0nh_left_O7.mp3/revision/latest?cb=20210209144230&path-prefix=vi)|
+|Tăng tốc|`tangtoc-wrong`|Không có thí sinh nào trả lời đúng|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/6a/V%C4%90_sai_left_O7.ogg/revision/latest?cb=20201216152804&path-prefix=vi)|
