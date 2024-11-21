@@ -59,7 +59,7 @@
                 <div class="timerbar"><TimerBar {states} /></div>
             {/if}
         </div>
-        <div class="scorebar"><ScoreBar {players} {states} /></div>
+        <div class="scorebar"><ScoreBar {states} /></div>
     </Load>
 </div>
 

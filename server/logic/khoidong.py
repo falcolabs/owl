@@ -29,12 +29,12 @@ class KhoiDong(penguin.PartImplementation):
 
         self.timer = engine.Timer()
         self.timer.pause()
-
         self.stage = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
         self.current_question_content = self.rpc.use_state(
             "current_question_content", ""
         )
+        self.plusminus = self.rpc.use_state("plusminus", {"add": [0], "rem": [0]})
         self.qid = self.rpc.use_state("qid", -1)
         """Câu hỏi hiện tại."""
         self.display_qid = self.rpc.use_state("display_qid", "Chuẩn bị")
@@ -114,11 +114,13 @@ class KhoiDong(penguin.PartImplementation):
             )
             self.display_qid.set("Chuẩn bị")
             self.max_time.set(3)
+            self.plusminus.set({"add": [0], "rem": [0]})
             return
         q = self.show.qbank.get_question(qid)
         self.current_question_content.set(q.prompt)
         self.display_qid.set(str((qid % 6) + 1))
         self.max_time.set(q.time)
+        self.plusminus.set({"add": [q.score], "rem": [q.score_false]})
 
         # TODO - configuration entry for this
         # automatically clearing the bell queue when question changes

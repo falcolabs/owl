@@ -50,6 +50,10 @@ class VeDich(penguin.PartImplementation):
                 config().credentials[3].username: [0, 0, 0],
             },
         )
+        self.plusminus = self.rpc.use_state(
+            "plusminus", {"add": [20, 30, 40, 60], "rem": [-20, -30]}
+        )
+
         self.current_player_username = self.rpc.use_state("current_player_username", "")
         self.highlighted = self.rpc.use_state("highlighted", [])
         self.bell_player = self.rpc.use_state("bell_player", "")

@@ -189,6 +189,47 @@ class Show:
         new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
 
+    def set_score(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr: str,
+    ):
+        print(call.pack())
+        target = call.data.str_argno(0)
+        value = call.data.int_argno(1)
+        pl = self.players.get()
+        for p in pl:
+            if p.identifier == target:
+                p.score = value
+                self.players.set(pl)
+                break
+        else:
+            engine.log_warning(
+                f"Cannot find player with identifier {target}. Ignored score set request."
+            )
+
+    def add_score(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr: str,
+    ):
+        target = call.data.str_argno(0)
+        value = call.data.int_argno(1)
+        pl = self.players.get()
+        for p in pl:
+            if p.identifier == target:
+                p.score += value
+                self.players.set(pl)
+                break
+        else:
+            engine.log_warning(
+                f"Cannot find player with identifier {target}. Ignored score add request."
+            )
+
     def timer_operation(
         self,
         _: "Show",
@@ -235,7 +276,8 @@ class Show:
 
         def _ser_players(inp: list[engine.Player]) -> engine.PortableValue:
             return engine.PortableValue(
-                json.dumps([i.pack() for i in inp]), engine.PortableType.OBJECT
+                json.dumps([json.loads(i.pack()) for i in inp]),
+                engine.PortableType.OBJECT,
             )
 
         def _der_players(inp: engine.PortableValue) -> list[engine.Player]:
@@ -271,6 +313,22 @@ class Show:
                     "timer_operation",
                     self.timer_operation,
                     [("operation", engine.PortableType.STRING)],
+                ),
+                (
+                    "set_score",
+                    self.set_score,
+                    [
+                        ("target", engine.PortableType.STRING),
+                        ("value", engine.PortableType.NUMBER),
+                    ],
+                ),
+                (
+                    "add_score",
+                    self.add_score,
+                    [
+                        ("target", engine.PortableType.STRING),
+                        ("value", engine.PortableType.NUMBER),
+                    ],
                 ),
             ]
         )

@@ -31,6 +31,9 @@ class TangToc(penguin.PartImplementation):
             "media",
             None,
         )
+        self.plusminus = self.rpc.use_state(
+            "plusminus", {"add": [10, 20, 30, 40], "rem": [0]}
+        )
 
         self.media_status = self.rpc.use_state(
             "media_status",

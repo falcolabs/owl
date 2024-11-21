@@ -5,6 +5,8 @@ use js_sys::{Object, Reflect};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use wasm_bindgen::prelude::*;
 
+use crate::console_log;
+
 #[derive(Debug, Clone, Copy, Serialize_repr, Deserialize_repr)]
 #[wasm_bindgen]
 #[allow(unused)]

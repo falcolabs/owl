@@ -21,7 +21,7 @@ import config
 
 def main():
     qbank = engine.QuestionBank()
-    qbank.load("../assets/question_template.json")
+    qbank.load("../assets/question_test.json")
     config.load("../config.json")
     penguin.set_error_hook()
     if config.config().debug:

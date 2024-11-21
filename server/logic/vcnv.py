@@ -53,6 +53,7 @@ class VCNV(penguin.PartImplementation):
         self.highlighted: penguin.Writable[list[str]] = self.rpc.use_state(
             "highlighted", []
         )
+        self.plusminus = self.rpc.use_state("plusminus", {"add": [10], "rem": [0]})
         self.key_length = self.rpc.use_state("key_length", 69)
         self.image = self.rpc.use_state(
             "image", utils.vcnv.get_imgdata(["1", "2", "3", "4", "M"])

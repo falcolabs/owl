@@ -36,7 +36,7 @@
                         await conn.send(CallProcedure.name("vcnv::bell").string("token", gm.authToken).number("timeMs", Date.now()).build());
                     }}>Chuông trả lời CNV</button
                 >
-                <ScoreBar {players} {states} />
+                <ScoreBar {states} />
             </div>
         </div>
     </Load>

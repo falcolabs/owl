@@ -1,13 +1,12 @@
 <script lang="ts">
     import ScorePill from "./ScorePill.svelte";
 
-    export let players;
     export let states;
 </script>
 
 <div class="bar">
     {#if $states.highlighted !== undefined}
-        {#each $players.entries() as [_, player]}
+        {#each $states.engine_players as player}
             <ScorePill
                 activated={$states.highlighted.includes(player.identifier)}
                 name={player.name}

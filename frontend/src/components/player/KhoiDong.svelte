@@ -33,7 +33,7 @@
                     <div class="qnum"><PillTag text="Chuẩn bị" /></div>
                     <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
                 {/if}
-                <div class="sbar"><ScoreBar players={gm.players} {states} /></div>
+                <div class="sbar"><ScoreBar {states} /></div>
             </div>
             <div class="timerbar">
                 <TimerBar {states} />

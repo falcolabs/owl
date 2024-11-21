@@ -47,7 +47,7 @@
                 </div>
             {/if}
         </div>
-        <div class="bottom"><ScoreBar {players} {states} /></div>
+        <div class="bottom"><ScoreBar {states} /></div>
     </Load>
 </div>
 
