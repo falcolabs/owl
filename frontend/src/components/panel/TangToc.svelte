@@ -103,14 +103,6 @@
         filter: brightness(120%);
     }
 
-    .disabled-btn {
-        cursor: not-allowed;
-    }
-
-    .disabled-btn:hover {
-        filter: none;
-    }
-
     div.big-gap {
         gap: 15px;
     }

@@ -50,6 +50,7 @@ class TangToc(penguin.PartImplementation):
             "answers",
             [],
         )
+        self.max_time = self.rpc.use_state("max_time", -1)
         self.qid.subscribe(self.on_qid_change)
         self.rpc.add_procedures(
             [
@@ -85,7 +86,6 @@ class TangToc(penguin.PartImplementation):
             call.data.str_argno(1),
             call.data.float_argno(2),
         )
-        print(self.show.session_manager.player_map)
         match self.show.session_manager.playername(token):
             case Some(name):
                 elapsed: float = self.show.timer.get().time_elapsed().total_seconds()
@@ -147,6 +147,8 @@ class TangToc(penguin.PartImplementation):
         q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
         self.answers.set(self.DEFAULT_ANSWERS)
+        self.max_time = self.rpc.use_state("max_time", q.time)
+        self.show.timer.set(engine.Timer())
         if q.media is None:
             self.media.set(None)
         else:

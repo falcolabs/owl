@@ -1,3 +1,4 @@
+from traceback import print_stack
 from typing import final, override
 import typing
 import engine
@@ -81,7 +82,6 @@ class Show:
                         token = self.session_manager.link_player(
                             detail.username, req.handle
                         )
-                        print(self.session_manager.player_map)
                         response = engine.Packet.AuthStatus(
                             engine.AuthenticationStatus(True, "Authenticated.", token)
                         )
@@ -189,6 +189,23 @@ class Show:
         new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
 
+        TASK_POOL.append(
+            self.session_manager.broadcast(
+                engine.Packet.StateList(list(self.rpc.states.values())).pack()
+            )
+        )
+        TASK_POOL.append(
+            self.session_manager.broadcast(
+                engine.Packet.StateList(
+                    list(
+                        self.parts[
+                            self.current_part.get()
+                        ].implementation.rpc.states.values()  # type: ignore[reportAttributeAccessIssue]
+                    )
+                ).pack()
+            )
+        )
+
     def set_score(
         self,
         _: "Show",
@@ -196,7 +213,6 @@ class Show:
         handle: engine.IOHandle,
         addr: str,
     ):
-        print(call.pack())
         target = call.data.str_argno(0)
         value = call.data.int_argno(1)
         pl = self.players.get()

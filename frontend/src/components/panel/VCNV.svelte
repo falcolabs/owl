@@ -42,6 +42,9 @@
                         await states.setBoolean("final_hint", !$states.final_hint)}
                     >{$states.final_hint ? "Final Hint: Shown" : "Final Hint: Hidden"}</button
                 >
+                <button class="btn" on:click={async () => await states.setArray("highlighted", [])}
+                    >Clear Bell</button
+                >
             </div>
             <div class="vertical big-gap">
                 <h1>Selected Row</h1>

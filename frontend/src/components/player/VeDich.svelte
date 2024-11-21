@@ -7,6 +7,7 @@
     import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import ScoreBar from "../ScoreBar.svelte";
     import TimerBar from "../TimerBar.svelte";
+    import { CallProcedure } from "$lib";
     const STAGE_CHOOSE: number = 0;
     const STAGE_COMPETE: number = 1;
 
@@ -25,44 +26,14 @@
         stage: STAGE_COMPETE,
         qid: -1
     });
-    let videoElement: HTMLVideoElement;
-    let audioElement: HTMLAudioElement;
-    let imageElement: HTMLImageElement;
     export let players: PlayerManager;
 </script>
 
 <title>Về đích - Đường đua xanh</title>
 <div class="bg">
     <Load until={gm !== undefined && $states.package !== undefined}>
-        <TitleBar activity="Về đích" />
         <div class="center-box">
-            {#if $states.media != null && $states.media_status.visible}
-                {#if $states.media != null}
-                    <div class="media-placeholder" />
-                    {#if $states.media.mediaType == "video"}
-                        <!-- svelte-ignore a11y-media-has-caption -->
-                        <video
-                            class="mmedia mobj"
-                            bind:this={videoElement}
-                            src={$states.media.uri}
-                            autoplay
-                        />
-                    {:else if $states.media.mediaType == "image"}
-                        <img
-                            class="mmedia mobj"
-                            src={$states.media.uri}
-                            alt="Question content"
-                            bind:this={imageElement}
-                        />
-                    {:else if $states.media.mediaType == "audio"}
-                        <audio
-                            class="mmedia mobj"
-                            src={$states.media.uri}
-                            bind:this={audioElement}
-                        />
-                    {/if}
-                {/if}
-            {:else if $states.stage == STAGE_CHOOSE}
+            {#if $states.stage == STAGE_CHOOSE}
                 {#if $states.current_player_username !== ""}
                     <div class="vertical">
                         <PackageChooser {states} />
@@ -88,7 +59,21 @@
                 <div class="timerbar"><TimerBar {states} /></div>
             {/if}
         </div>
-        <div class="scorebar"><ScoreBar {states} /></div>
+        <div class="bottom">
+            <button
+                class="btn answercnv"
+                class:activated={$states.highlighted.includes(gm.username)}
+                on:click={async () => {
+                    await conn.send(
+                        CallProcedure.name("vedich::bell")
+                            .string("token", gm.authToken)
+                            .number("timeMs", Date.now())
+                            .build()
+                    );
+                }}>Chuông trả lời CNV</button
+            >
+            <ScoreBar {states} />
+        </div>
     </Load>
 </div>
 
@@ -98,6 +83,21 @@
         height: 100vh;
         overflow: hidden;
         background: var(--bg-gradient);
+    }
+
+    .btn {
+        font-family: var(--font);
+        font-size: var(--font-normal);
+        color: var(--text);
+        padding: 1rem;
+        margin-left: 0;
+        user-select: none;
+        cursor: pointer;
+        background-color: var(--bg-dark-2);
+        border: 2px var(--accent) solid;
+        border-radius: var(--radius-1);
+        transition: 100ms ease-in-out;
+        width: fit-content;
     }
     .center-box {
         display: flex;
@@ -109,10 +109,18 @@
         transform: translateY(2rem);
     }
 
-    .scorebar {
-        width: 100vw;
+    .bottom {
+        position: fixed;
+        left: 0px;
+        bottom: 1rem;
+        max-width: 80%;
+        width: 80%;
+        margin: 0;
+        padding-left: 10vw;
+        padding-right: 10vw;
         display: flex;
-        justify-content: center;
+        align-items: center;
+        justify-content: space-between;
     }
 
     .timerbar {
@@ -132,7 +140,7 @@
         padding: 3em 5em;
         margin-top: 50px;
         width: 60vw;
-        height: 30vh;
+        height: 40vh;
         text-align: justify;
         display: flex;
         flex-direction: column;

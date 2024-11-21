@@ -22,7 +22,6 @@
 
 <title>Khởi động - Đường đua xanh</title>
 <div class="bg">
-    <TitleBar activity="Khởi động" />
     <div class="center-box">
         <div class="container">
             <div class="box">
@@ -78,7 +77,7 @@
 
     .box {
         width: 60vw;
-        height: 30vh;
+        height: 40vh;
         padding: 3em 5em;
         text-align: justify;
         display: flex;

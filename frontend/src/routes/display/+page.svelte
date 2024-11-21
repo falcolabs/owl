@@ -20,6 +20,7 @@
         players = gm.players;
         conn.on(Peeker.PacketType.State, async (update) => {
             if (update.value.name === "current_part") {
+                gm.states.flush();
                 await gm.updateAll();
             }
         });

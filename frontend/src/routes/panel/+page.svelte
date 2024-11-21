@@ -78,7 +78,7 @@
                 </div>
                 <div class="right">
                     <PartSwitcher {states} {conn} />
-                    <ScoreJudge {conn} {states} {players} />
+                    <ScoreJudge {conn} {states} />
                 </div>
             </div>
         </div>

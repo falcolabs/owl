@@ -8,7 +8,12 @@
 
     onMount(() => {
         progress.subscribe((v) => {
-            thumb.style.width = `${v * 100}%`;
+            if (thumb === null) return;
+            if (v >= 1) {
+                thumb.style.width = "100%";
+            } else {
+                thumb.style.width = `${v * 100}%`;
+            }
             thumb.style.display = v <= 0 ? "none" : "block";
         });
     });
@@ -21,6 +26,7 @@
 <style>
     .timerbar {
         width: 100%;
+        max-width: 100%;
         height: 11px;
         border-radius: 9px;
         border: 1px solid var(--border-color);

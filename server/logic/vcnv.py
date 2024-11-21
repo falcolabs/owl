@@ -26,7 +26,7 @@ class VCNV(penguin.PartImplementation):
             "1": 36,
             "2": 37,
             "3": 38,
-            "4": 38,
+            "4": 39,
             "M": 40,
         }
 
@@ -122,7 +122,6 @@ class VCNV(penguin.PartImplementation):
             call.data.str_argno(1),
             call.data.float_argno(2),
         )
-        print(self.show.session_manager.player_map)
         match self.show.session_manager.playername(token):
             case Some(name):
                 elapsed: float = self.show.timer.get().time_elapsed().total_seconds()
@@ -222,7 +221,7 @@ class VCNV(penguin.PartImplementation):
         self.answers.set(mod)
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
-        target = call.data.str_argno(0)
+        target = self.session_manager.playername(call.data.str_argno(0)).unwrap()
         # TODO - check timeMs also
         engine.log_info(
             f"{target} pressed bell on {datetime.time().isoformat("microseconds")}"

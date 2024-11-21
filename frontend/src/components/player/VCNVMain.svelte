@@ -17,7 +17,9 @@
         new Map<string, Writable<{ status: string; content: string; tag: string }>>()
     );
     states.subscribe((s) => {
+        console.log("checking")
         if (s.puzzle_data == undefined) return;
+        console.log("passed checkpoint1",s);
         if (s.final_hint) {
             if ($lines.size != 1) {
                 console.log("M");
@@ -33,6 +35,7 @@
                 for (let entry of $states.puzzle_data.normal) {
                     o.set(entry.tag, writable(entry));
                 }
+
                 lines.set(o);
             } else {
                 for (let entry of $states.puzzle_data.normal) {

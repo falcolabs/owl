@@ -74,8 +74,9 @@ class Null(_OptionLogic):
         return False
 
     @typing.override
-    def unwrap(self):
+    def unwrap(self) -> typing.NoReturn:
         super().unwrap()
+        raise Exception()
 
     @typing.override
     def expect(self, msg: str):

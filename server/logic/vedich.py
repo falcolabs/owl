@@ -3,6 +3,7 @@ import engine
 import datetime
 import penguin
 from config import config
+import json
 
 STAGE_CHOOSE = 0
 """Phần chọn gói câu hỏi"""
@@ -62,6 +63,17 @@ class VeDich(penguin.PartImplementation):
         self.prompt = self.rpc.use_state("prompt", "")
         self.stage = self.rpc.use_state("stage", STAGE_CHOOSE)
         self.qid = self.rpc.use_state("qid", -1)
+        self.media = self.rpc.use_state(
+            "media",
+            None,
+        )
+        self.media_status = self.rpc.use_state(
+            "media_status",
+            {
+                "visible": False,
+                "playback_paused": False,
+            },
+        )
         self.rpc.add_procedures(
             [
                 (
@@ -119,6 +131,16 @@ class VeDich(penguin.PartImplementation):
         )
         self.max_time.set(q.time)
         self.show.timer.set(engine.Timer())
+        if q.media is None:
+            self.media.set(None)
+        else:
+            self.media.set(json.loads(q.media.pack()))
+        self.media_status.set(
+            {
+                "visible": False,
+                "playback_paused": False,
+            }
+        )
 
     def set_choice(
         self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2
@@ -140,7 +162,7 @@ class VeDich(penguin.PartImplementation):
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
         target = call.data.str_argno(0)
-        clientTime = call.data.str_argno(1)
+        clientTime = call.data.int_argno(1)
         if self.bell_player != "":
             engine.log_info(
                 f"{target} tried to ring bell, being late to the game. {datetime.time().isoformat("microseconds")}"

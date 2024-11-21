@@ -63,8 +63,12 @@ export class StateManager implements Readable<any> {
         return this.store.__init;
     }
 
+    flush() {
+        this.store = { __init: false };
+    }
 
     async updateAll() {
+        this.flush()
         await this.connection.send(Peeker.Query.stateList());
     }
 

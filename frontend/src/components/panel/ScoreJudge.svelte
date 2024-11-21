@@ -1,55 +1,59 @@
 <script lang="ts">
     import { type Connection, type StateManager, CallProcedure } from "$lib";
+    import Load from "../Load.svelte";
     import ScorePillSmall from "../ScorePillSmall.svelte";
 
     export let conn: Connection;
     export let states: StateManager;
-    console.log($states.engine_players);
+
+    console.log($states, $states.plusminus);
 </script>
 
 <div class="bar">
     {#if $states.highlighted !== undefined}
         {#each $states.engine_players as player}
-            <div class="scorestack">
-                {#each $states.plusminus.rem as i}
-                    <button
-                        class="btn destructive"
-                        on:click={async () => {
-                            await conn.send(
-                                CallProcedure.name("engine::add_score")
-                                    .string("target", player.identifier)
-                                    .number("value", i)
-                                    .build()
-                            );
-                        }}>{i}</button
-                    >
-                {/each}
-                <ScorePillSmall
-                    activated={$states.highlighted.includes(player.identifier)}
-                    name={player.name}
-                    score={player.score}
-                />
-                {#each $states.plusminus.add as i}
-                    <button
-                        class="btn"
-                        on:click={async () => {
-                            console.log(
-                                CallProcedure.name("engine::add_score")
-                                    .string("target", player.identifier)
-                                    .number("value", i)
-                                    .build()
-                                    .pack()
-                            );
-                            await conn.send(
-                                CallProcedure.name("engine::add_score")
-                                    .string("target", player.identifier)
-                                    .number("value", i)
-                                    .build()
-                            );
-                        }}>+{i}</button
-                    >
-                {/each}
-            </div>
+            <Load until={$states.plusminus !== undefined}>
+                <div class="scorestack">
+                    {#each $states.plusminus.rem as i}
+                        <button
+                            class="btn destructive"
+                            on:click={async () => {
+                                await conn.send(
+                                    CallProcedure.name("engine::add_score")
+                                        .string("target", player.identifier)
+                                        .number("value", i)
+                                        .build()
+                                );
+                            }}>{i}</button
+                        >
+                    {/each}
+                    <ScorePillSmall
+                        activated={$states.highlighted.includes(player.identifier)}
+                        name={player.name}
+                        score={player.score}
+                    />
+                    {#each $states.plusminus.add as i}
+                        <button
+                            class="btn"
+                            on:click={async () => {
+                                console.log(
+                                    CallProcedure.name("engine::add_score")
+                                        .string("target", player.identifier)
+                                        .number("value", i)
+                                        .build()
+                                        .pack()
+                                );
+                                await conn.send(
+                                    CallProcedure.name("engine::add_score")
+                                        .string("target", player.identifier)
+                                        .number("value", i)
+                                        .build()
+                                );
+                            }}>+{i}</button
+                        >
+                    {/each}
+                </div>
+            </Load>
         {/each}
     {/if}
 </div>

@@ -43,7 +43,7 @@ export class Connection {
         Peeker = await import("client")
         let obj = new Connection();
         Peeker.ClientHandle.set_panic_hook()
-        obj.ws = new WebSocket("ws://localhost:6942/harlem");
+        obj.ws = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/harlem`);
         obj.callbacks = new Map()
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {

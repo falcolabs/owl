@@ -50,7 +50,7 @@ def main():
     )
 
     show.start(
-        "localhost:6942",
+        config.config().listenOn,
         "dist",
         "static",
     )

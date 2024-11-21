@@ -17,7 +17,6 @@
 <title>Vượt chướng ngại vật - Đường đua xanh</title>
 <div class="bg">
     <Load until={$states.selected !== undefined}>
-        <TitleBar activity="Vượt chướng ngại vật" />
         <div class="center-box">
             {#if $states.show_key}
                 <div class="answers">
@@ -80,10 +79,11 @@
         width: 100vw;
         height: 100vh;
         flex-direction: column;
-        transform: translateY(4rem);
     }
 
     .bottom {
+        position: fixed;
+        bottom: 1rem;
         width: 100%;
         display: flex;
         align-items: center;

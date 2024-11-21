@@ -1,5 +1,9 @@
 {
   "listenOn": "localhost:6942",
+  "devServer": {
+    "host": "localhost",
+    "port": 6699
+  },
   "serveDir": "dist",
   "staticDir": "static",
   "checkRPCTypes": true,
@@ -7,24 +11,24 @@
   "tickSpeed": 60,
   "credentials": [
     {
-      "fullName": "MrBeast",
-      "username": "mrbeast",
-      "accessKey": "joebiden"
+      "fullName": "Bảo Ngọc",
+      "username": "baongoc",
+      "accessKey": "1234"
     },
     {
-      "fullName": "Dr Disrespect",
-      "username": "disrespect",
-      "accessKey": "ytshorts"
+      "fullName": "Thùy An",
+      "username": "thuyan",
+      "accessKey": "1234"
     },
     {
-      "fullName": "Test One",
+      "fullName": "Đại Phong",
+      "username": "daiphong",
+      "accessKey": "1234"
+    },
+    {
+      "fullName": "Test Player",
       "username": "1",
       "accessKey": "1"
-    },
-    {
-      "fullName": "ChatGPT",
-      "username": "elonmusk",
-      "accessKey": "chatgpt"
     }
   ],
   "game": {

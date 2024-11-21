@@ -8,6 +8,7 @@
     import ScoreBar from "../ScoreBar.svelte";
     import type { PlayerManager } from "$lib/player";
     import BareTimer from "../BareTimer.svelte";
+    import TimerBar from "../TimerBar.svelte";
 
     // @ts-ignore
     export let states: StateManager = writable({
@@ -45,7 +46,6 @@
                 // @ts-ignore
                 let media = JSON.parse(a[1]);
                 if (media == null) return;
-                console.log("uri is", media);
                 let r = await fetch(media.uri);
                 blobs[media.uri] = URL.createObjectURL(await r.blob());
             });
@@ -60,17 +60,17 @@
                 if (!s.media_status.playbackPaused) {
                     if (videoElement.paused) {
                         if (videoElement.currentTime == 0) {
-                            states.setTimer(new Peeker.Timer());
+                            // states.setTimer(new Peeker.Timer());
                         }
                         await videoElement.play();
                         $timerStore.resume();
 
                         videoElement.onended = (ev) => {
-                            states.setTimer(new Peeker.Timer());
-                            states.setObject("media_status", {
-                                visible: true,
-                                playbackPaused: true
-                            });
+                            // states.setTimer(new Peeker.Timer());
+                            // states.setObject("media_status", {
+                            // visible: true,
+                            // playbackPaused: true
+                            // });
                             videoProgress.set(0);
                         };
                     }
@@ -78,7 +78,7 @@
                     videoElement?.pause();
                     $timerStore.pause();
                 }
-                states.setTimer($timerStore);
+                // states.setTimer($timerStore);
             }
             previousState = s.media_status.playbackPaused;
         });
@@ -106,7 +106,6 @@
 
 <title>Tăng tốc - Đường đua xanh</title>
 <div class="bg spcbtwn">
-    <TitleBar activity="Tăng tốc" />
     <Load until={gm !== undefined && $states.__init}>
         <div class="center-box upper">
             {#if $states.show_key}
@@ -146,7 +145,15 @@
                                 <div class="media-placeholder" />
                             {/if}
                         </div>
-                        <div class="timer"><BareTimer progress={videoProgress} /></div>
+                        <div class="timer">
+                            {#if $states.media != null}
+                                {#if $states.media.mediaType == "video"}
+                                    <BareTimer progress={videoProgress} />
+                                {:else}
+                                    <TimerBar {states} />
+                                {/if}
+                            {/if}
+                        </div>
                     </div>
                     <div class="sepright">
                         <div>
@@ -260,7 +267,6 @@
         width: 100vw;
         height: calc(100vh - 5rem);
         flex-direction: column;
-        transform: translateY(2rem);
     }
 
     .sep {

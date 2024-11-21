@@ -2,6 +2,7 @@
     import type { Writable } from "svelte/store";
 
     export let line: Writable<any>;
+    console.log($line);
 </script>
 
 <div class="line">

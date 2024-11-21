@@ -7,7 +7,9 @@
     import Load from "../Load.svelte";
     import ScoreBar from "../ScoreBar.svelte";
     import type { PlayerManager } from "$lib/player";
+    import type { MediaContent } from "client";
     import BareTimer from "../BareTimer.svelte";
+    import TimerBar from "../TimerBar.svelte";
 
     // @ts-ignore
     export let states: StateManager = writable({
@@ -36,12 +38,11 @@
     onMount(async () => {
         // @ts-ignore
         states.on("preload_list", (l: any) => {
-            Object.entries(l).forEach(async (a) => {
+            Object.entries(l).forEach(async (a: any) => {
                 let qn = JSON.parse(a[0]);
                 // @ts-ignore
                 let media = JSON.parse(a[1]);
                 if (media == null) return;
-                console.log("uri is", media);
                 let r = await fetch(media.uri);
                 blobs[media.uri] = URL.createObjectURL(await r.blob());
             });
@@ -56,7 +57,9 @@
                 if (!s.media_status.playbackPaused) {
                     if (videoElement.paused) {
                         if (videoElement.currentTime == 0) {
-                            states.setTimer(new Peeker.Timer());
+                            let t = new Peeker.Timer();
+                            t.resume();
+                            states.setTimer(t);
                         }
                         await videoElement.play();
                         $timerStore.resume();
@@ -126,7 +129,15 @@
                         <div class="media-placeholder" />
                     {/if}
                 </div>
-                <div class="timer"><BareTimer progress={videoProgress} /></div>
+                <div class="timer">
+                    {#if $states.media != null}
+                        {#if $states.media.mediaType == "video"}
+                            <BareTimer progress={videoProgress} />
+                        {:else}
+                            <TimerBar {states} />
+                        {/if}
+                    {/if}
+                </div>
             {/if}
         </div>
         <div class="scorebar"><ScoreBar {states} /></div>

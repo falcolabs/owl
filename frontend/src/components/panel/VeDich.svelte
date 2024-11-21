@@ -17,17 +17,6 @@
             <h1>GameMaster Controls</h1>
             <button
                 class="btn"
-                class:accent={$states.stage == STAGE_COMPETE}
-                on:click={async () => {
-                    await states.setNumber(
-                        "stage",
-                        $states.stage == STAGE_CHOOSE ? STAGE_COMPETE : STAGE_CHOOSE
-                    );
-                }}
-                >{$states.stage == STAGE_CHOOSE ? "Màn hình Chọn gói" : "Màn hình Phần thi"}</button
-            >
-            <button
-                class="btn"
                 on:click={async () => {
                     if ($states.qid == -1) {
                         await states.setNumber(
@@ -45,6 +34,28 @@
                     }
                 }}>Next question</button
             >
+            <button
+                class="btn"
+                class:accent={$states.stage == STAGE_COMPETE}
+                on:click={async () => {
+                    await states.setNumber(
+                        "stage",
+                        $states.stage == STAGE_CHOOSE ? STAGE_COMPETE : STAGE_CHOOSE
+                    );
+                }}
+                >{$states.stage == STAGE_CHOOSE ? "Màn hình Chọn gói" : "Màn hình Phần thi"}</button
+            >
+            {#if $states.media != null}
+                <button
+                    class="btn"
+                    class:accent={$states.media_status.visible}
+                    on:click={async () => {
+                        let status = $states.media_status;
+                        status.visible = !status.visible;
+                        await states.setObject("media_status", status);
+                    }}>{$states.media_status.visible ? "Ẩn media" : "Hiện media"}</button
+                >
+            {/if}
         </div>
 
         <div class="vertical">
@@ -69,28 +80,35 @@
             </div>
             {#if $states.current_player_username !== ""}
                 <div class="vertical">
-                    <h1>Gói câu hỏi cho {$states.current_player_username}:</h1>
-                    {#each [0, 1, 2] as i}
-                        <div class="horizontal smolmargin">
-                            {#each [0, 20, 30] as score}
-                                <button
-                                    class="btn smol nomargin"
-                                    class:accent={$states.package[$states.current_player_username][
-                                        i
-                                    ] == score}
-                                    on:click={async () => {
-                                        await conn.send(
-                                            CallProcedure.name("vedich::set_choice")
-                                                .string("target", $states.current_player_username)
-                                                .number("slot", i)
-                                                .number("to", score)
-                                                .build()
-                                        );
-                                    }}>{score != 0 ? score : "unset"}</button
-                                >
-                            {/each}
-                        </div>
-                    {/each}
+                    {#if $states.stage == STAGE_CHOOSE}
+                        <h1>Gói câu hỏi cho {$states.current_player_username}:</h1>
+                        {#each [0, 1, 2] as i}
+                            <div class="horizontal smolmargin">
+                                {#each [0, 20, 30] as score}
+                                    <button
+                                        class="btn smol nomargin"
+                                        class:accent={$states.package[
+                                            $states.current_player_username
+                                        ][i] == score}
+                                        on:click={async () => {
+                                            await conn.send(
+                                                CallProcedure.name("vedich::set_choice")
+                                                    .string(
+                                                        "target",
+                                                        $states.current_player_username
+                                                    )
+                                                    .number("slot", i)
+                                                    .number("to", score)
+                                                    .build()
+                                            );
+                                        }}>{score != 0 ? score : "unset"}</button
+                                    >
+                                {/each}
+                            </div>
+                        {/each}
+                    {:else}
+                        <h1>Media Controls</h1>
+                    {/if}
                 </div>
                 <div class="horizontal big-gap">
                     <div class="vertical">

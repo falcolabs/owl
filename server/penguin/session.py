@@ -32,7 +32,7 @@ class SessionManager:
     def link_player(self, identifier: str, handle: engine.IOHandle) -> str:
         token = self.register_session(handle)
         self.player_map[identifier] = token
-        print(f"Linked {identifier} -> {token}")
+        engine.log_debug(f"Linked {identifier} -> {token}")
         return token
 
     def playername(self, token: str) -> Option[str]:
@@ -58,8 +58,8 @@ class SessionManager:
             try:
                 # del self.player_map[ident]
                 del self.active_sessions[handle]
-                print(f"Purged {ident}")
-                traceback.print_stack()
+                engine.log_debug(f"Purged {ident}")
+                # traceback.print_stack()
             except KeyError:
                 pass
 

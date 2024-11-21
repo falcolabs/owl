@@ -6,7 +6,7 @@
     "compileRustProd": "wasm-pack build ./client --target bundler --out-dir ../node_modules/client --out-name client",
     "compileRustDev": "wasm-pack build ./client --target bundler --out-dir ../node_modules/client --out-name client --debug",
     "watchRust": "cargo watch -i .gitignore -i src/ -C . -s \"deno run compileRust\"",
-    "dev": "deno run compileRustDev && vite dev --force",
+    "dev": "deno run compileRustDev && vite dev --force --host=$HOST --port=$PORT",
     "build": "deno run compileRustProd && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

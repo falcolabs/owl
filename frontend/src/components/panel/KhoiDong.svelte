@@ -33,22 +33,20 @@
     });
 
     onMount(async () => {
-        players.subscribe((p) => {
-            let player_list = Array.from(p.values());
-            if (player_list.length === 0) {
-                return;
-            }
-            $question_placement = {
-                // @ts-ignore
-                [Number(STAGE_SEPERATED)]: {
-                    [player_list[0].identifier]: [0, 1, 2, 3, 4, 5],
-                    [player_list[1].identifier]: [6, 7, 8, 9, 10, 11],
-                    [player_list[2].identifier]: [12, 13, 14, 15, 16, 17],
-                    [player_list[3].identifier]: [18, 19, 20, 21, 22, 23]
-                },
-                [Number(STAGE_JOINT)]: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
-            };
-        });
+        let player_list = $states.engine_players;
+        if (player_list.length === 0) {
+            return;
+        }
+        $question_placement = {
+            // @ts-ignore
+            [Number(STAGE_SEPERATED)]: {
+                [player_list[0].identifier]: [0, 1, 2, 3, 4, 5],
+                [player_list[1].identifier]: [6, 7, 8, 9, 10, 11],
+                [player_list[2].identifier]: [12, 13, 14, 15, 16, 17],
+                [player_list[3].identifier]: [18, 19, 20, 21, 22, 23]
+            },
+            [Number(STAGE_JOINT)]: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+        };
     });
 
     const setStage = (stage: number) => async () => await states.setNumber("stage", stage);

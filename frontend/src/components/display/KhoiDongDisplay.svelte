@@ -4,12 +4,7 @@
     import ScoreBar from "../ScoreBar.svelte";
     import TitleBar from "../TitleBar.svelte";
 
-    import {
-        Connection,
-        GameMaster,
-        PlayerManager,
-        StateManager
-    } from "$lib";
+    import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import TimerBar from "../TimerBar.svelte";
     const STAGE_SEPERATED = 0;
     const STAGE_JOINT = 1;
