@@ -1,5 +1,5 @@
 # Sounds
-Put your sound files here. The show will play the sounds located in this directory. Your files shoudd be in WebM format with Opus encoding. Use the script provided if you want to convert into that format using `ffmpeg`.
+Put your sound files here. The show will play the sounds located in this directory. Your files shoudd be in WebM format with Opus encoding. Use the script provided if you want to convert into that format using `ffmpeg` (you can use the `convertall.py` providedto convert all audio files in `unconverted/` to the appropriate format).
 
 |Part|Name (without file extension)   |Purpose   |Sample (O24)|
 |-------|----|----------|------------|
