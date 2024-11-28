@@ -8,6 +8,7 @@
     import VeDichDisplay from "../../components/mc/VeDichDisplay.svelte";
     import Standby from "../../components/mc/Standby.svelte";
     import TieBreakerDisplay from "../../components/mc/TieBreakerDisplay.svelte";
+    import Tkd from "../../components/display/TKD.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -39,6 +40,8 @@
         <VeDichDisplay {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
         <TieBreakerDisplay {conn} {gm} {states} {players} />
+    {:else if $states.available_parts[$states.current_part] == "tkd"}
+        <Tkd {states} />
     {:else}
         <Standby />
     {/if}

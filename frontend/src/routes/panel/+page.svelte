@@ -12,6 +12,7 @@
     import PartSwitcher from "../../components/panel/PartSwitcher.svelte";
     import ScoreJudge from "../../components/panel/ScoreJudge.svelte";
     import TieBreaker from "../../components/panel/TieBreaker.svelte";
+    import Tkd from "../../components/panel/TKD.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -73,7 +74,9 @@
                         {:else if $states.available_parts[$states.current_part] == "vedich"}
                             <VeDich {states} {conn} />
                         {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
-                            <TieBreaker {states} {conn} />
+                            <TieBreaker {states} {conn} {players} />
+                        {:else if $states.available_parts[$states.current_part] == "tkd"}
+                            <Tkd {conn} />
                         {/if}
                     </div>
                 </div>

@@ -34,6 +34,7 @@ def main():
     import logic.tangtoc
     import logic.vedich
     import logic.tiebreaker
+    import logic.tkd
 
     show = penguin.Show(
         "Đường đua xanh",
@@ -45,6 +46,7 @@ def main():
             engine.Part(logic.tangtoc.TangToc(), "tangtoc"),
             engine.Part(logic.vedich.VeDich(), "vedich"),
             engine.Part(logic.tiebreaker.TieBreaker(), "tiebreaker"),
+            engine.Part(logic.tkd.TKD(), "tkd"),
         ],
         [engine.Player(c.username, c.fullName, 0) for c in config.config().credentials],
         config.config().tickSpeed,
