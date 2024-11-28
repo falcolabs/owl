@@ -10,6 +10,7 @@
     import Vcnv from "../../components/player/VCNV.svelte";
     import TangToc from "../../components/player/TangToc.svelte";
     import VeDich from "../../components/player/VeDich.svelte";
+    import TieBreaker from "../../components/player/TieBreaker.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -45,5 +46,7 @@
         <TangToc {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vedich"}
         <VeDich {conn} {gm} {states} {players} />
+    {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
+        <TieBreaker {conn} {gm} {states} {players} />
     {/if}
 </Load>

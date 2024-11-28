@@ -691,5 +691,35 @@
         "choices": [],
         "scoreFalse": 0,
         "explaination": "think"
+    },
+    {
+        "prompt": "TIEBREAKER 1",
+        "media": null,
+        "key": "tb1",
+        "score": 10,
+        "time": 15,
+        "choices": [],
+        "scoreFalse": 0,
+        "explaination": "think"
+    },
+    {
+        "prompt": "TIEBREAKER 2",
+        "media": null,
+        "key": "tb2",
+        "score": 10,
+        "time": 15,
+        "choices": [],
+        "scoreFalse": 0,
+        "explaination": "think"
+    },
+    {
+        "prompt": "TIEBREAKER 3",
+        "media": null,
+        "key": "tb3",
+        "score": 10,
+        "time": 15,
+        "choices": [],
+        "scoreFalse": 0,
+        "explaination": "think"
     }
 ]

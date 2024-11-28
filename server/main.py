@@ -33,6 +33,7 @@ def main():
     import logic.vcnv
     import logic.tangtoc
     import logic.vedich
+    import logic.tiebreaker
 
     show = penguin.Show(
         "Đường đua xanh",
@@ -43,6 +44,7 @@ def main():
             engine.Part(logic.vcnv.VCNV(), "vcnv"),
             engine.Part(logic.tangtoc.TangToc(), "tangtoc"),
             engine.Part(logic.vedich.VeDich(), "vedich"),
+            engine.Part(logic.tiebreaker.TieBreaker(), "tiebreaker"),
         ],
         [engine.Player(c.username, c.fullName, 0) for c in config.config().credentials],
         config.config().tickSpeed,

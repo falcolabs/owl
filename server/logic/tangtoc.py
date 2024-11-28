@@ -20,6 +20,8 @@ class TangToc(penguin.PartImplementation):
         super().__init__()
         self.rpc = penguin.RPCManager("tangtoc")
         self.qid = self.rpc.use_state("qid", -1)
+        # TODO - SECURITY: encrypt this
+        self.key = self.rpc.use_state("key", "")
         self.preload_list = self.rpc.use_state("preload_list", {})
         self.prompt = self.rpc.use_state(
             "prompt",
@@ -138,16 +140,19 @@ class TangToc(penguin.PartImplementation):
             {"time": 30, "name": p.identifier, "content": "", "verdict": False}
             for p in show.players.get()
         ]
+        self.answers.set(self.DEFAULT_ANSWERS)
 
     def on_qid_change(self, qid: int):
         if qid == -1:
             self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
             self.media.set({"media_type": None, "uri": None})
+            self.key.set("")
             return
         q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
         self.answers.set(self.DEFAULT_ANSWERS)
         self.max_time = self.rpc.use_state("max_time", q.time)
+        self.key.set(q.key)
         self.show.timer.set(engine.Timer())
         if q.media is None:
             self.media.set(None)

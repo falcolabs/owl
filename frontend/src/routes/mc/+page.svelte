@@ -2,12 +2,12 @@
     import { Peeker, Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
-    import KhoiDongDisplay from "../../components/display/KhoiDongDisplay.svelte";
-    import VcnvDisplay from "../../components/display/VCNVDisplay.svelte";
-    import TangTocDisplay from "../../components/display/TangTocDisplay.svelte";
-    import VeDichDisplay from "../../components/display/VeDichDisplay.svelte";
-    import Standby from "../../components/display/Standby.svelte";
-    import TieBreakerDisplay from "../../components/display/TieBreakerDisplay.svelte";
+    import KhoiDongDisplay from "../../components/mc/KhoiDongDisplay.svelte";
+    import VcnvDisplay from "../../components/mc/VCNVDisplay.svelte";
+    import TangTocDisplay from "../../components/mc/TangTocDisplay.svelte";
+    import VeDichDisplay from "../../components/mc/VeDichDisplay.svelte";
+    import Standby from "../../components/mc/Standby.svelte";
+    import TieBreakerDisplay from "../../components/mc/TieBreakerDisplay.svelte";
 
     let conn: Connection;
     let gm: GameMaster;

@@ -63,6 +63,7 @@
                         if (videoElement.currentTime == 0) {
                             // states.setTimer(new Peeker.Timer());
                         }
+                        videoElement.muted = true;
                         await videoElement.play();
                         $timerStore.resume();
 

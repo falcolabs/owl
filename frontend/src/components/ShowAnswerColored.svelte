@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Readable } from "svelte/store";
     import PillTag from "./PillTag.svelte";
-    import TextAnswer from "./TextAnswer.svelte";
+    import TextAnswerColored from "./TextAnswerColored.svelte";
     import { PlayerManager, StateManager } from "$lib";
 
     export let states: StateManager;
@@ -13,7 +13,7 @@
 <div class="container">
     {#if $states.answers !== undefined && $states.engine_players.size != 0}
         {#each $states.answers as { time, name, content, verdict }}
-            <TextAnswer
+            <TextAnswerColored
                 {time}
                 name={PlayerManager.getDisplayName(name, $states.engine_players)}
                 {content}

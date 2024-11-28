@@ -5,7 +5,9 @@
 </script>
 
 <div class="line">
-    <div class="letter disabled tag">{$line.tag}</div>
+    <div class="letter disabled">{$line.tag}</div>
+    <div class="letter long disabled tag">{$line.content.length} ký tự</div>
+
     {#each $line.content as lett}
         <div
             class="letter"
@@ -26,7 +28,7 @@
     }
 
     .tag {
-        margin-right: 30px;
+        margin-right: 15px;
     }
 
     .letter {
@@ -41,6 +43,13 @@
         justify-content: center;
         font-weight: bold;
         transition: 200ms ease-in-out;
+    }
+
+    .long {
+        width: 100px;
+        text-transform: unset;
+        padding-left: 15px;
+        padding-right: 15px;
     }
 
     .selected {

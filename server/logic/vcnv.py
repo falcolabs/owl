@@ -109,6 +109,7 @@ class VCNV(penguin.PartImplementation):
             {"time": 30, "name": p.identifier, "content": "", "verdict": False}
             for p in show.players.get()
         ]
+        self.answers.set(self.DEFAULT_ANSWERS)
 
         self.puzzle_data.set(
             {

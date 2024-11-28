@@ -67,6 +67,8 @@ class VeDich(penguin.PartImplementation):
         self.prompt = self.rpc.use_state("prompt", "")
         self.stage = self.rpc.use_state("stage", STAGE_CHOOSE)
         self.qid = self.rpc.use_state("qid", -1)
+        # TODO - SECURITY: encrypt this (with MC token or sth)
+        self.key = self.rpc.use_state("key", "")
         self.media = self.rpc.use_state(
             "media",
             None,
@@ -120,6 +122,7 @@ class VeDich(penguin.PartImplementation):
     def on_qid_change(self, qid: int):
         if qid == -1:
             self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
+            self.key.set("")
             return
         q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
@@ -127,6 +130,7 @@ class VeDich(penguin.PartImplementation):
         # clears bell list automatically on question change.
         self.bell_player.set("")
         self.max_time.set(q.time)
+        self.key.set(q.key)
         self.show.timer.set(engine.Timer())
         if q.media is None:
             self.media.set(None)

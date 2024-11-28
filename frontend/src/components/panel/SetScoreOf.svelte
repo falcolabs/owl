@@ -9,8 +9,9 @@
     let inp: number;
 
     const refreshScore = () => {
-        console.log("updating score");
-        inp = PlayerManager.getFromName(identifier, $states.engine_players).score;
+        // @ts-ignore
+        inp = null;
+        // inp = PlayerManager.getFromName(identifier, $states.engine_players).score;
     };
 
     onMount(() => {

@@ -11,6 +11,7 @@
     import VeDich from "../../components/panel/VeDich.svelte";
     import PartSwitcher from "../../components/panel/PartSwitcher.svelte";
     import ScoreJudge from "../../components/panel/ScoreJudge.svelte";
+    import TieBreaker from "../../components/panel/TieBreaker.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -71,6 +72,8 @@
                             <TangToc {states} {conn} />
                         {:else if $states.available_parts[$states.current_part] == "vedich"}
                             <VeDich {states} {conn} />
+                        {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
+                            <TieBreaker {states} {conn} />
                         {/if}
                     </div>
                 </div>
