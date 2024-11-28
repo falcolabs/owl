@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { SHOW_NAME, ORG_NAME } from "$lib";
+    import { SHOW_NAME, ORG_NAME, SUBTEXT } from "$lib";
 </script>
 
 <div class="bg">
@@ -9,6 +9,7 @@
         <h1>
             {SHOW_NAME}
         </h1>
+        <h2 class="caps subtext">{SUBTEXT}</h2>
     </div>
     <p class="cpy">Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.</p>
 </div>
@@ -23,7 +24,6 @@
         align-items: center;
         justify-content: space-between;
         overflow: hidden;
-
     }
 
     .titlegroup {
@@ -55,5 +55,8 @@
         font-size: 4rem;
         color: var(--text);
         font-weight: bold;
+    }
+    .subtext {
+        margin: 1rem;
     }
 </style>

@@ -1,16 +1,17 @@
 import { Peeker, Connection } from "$lib";
 import { PlayerManager } from "$lib/player";
-import { StateManager } from "$lib/state"
+import { StateManager } from "$lib/state";
 import { writable, type Writable } from "svelte/store";
 
 export type AcceptableValue = any[] | number | string | boolean | null | object;
 
 export class GameMaster {
-    connection!: Connection
-    updateListeners!: ((gm: GameMaster) => void)[]
+    connection!: Connection;
+    updateListeners!: ((gm: GameMaster) => void)[];
 
     public states!: StateManager;
     public players!: PlayerManager;
+
     public partName!: Writable<string>;
     public isAuthenticated!: Writable<boolean>;
     public authToken!: string;
@@ -25,50 +26,51 @@ export class GameMaster {
         obj.partName = writable("");
         obj.connection.on(Peeker.PacketType.Part, (packetPart) => {
             obj.partName.set(packetPart.value.name);
-        })
+        });
 
-        obj.states.onready = (states) => {
+        obj.states.onready = async (_) => {
             let ad = window.sessionStorage.getItem("authData");
             if (ad !== null && ad !== "") {
                 let adt = JSON.parse(ad);
-                if (adt.sid == states.sid) {
-                    obj.authToken = adt.token;
-                    obj.isAuthenticated.set(true);
-                    obj.username = adt.username;
-                } else {
-                    window.sessionStorage.removeItem("authData")
-                }
+                obj.username = adt.username;
+                await connection.send(
+                    new Peeker.Packet(Peeker.PacketType.CommenceSession, {
+                        username: adt.username,
+                        accessKey: adt.accessKey,
+                    })
+                );
             }
-        }
+        };
 
         obj.connection.on(Peeker.PacketType.AuthStatus, (packet) => {
             if (packet.value.success) {
                 obj.authToken = packet.value.token;
                 obj.isAuthenticated.set(true);
-                window.sessionStorage.setItem("authData", JSON.stringify({
-                    "sid": obj.states.get("sid"),
-                    "token": packet.value.token,
-                    "username": obj.username
-                }))
-
             }
         });
 
-        await obj.updateAll()
-        return obj
+        await obj.updateAll();
+        return obj;
     }
 
     isInitialized(): boolean {
         // @ts-ignore
-        return this.states.__init
+        return this.states.__init;
     }
 
     async authenticate(username: string, accessKey: string) {
         this.username = username;
+        window.sessionStorage.setItem(
+            "authData",
+            JSON.stringify({
+                username: username,
+                accessKey: accessKey,
+            })
+        );
         await this.connection.send(
             new Peeker.Packet(Peeker.PacketType.CommenceSession, {
                 username: username,
-                accessKey: accessKey
+                accessKey: accessKey,
             })
         );
     }
@@ -78,5 +80,4 @@ export class GameMaster {
         await this.players.updateAll();
         await this.connection.send(Peeker.Query.currentPart());
     }
-
 }

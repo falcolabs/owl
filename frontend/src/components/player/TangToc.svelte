@@ -37,6 +37,7 @@
     let timeElapsed = 30;
     let hasMine = false;
     let timer = states.timerStore;
+    let inputBox: HTMLInputElement;
 
     onMount(async () => {
         // @ts-ignore
@@ -83,12 +84,22 @@
             previousState = s.media_status.playbackPaused;
         });
 
+        inputBox.focus();
+        timer.subscribe((t) => {
+            try {
+                if (!t.isPaused()) {
+                    inputBox.focus();
+                }
+            } catch (e) {}
+        });
+
         states.subscribe((s: any) => {
             if (s.answers === undefined) {
                 hasMine = false;
                 return;
             }
             for (let ans of s.answers) {
+                console.log(ans, gm.username, ans.time);
                 if (ans.name == gm.username && ans.content != "" && ans.time != 30) {
                     hasMine = true;
                     return;
@@ -192,6 +203,7 @@
                                     placeholder="Nhập đáp án"
                                     spellcheck="false"
                                     bind:value={answer}
+                                    bind:this={inputBox}
                                 />
                             </form>
                         </div>

@@ -344,8 +344,8 @@ pub struct Credentials {
     pub username: String,
     pub access_key: String,
 }
-pyproperty!(Credentials:username   -> String);
-pyproperty!(Credentials:access_key -> String);
+pyproperty!(Credentials:username:set_username   -> String);
+pyproperty!(Credentials:access_key:set_access_key -> String);
 
 impl crate::api::Resource for Credentials {}
 

@@ -74,7 +74,12 @@ async fn sws(call_mpsc: MessageHandler, listen_on: String, serve_dir: String, st
 
     let listener = tokio::net::TcpListener::bind(listen_on.clone())
         .await
-        .unwrap();
+        .unwrap_or_else(|_| {
+            panic!(
+        "Bad host address. Make sure you provided a valid address (HOST:PORT) (you provided {})",
+        listen_on
+    )
+        });
     logging::info(format!("Serving on {}...", listen_on));
     axum::serve(
         listener,

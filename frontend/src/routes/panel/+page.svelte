@@ -4,7 +4,6 @@
     import type { Timer, Player } from "client";
     import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
-    import ScoreBar from "../../components/ScoreBar.svelte";
     import KhoiDong from "../../components/panel/KhoiDong.svelte";
     import Vcnv from "../../components/panel/VCNV.svelte";
     import TimerControls from "../../components/panel/TimerControls.svelte";
@@ -49,7 +48,6 @@
         }, 100);
 
         conn.on(Peeker.PacketType.State, async (update) => {
-            console.log(`Updated ${update.value.name}`);
             if (update.value.name === "current_part") {
                 await gm.updateAll();
             }
@@ -78,7 +76,7 @@
                 </div>
                 <div class="right">
                     <PartSwitcher {states} {conn} />
-                    <ScoreJudge {conn} {states} />
+                    <ScoreJudge {conn} {states} {gm} />
                 </div>
             </div>
         </div>

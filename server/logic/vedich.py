@@ -52,9 +52,13 @@ class VeDich(penguin.PartImplementation):
             },
         )
         self.plusminus = self.rpc.use_state(
-            "plusminus", {"add": [20, 30, 40, 60], "rem": [-20, -30]}
+            "plusminus",
+            {
+                "add": [20, 30, 40, 60],
+                "rem": [-30, -20, -15, -10],
+            },
         )
-
+        self.allow_bell = self.rpc.use_state("allow_bell", False)
         self.current_player_username = self.rpc.use_state("current_player_username", "")
         self.highlighted = self.rpc.use_state("highlighted", [])
         self.bell_player = self.rpc.use_state("bell_player", "")
@@ -90,7 +94,7 @@ class VeDich(penguin.PartImplementation):
                     self.bell,
                     [
                         ("target", engine.PortableType.STRING),
-                        ("clientTime", engine.PortableType.NUMBER),
+                        ("clientTime", engine.PortableType.STRING),
                     ],
                 ),
             ]
@@ -105,8 +109,8 @@ class VeDich(penguin.PartImplementation):
 
         self.bell_player.subscribe(
             lambda name: self.highlighted.set(
-                self.highlighted.get()
-                + [
+                [
+                    self.current_player_username.get(),
                     name,
                 ]
             )
@@ -122,13 +126,6 @@ class VeDich(penguin.PartImplementation):
         # TODO - add configuration entry for this
         # clears bell list automatically on question change.
         self.bell_player.set("")
-        self.current_player_username.subscribe(
-            lambda name: self.highlighted.set(
-                [
-                    name,
-                ]
-            )
-        )
         self.max_time.set(q.time)
         self.show.timer.set(engine.Timer())
         if q.media is None:
@@ -161,11 +158,11 @@ class VeDich(penguin.PartImplementation):
             )
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
-        target = call.data.str_argno(0)
-        clientTime = call.data.int_argno(1)
-        if self.bell_player != "":
+        target = self.session_manager.playername(call.data.str_argno(0)).unwrap()
+        clientTime = call.data.str_argno(1)
+        if self.bell_player.get() != "" or not self.allow_bell.get():
             engine.log_info(
-                f"{target} tried to ring bell, being late to the game. {datetime.time().isoformat("microseconds")}"
+                f"{target} tried to ring bell, being late to the game, or the bell is not available yet. {self.bell_player.get()}"
             )
         else:
             engine.log_info(

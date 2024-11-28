@@ -5,6 +5,7 @@
     import PillTag from "../PillTag.svelte";
     import Load from "../Load.svelte";
     import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
+    import { scoreOf } from "$lib/globals";
     import ScoreBar from "../ScoreBar.svelte";
     import TimerBar from "../TimerBar.svelte";
     const STAGE_CHOOSE: number = 0;
@@ -74,7 +75,8 @@
                         <div class="qnum">
                             <PillTag
                                 text={`Câu ${$states.placement[$states.current_player_username].indexOf($states.qid) + 1}` +
-                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "")}
+                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "") +
+                                    " · " + `${scoreOf[$states.qid]}` + "đ"}
                             />
                         </div>
                         <p class="prompt">{$states.prompt}</p>

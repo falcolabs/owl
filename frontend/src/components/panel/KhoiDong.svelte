@@ -52,6 +52,20 @@
     const setStage = (stage: number) => async () => await states.setNumber("stage", stage);
 
     const incrementQuestion = async () => {
+        if ($states.stage == STAGE_SEPERATED) {
+            if (
+                $states.qid ==
+                $question_placement[$states.stage][$states.seperated_candidate].at(-1)
+            ) {
+                await setQuestion(-1)();
+                return;
+            }
+        } else {
+            if ($states.qid == $question_placement[$states.stage].at(-1)) {
+                await setQuestion(-1)();
+                return;
+            }
+        }
         await conn.send(CallProcedure.name("khoidong::next_question").build());
     };
 
@@ -66,7 +80,7 @@
 </div>
 
 <div>
-    <p>Game Master Controls</p>
+    <h1>Game Master Controls</h1>
     <div class="bgroup-hor">
         <button
             on:click={$states.qid != -1
@@ -106,7 +120,7 @@
 </div>
 {#if $states.stage == STAGE_SEPERATED}
     <div>
-        <p>Chọn thí sinh khởi động</p>
+        <h1>Chọn thí sinh khởi động</h1>
         <div class="bgroup-hor">
             <button
                 on:click={setPlayerSeperate("")}
@@ -127,7 +141,7 @@
         </div>
     </div>
     <div>
-        <p>Câu hỏi cho thí sinh</p>
+        <h1>Câu hỏi cho thí sinh</h1>
         <div class="setq">
             <button on:click={setQuestion(-1)} class="btn smol" class:accent={$states.qid == -1}>
                 prepare
@@ -147,7 +161,7 @@
     </div>
 {:else if $states.stage == STAGE_JOINT}
     <div>
-        <p>Câu hỏi phần thi chung</p>
+        <h1>Câu hỏi phần thi chung</h1>
         <div class="setq">
             <button on:click={setQuestion(-1)} class="btn smol" class:accent={$states.qid == -1}>
                 prepare
@@ -170,6 +184,10 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+    }
+
+    h1 {
+        font-weight: bold;
     }
 
     p {

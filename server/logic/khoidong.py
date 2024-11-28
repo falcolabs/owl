@@ -119,7 +119,11 @@ class KhoiDong(penguin.PartImplementation):
             return
         q = self.show.qbank.get_question(qid)
         self.current_question_content.set(q.prompt)
-        self.display_qid.set(str((qid % 6) + 1))
+        if self.stage.get() == STAGE_SEPERATED:
+            self.display_qid.set(str((qid % 6) + 1))
+        else:
+            self.display_qid.set(self.question_placement[STAGE_JOINT].index(qid) + 1)  # type: ignore[reportAttributeAccessIssue]
+
         self.max_time.set(q.time)
         self.plusminus.set({"add": [q.score], "rem": [q.score_false]})
 

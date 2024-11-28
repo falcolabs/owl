@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { type Connection, type StateManager, CallProcedure } from "$lib";
+    import { type Connection, type StateManager, CallProcedure, GameMaster } from "$lib";
     import Load from "../Load.svelte";
     import ScorePillSmall from "../ScorePillSmall.svelte";
+    import SetScoreOf from "./SetScoreOf.svelte";
 
     export let conn: Connection;
+    export let gm: GameMaster;
     export let states: StateManager;
-
-    console.log($states, $states.plusminus);
 </script>
 
 <div class="bar">
@@ -32,6 +32,8 @@
                         name={player.name}
                         score={player.score}
                     />
+                    <SetScoreOf {conn} identifier={player.identifier} players={gm.players} {states}/>
+
                     {#each $states.plusminus.add as i}
                         <button
                             class="btn"

@@ -37,12 +37,12 @@ class VCNV(penguin.PartImplementation):
             "puzzle_data",
             {
                 "normal": [
-                    {"status": "hidden", "content": "mrbeast", "tag": "1"},
-                    {"status": "hidden", "content": "trump", "tag": "2"},
-                    {"status": "hidden", "content": "ohio", "tag": "3"},
-                    {"status": "hidden", "content": "しかせんべい", "tag": "4"},
+                    {"status": "hidden", "content": "", "tag": "1"},
+                    {"status": "hidden", "content": "", "tag": "2"},
+                    {"status": "hidden", "content": "", "tag": "3"},
+                    {"status": "hidden", "content": "", "tag": "4"},
                 ],
-                "center": {"status": "hidden", "content": "mrbeast", "tag": "M"},
+                "center": {"status": "hidden", "content": "", "tag": "M"},
             },
         )
         self.prompt = self.rpc.use_state(
@@ -54,7 +54,7 @@ class VCNV(penguin.PartImplementation):
             "highlighted", []
         )
         self.plusminus = self.rpc.use_state("plusminus", {"add": [10], "rem": [0]})
-        self.key_length = self.rpc.use_state("key_length", 69)
+        self.key_length = self.rpc.use_state("key_length", config().game.vcnv.keyLength)
         self.image = self.rpc.use_state(
             "image", utils.vcnv.get_imgdata(["1", "2", "3", "4", "M"])
         )
@@ -109,6 +109,38 @@ class VCNV(penguin.PartImplementation):
             {"time": 30, "name": p.identifier, "content": "", "verdict": False}
             for p in show.players.get()
         ]
+
+        self.puzzle_data.set(
+            {
+                "normal": [
+                    {
+                        "status": "hidden",
+                        "content": self.show.qbank.get_question(36).key,
+                        "tag": "1",
+                    },
+                    {
+                        "status": "hidden",
+                        "content": self.show.qbank.get_question(37).key,
+                        "tag": "2",
+                    },
+                    {
+                        "status": "hidden",
+                        "content": self.show.qbank.get_question(38).key,
+                        "tag": "3",
+                    },
+                    {
+                        "status": "hidden",
+                        "content": self.show.qbank.get_question(39).key,
+                        "tag": "4",
+                    },
+                ],
+                "center": {
+                    "status": "hidden",
+                    "content": self.show.qbank.get_question(36).key,
+                    "tag": "M",
+                },
+            },
+        )
 
     def submit_answer(
         self,

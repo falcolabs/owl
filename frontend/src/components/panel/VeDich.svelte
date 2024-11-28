@@ -1,8 +1,6 @@
 <script lang="ts">
     import { Connection, Peeker, type StateManager, CallProcedure } from "$lib";
-    import type { Timer, Player } from "client";
-    import { writable, readable, type Readable, type Writable } from "svelte/store";
-    import SubmitJudger from "./SubmitJudger.svelte";
+    import { scoreOf } from "$lib/globals";
     import Load from "../Load.svelte";
     export let states: StateManager;
     export let conn: Connection;
@@ -14,7 +12,7 @@
 <Load until={$states.package !== undefined}>
     <div class="vertical">
         <div class="vertical">
-            <h1>GameMaster Controls</h1>
+            <h1>Quản trò</h1>
             <button
                 class="btn"
                 on:click={async () => {
@@ -42,8 +40,23 @@
                         "stage",
                         $states.stage == STAGE_CHOOSE ? STAGE_COMPETE : STAGE_CHOOSE
                     );
-                }}
-                >{$states.stage == STAGE_CHOOSE ? "Màn hình Chọn gói" : "Màn hình Phần thi"}</button
+                }}>{$states.stage == STAGE_CHOOSE ? "Chọn gói" : "Câu hỏi"}</button
+            >
+            <button
+                class="btn"
+                on:click={async () => {
+                    await states.setString("bell_player", "");
+                }}>Xóa chuông</button
+            >
+            <button
+                class="btn"
+                class:accent={$states.allow_bell}
+                on:click={async () => {
+                    await states.setBoolean("allow_bell", !$states.allow_bell);
+                    setTimeout(async () => {
+                        await states.setBoolean("allow_bell", false);
+                    }, 5000);
+                }}>{$states.allow_bell ? "Chuông bật (tự tắt)" : "Chuông tắt"}</button
             >
             {#if $states.media != null}
                 <button
@@ -80,35 +93,30 @@
             </div>
             {#if $states.current_player_username !== ""}
                 <div class="vertical">
-                    {#if $states.stage == STAGE_CHOOSE}
-                        <h1>Gói câu hỏi cho {$states.current_player_username}:</h1>
-                        {#each [0, 1, 2] as i}
-                            <div class="horizontal smolmargin">
-                                {#each [0, 20, 30] as score}
-                                    <button
-                                        class="btn smol nomargin"
-                                        class:accent={$states.package[
-                                            $states.current_player_username
-                                        ][i] == score}
-                                        on:click={async () => {
-                                            await conn.send(
-                                                CallProcedure.name("vedich::set_choice")
-                                                    .string(
-                                                        "target",
-                                                        $states.current_player_username
-                                                    )
-                                                    .number("slot", i)
-                                                    .number("to", score)
-                                                    .build()
-                                            );
-                                        }}>{score != 0 ? score : "unset"}</button
-                                    >
-                                {/each}
-                            </div>
-                        {/each}
-                    {:else}
-                        <h1>Media Controls</h1>
-                    {/if}
+                    <h1>Gói câu hỏi cho {$states.current_player_username}:</h1>
+                    {#each [0, 1, 2] as i}
+                        <div class="horizontal smolmargin">
+                            {#each [0, 20, 30] as score}
+                                <button
+                                    class="btn smol nomargin"
+                                    class:accent={$states.package[$states.current_player_username][
+                                        i
+                                    ] == score}
+                                    on:click={async () => {
+                                        await conn.send(
+                                            CallProcedure.name("vedich::set_choice")
+                                                .string("target", $states.current_player_username)
+                                                .number("slot", i)
+                                                .number("to", score)
+                                                .build()
+                                        );
+                                    }}>{score != 0 ? score : "unset"}</button
+                                >
+                            {/each}
+                        </div>
+                    {/each}
+                    <!-- TODO -->
+                    <!-- <h1>Media Controls</h1> -->
                 </div>
                 <div class="horizontal big-gap">
                     <div class="vertical">
@@ -125,7 +133,9 @@
                                     class="btn smol nomargin-horizontal"
                                     class:accent={qid == $states.qid && qid != -1}
                                     on:click={async () => await states.setNumber("qid", qid)}
-                                    >{qid == -1 ? "unset" : qid}</button
+                                    ><span class="bold">{qid == -1 ? "unset" : qid}</span>{qid == -1
+                                        ? ""
+                                        : `: ${scoreOf[qid]}đ`}</button
                                 >
                             {/each}
                         </div>
@@ -178,6 +188,10 @@
         border-radius: var(--radius-1);
         transition: 100ms ease-in-out;
         width: fit-content;
+    }
+
+    .bold {
+        font-weight: bold;
     }
 
     .btn:hover {

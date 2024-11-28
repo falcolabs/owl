@@ -4,6 +4,7 @@
     import { writable } from "svelte/store";
     import PillTag from "../PillTag.svelte";
     import Load from "../Load.svelte";
+    import { scoreOf } from "$lib/globals";
     import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import ScoreBar from "../ScoreBar.svelte";
     import TimerBar from "../TimerBar.svelte";
@@ -45,7 +46,10 @@
                         <div class="qnum">
                             <PillTag
                                 text={`Câu ${$states.placement[$states.current_player_username].indexOf($states.qid) + 1}` +
-                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "")}
+                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "") +
+                                    " · " +
+                                    `${scoreOf[$states.qid]}` +
+                                    "đ"}
                             />
                         </div>
                         <p class="prompt">{$states.prompt}</p>
@@ -67,10 +71,10 @@
                     await conn.send(
                         CallProcedure.name("vedich::bell")
                             .string("token", gm.authToken)
-                            .number("timeMs", Date.now())
+                            .string("clientTime", `${Date.now()}`)
                             .build()
                     );
-                }}>Chuông trả lời CNV</button
+                }}>Chuông trả lời</button
             >
             <ScoreBar {states} />
         </div>

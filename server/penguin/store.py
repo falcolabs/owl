@@ -1,6 +1,12 @@
 import typing
+import tinydb
 
 T = typing.TypeVar("T")
+DB = tinydb.TinyDB("../gamedata.json")
+# Database scheme:
+# Document 1: session storage (player -> token)
+# Document 2: game state (score, current question, current part, etc)
+# Document 3: logging
 
 
 class Readable(typing.Generic[T]):

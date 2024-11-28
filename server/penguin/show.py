@@ -9,7 +9,6 @@ from .session import SessionManager
 from .store import Writable
 from utils.crypt import gen_token
 
-
 from config import config
 
 SESSION_MAN = SessionManager()
@@ -57,6 +56,30 @@ class PartImplementation:
 LOOP = asyncio.new_event_loop()
 
 
+def process_authentication(
+    session_manager: SessionManager,
+    packet: engine.Packet.CommenceSession,
+    handle: engine.IOHandle,
+) -> engine.Packet | None:
+    output = None
+    for detail in config().credentials:
+        if (detail.username, detail.accessKey) == (
+            packet.data.username,
+            packet.data.access_key,
+        ):
+            token = session_manager.link_player(detail.username, handle)
+            return engine.Packet.AuthStatus(
+                engine.AuthenticationStatus(True, "Authenticated.", token)
+            )
+        else:
+            output = engine.Packet.AuthStatus(
+                engine.AuthenticationStatus(
+                    False, "Authentication failed: invalid credentials.", ""
+                )
+            )
+    return output
+
+
 @final
 class Show:
     async def handle_webreq(self, req: engine.RawRequest):
@@ -74,24 +97,9 @@ class Show:
         response: engine.Packet | None = None
         if not isinstance(req.content, engine.Packet.Query):
             if isinstance(req.content, engine.Packet.CommenceSession):
-                for detail in config().credentials:
-                    if (detail.username, detail.accessKey) == (
-                        req.content.data.username,
-                        req.content.data.access_key,
-                    ):
-                        token = self.session_manager.link_player(
-                            detail.username, req.handle
-                        )
-                        response = engine.Packet.AuthStatus(
-                            engine.AuthenticationStatus(True, "Authenticated.", token)
-                        )
-                        break
-                else:
-                    response = engine.Packet.AuthStatus(
-                        engine.AuthenticationStatus(
-                            False, "Authentication failed: invalid credentials.", ""
-                        )
-                    )
+                response = process_authentication(
+                    self.session_manager, req.content, req.handle
+                )
             if isinstance(req.content, engine.Packet.Unknown):
                 if req.content.data == "CONNECTION INITIATED":
                     self.session_manager.register_session(req.handle)

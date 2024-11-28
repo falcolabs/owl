@@ -50,9 +50,13 @@ class SessionManager:
         remove_list = []
         for ident, ptok in self.player_map.items():
             for h, stok in self.active_sessions.items():
-                if stok == ptok and h.addr == handle.addr:
-                    remove_list.append((ident, handle))
-                    break
+                try:
+                    if stok == ptok and h.addr == handle.addr:
+                        remove_list.append((ident, handle))
+                        break
+                # Random rust borrow checker error may occur. This is not too important.
+                except Exception as e:
+                    engine.log_warning(str(e))
 
         for ident, handle in remove_list:
             try:

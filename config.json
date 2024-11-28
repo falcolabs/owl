@@ -1,7 +1,7 @@
 {
-  "listenOn": "localhost:6942",
+  "listenOn": "192.168.128.36:6942",
   "devServer": {
-    "host": "localhost",
+    "host": "192.168.128.36",
     "port": 6699
   },
   "serveDir": "dist",
@@ -33,6 +33,7 @@
   ],
   "game": {
     "vcnv": {
+      "keyLength": 10,
       "qualityPercentage": 85,
       "keyResolution": {
         "width": 784,

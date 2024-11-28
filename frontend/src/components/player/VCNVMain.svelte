@@ -4,6 +4,7 @@
     import { CallProcedure, GameMaster, type Connection, type StateManager } from "$lib";
     import { writable, type Writable } from "svelte/store";
     import TimerBar from "../TimerBar.svelte";
+    import { onMount } from "svelte";
 
     export let conn: Connection;
     export let gm: GameMaster;
@@ -12,14 +13,14 @@
     let answer: string;
     let timer = states.timerStore;
     let timeElapsed = 30;
-
+    let inputBox: HTMLInputElement;
     let lines = writable(
         new Map<string, Writable<{ status: string; content: string; tag: string }>>()
     );
     states.subscribe((s) => {
-        console.log("checking")
+        console.log("checking");
         if (s.puzzle_data == undefined) return;
-        console.log("passed checkpoint1",s);
+        console.log("passed checkpoint1", s);
         if (s.final_hint) {
             if ($lines.size != 1) {
                 console.log("M");
@@ -46,6 +47,17 @@
     });
 
     let hasMine = false;
+
+    onMount(() => {
+        inputBox.focus();
+        timer.subscribe((t) => {
+            try {
+                if (!t.isPaused()) {
+                    inputBox.focus();
+                }
+            } catch (e) {}
+        });
+    });
 
     states.subscribe((s: any) => {
         if (s.answers === undefined) {
@@ -106,6 +118,7 @@
                     <input
                         class="inp"
                         bind:value={answer}
+                        bind:this={inputBox}
                         type="text"
                         placeholder="Nhập đáp án"
                         spellcheck="false"
