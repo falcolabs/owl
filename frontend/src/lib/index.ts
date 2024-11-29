@@ -3,6 +3,7 @@
 export const ORG_NAME: string = "Đoàn trường THPT Chuyên Bắc Ninh · THPT Chuyên Bắc Ninh";
 export const SHOW_NAME: string = "Đường Đua Xanh";
 export const SUBTEXT: string = "Mùa 5, Bán kết 1"
+export const ANTICHEAT_ENABLED = false;
 
 import type { PacketType, Packet, _PacketValue, _PacketVariant } from "client";
 type CBHandle<T extends PacketType> = (packet: Packet<T>) => void

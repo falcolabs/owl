@@ -1,4 +1,5 @@
-import { Peeker, Connection } from "$lib";
+import { Peeker, Connection, CallProcedure } from "$lib";
+import type { AvailableSound } from "client";
 import { PlayerManager } from "$lib/player";
 import { StateManager } from "$lib/state";
 import { writable, type Writable } from "svelte/store";
@@ -73,6 +74,14 @@ export class GameMaster {
                 accessKey: accessKey,
             })
         );
+    }
+
+    async play_sound(sound_name: AvailableSound) {
+        await this.connection.send(CallProcedure.name("engine::play_sound").string("soundName", sound_name).build());
+    }
+
+    async timer_operation(operation: "start" | "pause" | "reset") {
+        await this.connection.send(CallProcedure.name("engine::timer_operation").string("operation", operation).build());
     }
 
     async updateAll() {

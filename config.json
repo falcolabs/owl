@@ -1,7 +1,7 @@
 {
-  "listenOn": "192.168.128.36:6942",
+  "listenOn": "localhost:6942",
   "devServer": {
-    "host": "192.168.128.36",
+    "host": "localhost",
     "port": 6699
   },
   "serveDir": "dist",
@@ -11,24 +11,24 @@
   "tickSpeed": 60,
   "credentials": [
     {
+      "fullName": "Tùng Lâm",
+      "username": "tunglam",
+      "accessKey": "ddxm5bk1"
+    },
+    {
       "fullName": "Bảo Ngọc",
       "username": "baongoc",
-      "accessKey": "1234"
+      "accessKey": "ddxm5bk1"
     },
     {
-      "fullName": "Thùy An",
-      "username": "thuyan",
-      "accessKey": "1234"
+      "fullName": "Anh Tú",
+      "username": "anhtu",
+      "accessKey": "ddxm5bk1"
     },
     {
-      "fullName": "Đại Phong",
-      "username": "daiphong",
-      "accessKey": "1234"
-    },
-    {
-      "fullName": "Test Player",
-      "username": "1",
-      "accessKey": "1"
+      "fullName": "Trí Dũng",
+      "username": "tridung",
+      "accessKey": "ddxm5bk1"
     }
   ],
   "game": {

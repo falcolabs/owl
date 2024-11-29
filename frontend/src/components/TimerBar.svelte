@@ -13,11 +13,11 @@
 
     let progress = writable(1);
 
-    let timer = states.timerStore;
+    let time = states.time;
     onMount(() => {
         setInterval(() => {
             let max = $states.max_time;
-            $progress = (max - $timer.elapsedSecs()) / max;
+            $progress = (max - $time) / max;
         }, 100);
     });
 </script>

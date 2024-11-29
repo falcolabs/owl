@@ -26,4 +26,4 @@
 </div>
 
 <!-- Right click catcher -->
-<svelte:window on:contextmenu|preventDefault={() => {}} />
+<svelte:window on:contextmenu|preventDefault={() => {}} on:select|preventDefault={() => {}} />

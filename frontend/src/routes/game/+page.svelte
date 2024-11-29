@@ -1,5 +1,12 @@
 <script lang="ts">
-    import { Peeker, Connection, GameMaster, PlayerManager, StateManager } from "$lib";
+    import {
+        Peeker,
+        Connection,
+        GameMaster,
+        PlayerManager,
+        StateManager,
+        ANTICHEAT_ENABLED
+    } from "$lib";
     import { type Readable } from "svelte/store";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
@@ -12,6 +19,7 @@
     import VeDich from "../../components/player/VeDich.svelte";
     import TieBreaker from "../../components/player/TieBreaker.svelte";
     import Tkd from "../../components/display/TKD.svelte";
+    import AntiCheat from "../../components/AntiCheat.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -33,23 +41,28 @@
     });
 </script>
 
-<Load until={gm !== undefined && $states.__init}>
-    {#if $states.available_parts[$states.current_part] == "standby"}
-        <Standby />
-    {:else if $states.available_parts[$states.current_part] == "auth"}
-        <!-- TODO - SECURITY: make this login portal always show up when unauthenticated -->
-        <AuthPlayer {gm} />
-    {:else if $states.available_parts[$states.current_part] == "khoidong"}
-        <KhoiDong {conn} {gm} {states} {players} />
-    {:else if $states.available_parts[$states.current_part] == "vcnv"}
-        <Vcnv {conn} {gm} {states} {players} />
-    {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-        <TangToc {conn} {gm} {states} {players} />
-    {:else if $states.available_parts[$states.current_part] == "vedich"}
-        <VeDich {conn} {gm} {states} {players} />
-    {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
-        <TieBreaker {conn} {gm} {states} {players} />
-    {:else if $states.available_parts[$states.current_part] == "tkd"}
-        <Tkd {states} />
-    {/if}
-</Load>
+<div class:noselect={ANTICHEAT_ENABLED}>
+    <Load until={gm !== undefined && $states.__init}>
+        {#if $states.available_parts[$states.current_part] == "standby"}
+            <Standby />
+        {:else if $states.available_parts[$states.current_part] == "auth"}
+            <!-- TODO - SECURITY: make this login portal always show up when unauthenticated -->
+            <AuthPlayer {gm} />
+        {:else if $states.available_parts[$states.current_part] == "khoidong"}
+            <KhoiDong {conn} {gm} {states} {players} />
+        {:else if $states.available_parts[$states.current_part] == "vcnv"}
+            <Vcnv {conn} {gm} {states} {players} />
+        {:else if $states.available_parts[$states.current_part] == "tangtoc"}
+            <TangToc {conn} {gm} {states} {players} />
+        {:else if $states.available_parts[$states.current_part] == "vedich"}
+            <VeDich {conn} {gm} {states} {players} />
+        {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
+            <TieBreaker {conn} {gm} {states} {players} />
+        {:else if $states.available_parts[$states.current_part] == "tkd"}
+            <Tkd {states} />
+        {/if}
+        {#if ANTICHEAT_ENABLED}
+            <AntiCheat url="" data={{}} />
+        {/if}
+    </Load>
+</div>

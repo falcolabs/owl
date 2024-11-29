@@ -23,6 +23,8 @@ class TKD(penguin.PartImplementation):
         handle: engine.IOHandle,
         addr: str,
     ):
+        if len(self.org_list) == 0:
+            return
         ktr = list(self.org_list.keys())[0]
         val = self.org_list.pop(ktr)
         a = self.appear.get()

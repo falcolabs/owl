@@ -24,7 +24,6 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
-    let timerStore = states.timerStore;
     export let conn: Connection;
     export let gm: GameMaster;
     export let players: PlayerManager;
@@ -58,28 +57,24 @@
                 if (!s.media_status.playbackPaused) {
                     if (videoElement.paused) {
                         if (videoElement.currentTime == 0) {
-                            let t = new Peeker.Timer();
-                            t.resume();
-                            states.setTimer(t);
+                            // gm.timer_operation("reset");
                         }
-                        videoElement.muted = true;
                         await videoElement.play();
-                        $timerStore.resume();
+                        // await gm.timer_operation("start");
 
                         videoElement.onended = (ev) => {
-                            states.setTimer(new Peeker.Timer());
-                            states.setObject("media_status", {
-                                visible: true,
-                                playbackPaused: true
-                            });
-                            videoProgress.set(0);
+                            // gm.timer_operation("reset");
+                            // states.setObject("media_status", {
+                            //     visible: true,
+                            //     playbackPaused: true
+                            // });
+                            // videoProgress.set(0);
                         };
                     }
                 } else {
                     videoElement?.pause();
-                    $timerStore.pause();
+                    // await gm.timer_operation("pause");
                 }
-                states.setTimer($timerStore);
             }
             previousState = s.media_status.playbackPaused;
         });

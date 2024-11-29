@@ -12,24 +12,27 @@
     export let conn: Connection;
     export let players: Readable<Map<string, Player>>;
 
-    let question_placement: Writable<any> = writable([69, 70, 71]);
-
-    onMount(async () => {
-        let player_list = $states.engine_players;
-        if (player_list.length === 0) {
-            return;
-        }
-    });
+    let question_placement: Writable<any> = writable([70, 71, 72]);
 
     const incrementQuestion = async () => {
         if ($states.qid == $question_placement.at(-1)) {
             await setQuestion(-1)();
             return;
         }
+        setTimeout(async () => {
+            await states.setBoolean("allow_bell", true);
+        }, 2000);
         await conn.send(CallProcedure.name("tiebreaker::next_question").build());
     };
 
-    const setQuestion = (qid: number) => async () => await states.setNumber("qid", qid);
+    const setQuestion = (qid: number) => async () => {
+        await states.setNumber("qid", qid);
+        if (qid != -1) {
+            setTimeout(async () => {
+                await states.setBoolean("allow_bell", true);
+            }, 2000);
+        }
+    };
 </script>
 
 <div>
@@ -58,6 +61,13 @@
         >
             Xóa chuông
         </button>
+        <button
+            class="btn"
+            class:accent={$states.allow_bell}
+            on:click={async () => {
+                states.setBoolean("allow_bell", !$states.allow_bell);
+            }}>{$states.allow_bell ? "Chuông bật" : "Chuông tắt"}</button
+        >
     </div>
 </div>
 

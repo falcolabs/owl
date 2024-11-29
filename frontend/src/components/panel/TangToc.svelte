@@ -4,10 +4,11 @@
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import SubmitJudger from "./SubmitJudger.svelte";
     import Load from "../Load.svelte";
+    export let gm: GameMaster;
     export let states: StateManager;
     export let conn: Connection;
 
-    let timer = states.timerStore;
+    let time = states.time;
 </script>
 
 <Load until={$states.media !== undefined}>
@@ -47,11 +48,10 @@
                                     let status = $states.media_status;
                                     status.playbackPaused = !status.playbackPaused;
                                     if (status.playbackPaused) {
-                                        $timer.pause();
+                                        await gm.timer_operation("pause");
                                     } else {
-                                        $timer.resume();
+                                        await gm.timer_operation("start");
                                     }
-                                    await states.setTimer($timer);
                                     await states.setObject("media_status", status);
                                 }}
                                 >{$states.media_status.playbackPaused
@@ -67,7 +67,12 @@
             <div class="vertical big-gap">
                 <h1>Question Controls</h1>
                 <div class="horizontal">
-                    {#each [41, 42, 43, 44] as qi}
+                    <button
+                        class="btn smol nomargin-horizontal"
+                        class:accent={$states.qid == -1}
+                        on:click={async () => await states.setNumber("qid", -1)}>unset</button
+                    >
+                    {#each [42, 43, 44, 45] as qi}
                         <button
                             class="btn smol code"
                             class:accent={$states.qid == qi}

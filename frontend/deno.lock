@@ -12,6 +12,7 @@
     "npm:eslint-plugin-svelte@^2.44.0": "2.46.0_eslint@9.14.0_svelte@4.2.19_postcss@8.4.47",
     "npm:eslint@^9.11.0": "9.14.0",
     "npm:globals@^15.9.0": "15.12.0",
+    "npm:idb@8": "8.0.0",
     "npm:path@~0.12.7": "0.12.7",
     "npm:prettier-plugin-svelte@^3.2.6": "3.2.7_prettier@3.3.3_svelte@4.2.19",
     "npm:prettier@^3.3.3": "3.3.3",
@@ -991,6 +992,9 @@
     "has-flag@4.0.0": {
       "integrity": "sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ=="
     },
+    "idb@8.0.0": {
+      "integrity": "sha512-l//qvlAKGmQO31Qn7xdzagVPPaHTxXx199MhrAFuVBTPqydcPYBWjkrbv4Y0ktB+GmWOiwHl237UUOrLmQxLvw=="
+    },
     "ignore@5.3.2": {
       "integrity": "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="
     },
@@ -1710,6 +1714,7 @@
         "npm:eslint-plugin-svelte@^2.44.0",
         "npm:eslint@^9.11.0",
         "npm:globals@^15.9.0",
+        "npm:idb@8",
         "npm:path@~0.12.7",
         "npm:prettier-plugin-svelte@^3.2.6",
         "npm:prettier@^3.3.3",

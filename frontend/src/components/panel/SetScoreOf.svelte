@@ -7,31 +7,19 @@
     export let players: PlayerManager;
     export let states: StateManager;
     let inp: number;
-
-    const refreshScore = () => {
-        // @ts-ignore
-        inp = null;
-        // inp = PlayerManager.getFromName(identifier, $states.engine_players).score;
-    };
-
-    onMount(() => {
-        states.subscribe(() => {
-            refreshScore();
-        });
-    });
 </script>
 
 <form
     on:submit={async () => {
+        if (inp == null || inp == undefined) return;
         await conn.send(
             CallProcedure.name("engine::set_score")
                 .string("target", identifier)
                 .number("value", inp)
                 .build()
         );
-        setTimeout(() => {
-            refreshScore();
-        }, 200);
+        // @ts-ignore
+        inp = undefined;
     }}
 >
     <input type="number" class="scoreset" bind:value={inp} />

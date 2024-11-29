@@ -306,7 +306,8 @@ def ws_task(
     listen_on: str,
     serve_on: str,
     static_dir: str,
-    call_hook: Callable[[RawRequest], None],
+    tick_speed: int,
+    tick_hook: Callable[[bool, Literal[""] | RawRequest], None],
 ): ...
 
 class RawRequest:
@@ -543,6 +544,56 @@ class Query(ABC):
     class Log(Query):
         index: int
         def __init__(self): ...
+
+AvailableSound = (
+    Literal["op-introduction"]
+    | Literal["op-introducecontestants"]
+    | Literal["common-startsection"]
+    | Literal["common-dotdotdot"]
+    | Literal["common-scoresum"]
+    | Literal["tongket-4th"]
+    | Literal["tongket-3rd"]
+    | Literal["tongket-2nd"]
+    | Literal["tongket-1st"]
+    | Literal["tongket-award"]
+    | Literal["khoidong-start"]
+    | Literal["khoidong-ready"]
+    | Literal["khoidong-3secs"]
+    | Literal["khoidong-bgm"]
+    | Literal["khoidong-correct"]
+    | Literal["khoidong-incorrect"]
+    | Literal["khoidong-bell"]
+    | Literal["khoidong-complete"]
+    | Literal["vcnv-start"]
+    | Literal["vcnv-questionbox"]
+    | Literal["vcnv-selectrow"]
+    | Literal["vcnv-showquestion"]
+    | Literal["vcnv-15secs"]
+    | Literal["vcnv-showanswers"]
+    | Literal["vcnv-correct"]
+    | Literal["vcnv-incorrect"]
+    | Literal["vcnv-bell"]
+    | Literal["vcnv-bellcorrect"]
+    | Literal["tangtoc-start"]
+    | Literal["tangtoc-revealquestion"]
+    | Literal["tangtoc-10secs"]
+    | Literal["tangtoc-20secs"]
+    | Literal["tangtoc-30secs"]
+    | Literal["tangtoc-40secs"]
+    | Literal["tangtoc-showanswers"]
+    | Literal["tangtoc-correct"]
+    | Literal["tangtoc-wrong"]
+    | Literal["vedich-start"]
+    | Literal["vedich-onstage"]
+    | Literal["vedich-packagechoice"]
+    | Literal["vedich-confirmchoice"]
+    | Literal["vedich-15secs"]
+    | Literal["vedich-20secs"]
+    | Literal["vedich-poll"]
+    | Literal["vedich-bell"]
+    | Literal["vedich-correct"]
+    | Literal["vedich-complete"]
+)
 
 class Color:
     BLACK: Color

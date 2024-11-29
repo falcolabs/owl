@@ -17,29 +17,25 @@
     let conn: Connection;
     let gm: GameMaster;
     // @ts-ignore
-    let timer: Writable<Timer> = writable({ elapsedSecs: () => 6.9 });
     let players: Readable<Map<string, Player>> = readable(new Map());
     let elapsed = writable("0.00");
     let states: StateManager;
+    let time: Writable<number>;
 
     onMount(async () => {
         conn = await Connection.create();
         gm = await GameMaster.create(conn);
         states = gm.states;
         players = gm.players;
-        timer = states.timerStore;
+        time = states.time;
 
         setInterval(async () => {
-            let e = $timer.elapsedSecs();
+            let e = $time;
             if ($states.max_time !== undefined) {
                 if ($states.max_time - e <= 0) {
                     $elapsed = "0";
-                    if (!$timer.isPaused()) {
-                        await conn.send(
-                            CallProcedure.name("engine::timer_operation")
-                                .string("operation", "pause")
-                                .build()
-                        );
+                    if (!$states.timer_paused) {
+                        await gm.timer_operation("pause");
                     }
                 } else {
                     $elapsed = ($states.max_time - e).toFixed(2);
@@ -63,14 +59,14 @@
             <h1>Trash control panel</h1>
             <div class="horizontal">
                 <div>
-                    <TimerControls {elapsed} timer={states.timerStore} {conn} />
+                    <TimerControls {elapsed} {gm} {states} {conn} />
                     <div class="partcontrol">
                         {#if $states.available_parts[$states.current_part] == "khoidong"}
                             <KhoiDong {states} {conn} {players} />
                         {:else if $states.available_parts[$states.current_part] == "vcnv"}
                             <Vcnv {states} {conn} />
                         {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-                            <TangToc {states} {conn} />
+                            <TangToc {states} {conn} {gm} />
                         {:else if $states.available_parts[$states.current_part] == "vedich"}
                             <VeDich {states} {conn} />
                         {:else if $states.available_parts[$states.current_part] == "tiebreaker"}

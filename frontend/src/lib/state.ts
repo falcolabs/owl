@@ -8,7 +8,7 @@ export class StateManager implements Readable<any> {
     connection!: Connection
     listeners!: Map<string, (value: GameState) => void>
     updateListeners!: ((state: { [key: string]: AcceptableValue }) => void)[]
-    timerStore!: Writable<Timer>
+    time!: Writable<number>;
 
     public store!: any /* { [key: string]: AcceptableValue }*/
     public onready: (store: { [key: string]: AcceptableValue }) => void = (_) => { }
@@ -28,8 +28,7 @@ export class StateManager implements Readable<any> {
         } else {
             def = Peeker.Timer.from(obj.store.timer);
         }
-        obj.timerStore = writable(def);
-
+        obj.time = writable(0);
         connection.on(Peeker.PacketType.StateList, (packet) => {
             packet.value.forEach((state) => {
                 obj.handleState(state)
@@ -54,8 +53,8 @@ export class StateManager implements Readable<any> {
             }
         });
         this.store[state.name] = JSON.parse(state.data.data);
-        if (state.name == "timer") {
-            this.timerStore.set(Peeker.Timer.from(this.store.timer))
+        if (state.name == "time") {
+            this.time.set(this.store.time)
         }
     }
 
@@ -130,9 +129,5 @@ export class StateManager implements Readable<any> {
 
     async setBoolean(name: string, t: boolean) {
         await this.connection.send(Push.boolean(name, t));
-    }
-
-    async setTimer(t: Timer) {
-        await this.connection.send(Push.create("timer", JSON.parse(t.pack()), Peeker.PortableType.OBJECT));
     }
 }

@@ -9,7 +9,7 @@
     export let states: StateManager;
     export let players: PlayerManager;
 
-    const onKeyDown = async (_: KeyboardEvent) => {
+    const onKeyDown = async (_) => {
         await conn.send(
             CallProcedure.name("tiebreaker::ring_bell").string("token", gm.authToken!).build()
         );
@@ -34,10 +34,11 @@
                 <TimerBar {states} />
             </div>
         </div>
-        <h1 class="bellnotify">Bấm bất kỳ phím nào để rung chuông</h1>
+        <h1 class="bellnotify">Click chuột hay bấm bất kỳ phím nào để rung chuông</h1>
     </div>
 </div>
-<svelte:window on:keydown|preventDefault={onKeyDown} />
+<svelte:window on:keydown|preventDefault={onKeyDown} on:mousedown={onKeyDown} />
+
 
 <style>
     .bg {

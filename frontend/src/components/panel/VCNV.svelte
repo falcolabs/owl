@@ -10,6 +10,8 @@
     const isTile = (tile: string, s: string): boolean => {
         if (tile == "M") {
             return $states.puzzle_data.center.status == s;
+        } else if (tile == "K") {
+            return $states.puzzle_data.key.status == s;
         } else {
             for (let td of $states.puzzle_data.normal) {
                 if (td["tag"] == tile) {
@@ -49,7 +51,7 @@
             <div class="vertical big-gap">
                 <h1>Selected Row</h1>
                 <div class="vertical">
-                    {#each [...$states.puzzle_data.normal.map(extractTag), "M"] as r}
+                    {#each [...$states.puzzle_data.normal.map(extractTag), "M", "K"] as r}
                         <div class="horizontal">
                             <div class="btn disabled-btn smol code">
                                 {r}

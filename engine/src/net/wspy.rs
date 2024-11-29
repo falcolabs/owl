@@ -19,7 +19,7 @@ use tokio::sync::Mutex;
 use tower::util::ServiceExt;
 use tower_http::services::ServeDir;
 
-pub type MessageHandler = std::sync::mpsc::Sender<RawRequest>;
+pub type MessageHandler = std::sync::mpsc::Sender<Notifier>;
 /// Starts the web service. **This function contains
 /// an intentional memory leak.**
 ///
@@ -98,6 +98,11 @@ async fn ws_handler(
     ws.on_upgrade(move |socket| handle_socket(socket, addr, call_hook))
 }
 
+pub enum Notifier {
+    RawRequest(RawRequest),
+    ExecuteTick,
+}
+
 #[pyclass]
 #[derive(Clone)]
 pub struct RawRequest {
@@ -152,7 +157,7 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
     let sender = Arc::new(Mutex::new(s));
     let receiver = Arc::new(Mutex::new(r));
     call_hook
-        .send(RawRequest {
+        .send(Notifier::RawRequest(RawRequest {
             handle: IOHandle {
                 sender: Arc::clone(&sender),
                 receiver: Arc::clone(&receiver),
@@ -162,13 +167,13 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
             content: Packet::Unknown {
                 data: "CONNECTION INITIATED".to_string(),
             },
-        })
+        }))
         .unwrap();
 
     while let Some(Ok(msg)) = receiver.lock().await.next().await {
         let content = msg.to_text().expect("Error extracting text from Message");
         if call_hook
-            .send(RawRequest {
+            .send(Notifier::RawRequest(RawRequest {
                 handle: IOHandle {
                     sender: Arc::clone(&sender),
                     receiver: Arc::clone(&receiver),
@@ -178,7 +183,7 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
                 content: serde_json::from_str(content).unwrap_or(Packet::Unknown {
                     data: content.to_string(),
                 }),
-            })
+            }))
             .is_err()
         {
             logging::error("Failed to send RawRequest")
@@ -200,7 +205,7 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
     }
 
     call_hook
-        .send(RawRequest {
+        .send(Notifier::RawRequest(RawRequest {
             handle: IOHandle {
                 sender: Arc::clone(&sender),
                 receiver: Arc::clone(&receiver),
@@ -210,6 +215,6 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHan
             content: Packet::Unknown {
                 data: "CONNECTION HALTED".to_string(),
             },
-        })
+        }))
         .unwrap();
 }

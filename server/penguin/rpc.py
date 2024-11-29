@@ -197,18 +197,23 @@ class RPCManager:
             name=name,
             data=pvalue,
         )
+
         # engine.log_debug(f"(Logic) Broadcasting {name} = JSON(' {pvalue.json} ')")
         # original_type = self.orgtype_map[name]
         # if original_type is engine.Timer:
         #     pass
         # else:
         #     self.states_writable[name].set(self.deser_map[name](pvalue))
+        async def a():
+            await SESSION_MAN.broadcast(engine.Packet.State(self.states[name]).pack())
 
-        TASK_POOL.append(
-            LOOP.create_task(
-                SESSION_MAN.broadcast(engine.Packet.State(self.states[name]).pack())
-            )
+        asyncio.run_coroutine_threadsafe(
+            a(),
+            LOOP,
         )
+
+    async def sync_state(self, name: str):
+        await SESSION_MAN.broadcast(engine.Packet.State(self.states[name]).pack())
 
     @typing.overload
     def use_state(
@@ -350,6 +355,7 @@ class RPCManager:
                         engine.log_debug(f"Calling procedure {call.name}")
                         # TODO - type checking for procedure arguments.
                         try:
+                            # TODO - accept async functions.
                             engine.log_debug(
                                 f"Executed {proc.name} → {self.proc_map[proc.name](show, packet, handle, addr)}"
                             )

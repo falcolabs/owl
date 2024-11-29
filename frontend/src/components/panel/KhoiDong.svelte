@@ -34,7 +34,7 @@
 
     onMount(async () => {
         let player_list = $states.engine_players;
-        if (player_list.length === 0) {
+        if (player_list === undefined || player_list.length === 0) {
             return;
         }
         $question_placement = {
@@ -64,12 +64,23 @@
             if ($states.qid == $question_placement[$states.stage].at(-1)) {
                 await setQuestion(-1)();
                 return;
+            } else {
+                setTimeout(async () => {
+                    await states.setBoolean("allow_bell", true);
+                }, 2000);
             }
         }
         await conn.send(CallProcedure.name("khoidong::next_question").build());
     };
 
-    const setQuestion = (qid: number) => async () => await states.setNumber("qid", qid);
+    const setQuestion = (qid: number) => async () => {
+        await states.setNumber("qid", qid);
+        if ($states.stage == STAGE_JOINT && qid != -1) {
+            setTimeout(async () => {
+                await states.setBoolean("allow_bell", true);
+            }, 2000);
+        }
+    };
     const setPlayerSeperate = (playerName: string) => async () => {
         await states.setString("seperated_candidate", playerName);
     };
@@ -116,6 +127,11 @@
                 Phần thi chung
             </button>
         {/if}
+        <button class="btn" class:accent={$states.allow_bell} on:click={async () => {
+            states.setBoolean("allow_bell", !$states.allow_bell)
+        }}
+            >{$states.allow_bell ? "Chuông bật" : "Chuông tắt"}</button
+        >
     </div>
 </div>
 {#if $states.stage == STAGE_SEPERATED}

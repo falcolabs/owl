@@ -48,6 +48,7 @@ impl Level {
     }
 }
 
+#[allow(static_mut_refs)]
 static mut MINIMUM_LEVEL: Level = Level::INFO;
 
 #[cfg_attr(feature = "logic", pyfunction)]

@@ -46,6 +46,7 @@
                             class="mmedia mobj"
                             bind:this={videoElement}
                             src={$states.media.uri}
+                            muted={false}
                             autoplay
                         />
                     {:else if $states.media.mediaType == "image"}

@@ -1,19 +1,19 @@
 <script lang="ts">
-    import { CallProcedure, Connection, StateManager } from "$lib";
+    import { CallProcedure, Connection, GameMaster, StateManager } from "$lib";
     import type { Timer } from "client";
     import { type Readable, type Writable } from "svelte/store";
 
     export let conn: Connection;
-    export let timer: Writable<Timer>;
+    export let gm: GameMaster;
+    export let states: StateManager;
     export let elapsed: Readable<any>;
-
 </script>
 
 <div>
     <h1>Timer Controls</h1>
     <p>
         Time Left: <span class="code"
-            >{$timer.isPaused() ? "(PAUSED)" : "(RUNNING)"}&nbsp{$elapsed}</span
+            >{$states.timer_paused ? "(PAUSED)" : "(RUNNING)"}&nbsp{$elapsed}</span
         >
     </p>
     <div class="bgroup-hor">
@@ -21,11 +21,8 @@
             {#each ["reset", "pause"] as ops}
                 <button
                     on:click={async () => {
-                        await conn.send(
-                            CallProcedure.name("engine::timer_operation")
-                                .string("operation", ops)
-                                .build()
-                        );
+                        // @ts-ignore
+                        await gm.timer_operation(ops);
                     }}
                     class="btn"
                 >
@@ -36,11 +33,8 @@
             {#each ["start", "pause", "reset"] as ops}
                 <button
                     on:click={async () => {
-                        await conn.send(
-                            CallProcedure.name("engine::timer_operation")
-                                .string("operation", ops)
-                                .build()
-                        );
+                        // @ts-ignore
+                        await gm.timer_operation(ops);
                     }}
                     class="btn"
                 >
