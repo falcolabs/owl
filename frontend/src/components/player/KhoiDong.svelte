@@ -22,7 +22,6 @@
 
 <title>Khởi động - Đường đua xanh</title>
 <div class="bg">
-    <TitleBar activity="Khởi động" />
     <div class="center-box">
         <div class="container">
             <div class="box">
@@ -33,7 +32,7 @@
                     <div class="qnum"><PillTag text="Chuẩn bị" /></div>
                     <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
                 {/if}
-                <div class="sbar"><ScoreBar players={gm.players} {states} /></div>
+                <div class="sbar"><ScoreBar {states} /></div>
             </div>
             <div class="timerbar">
                 <TimerBar {states} />
@@ -78,7 +77,7 @@
 
     .box {
         width: 60vw;
-        height: 30vh;
+        height: 40vh;
         padding: 3em 5em;
         text-align: justify;
         display: flex;

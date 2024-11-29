@@ -13,6 +13,8 @@ wasm:
   - deno run compileRustDev
 
 front:
+  - output=$(python3 syncroot.py $*)
+  - eval $output
   - cd frontend
   - deno run dev
 

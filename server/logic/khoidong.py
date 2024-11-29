@@ -29,12 +29,14 @@ class KhoiDong(penguin.PartImplementation):
 
         self.timer = engine.Timer()
         self.timer.pause()
-
         self.stage = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
         self.current_question_content = self.rpc.use_state(
             "current_question_content", ""
         )
+        # TODO - SECURITY: encrypt this
+        self.key = self.rpc.use_state("key", "")
+        self.plusminus = self.rpc.use_state("plusminus", {"add": [0], "rem": [0]})
         self.qid = self.rpc.use_state("qid", -1)
         """Câu hỏi hiện tại."""
         self.display_qid = self.rpc.use_state("display_qid", "Chuẩn bị")
@@ -68,8 +70,7 @@ class KhoiDong(penguin.PartImplementation):
         )
         self.joint_bell.subscribe(
             lambda candidate_name: self.highlighted.set(
-                self.highlighted.get()
-                + [
+                [
                     candidate_name,
                 ]
             )
@@ -77,6 +78,7 @@ class KhoiDong(penguin.PartImplementation):
 
         # Resets the highlighted list when game stage is changed.
         self.stage.subscribe(lambda _: self.highlighted.set([]))
+        self.stage.subscribe(lambda _: self.qid.set(-1))
 
     def _seperated(self, _show: penguin.Show) -> engine.Status:
         return engine.Status.RUNNING
@@ -113,12 +115,20 @@ class KhoiDong(penguin.PartImplementation):
                 "Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút."
             )
             self.display_qid.set("Chuẩn bị")
+            self.key.set("")
             self.max_time.set(3)
+            self.plusminus.set({"add": [0], "rem": [0]})
             return
         q = self.show.qbank.get_question(qid)
         self.current_question_content.set(q.prompt)
-        self.display_qid.set(str((qid % 6) + 1))
+        if self.stage.get() == STAGE_SEPERATED:
+            self.display_qid.set(str((qid % 6) + 1))
+        else:
+            self.display_qid.set(self.question_placement[STAGE_JOINT].index(qid) + 1)  # type: ignore[reportAttributeAccessIssue]
+
         self.max_time.set(q.time)
+        self.plusminus.set({"add": [q.score], "rem": [q.score_false]})
+        self.key.set(q.key)
 
         # TODO - configuration entry for this
         # automatically clearing the bell queue when question changes

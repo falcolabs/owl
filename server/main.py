@@ -21,7 +21,7 @@ import config
 
 def main():
     qbank = engine.QuestionBank()
-    qbank.load("../assets/question_template.json")
+    qbank.load("../assets/question_test.json")
     config.load("../config.json")
     penguin.set_error_hook()
     if config.config().debug:
@@ -33,6 +33,8 @@ def main():
     import logic.vcnv
     import logic.tangtoc
     import logic.vedich
+    import logic.tiebreaker
+    import logic.tkd
 
     show = penguin.Show(
         "Đường đua xanh",
@@ -43,6 +45,8 @@ def main():
             engine.Part(logic.vcnv.VCNV(), "vcnv"),
             engine.Part(logic.tangtoc.TangToc(), "tangtoc"),
             engine.Part(logic.vedich.VeDich(), "vedich"),
+            engine.Part(logic.tiebreaker.TieBreaker(), "tiebreaker"),
+            engine.Part(logic.tkd.TKD(), "tkd"),
         ],
         [engine.Player(c.username, c.fullName, 0) for c in config.config().credentials],
         config.config().tickSpeed,
@@ -50,7 +54,7 @@ def main():
     )
 
     show.start(
-        "localhost:6942",
+        config.config().listenOn,
         "dist",
         "static",
     )

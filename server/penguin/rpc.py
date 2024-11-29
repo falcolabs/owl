@@ -1,5 +1,6 @@
 import collections.abc
 from os import initgroups
+import traceback
 import engine
 import typing
 import json
@@ -348,9 +349,13 @@ class RPCManager:
                     if proc.name == call.name:
                         engine.log_debug(f"Calling procedure {call.name}")
                         # TODO - type checking for procedure arguments.
-                        engine.log_debug(
-                            f"Executed {proc.name} → {self.proc_map[proc.name](show, packet, handle, addr)}"
-                        )
+                        try:
+                            engine.log_debug(
+                                f"Executed {proc.name} → {self.proc_map[proc.name](show, packet, handle, addr)}"
+                            )
+                        except Exception as e:
+                            engine.log_error(traceback.format_exc())
+
                         return Ok(True)
                 else:
                     if call.name.startswith(self.prefix):
@@ -394,7 +399,6 @@ class RPCManager:
                     self.states_writable[update.name].set(
                         self.deser_map[update.name](update.data)
                     )
-                    print(show.session_manager.active_addr)
                     await show.session_manager.broadcast(
                         engine.Packet.State(self.states[update.name]).pack()
                     )

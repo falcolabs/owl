@@ -20,7 +20,7 @@ pub struct Player {
 }
 pyproperty!(Player:identifier -> String);
 pyproperty!(Player:name -> String);
-pyproperty!(Player:score -> i32);
+pyproperty!(Player:score:set_score -> i32);
 
 impl Player {
     pub fn new(identifier: String, name: String, score: i32) -> Self {

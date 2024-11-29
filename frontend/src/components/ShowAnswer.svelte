@@ -2,16 +2,23 @@
     import type { Readable } from "svelte/store";
     import PillTag from "./PillTag.svelte";
     import TextAnswer from "./TextAnswer.svelte";
-    import type { PlayerManager } from "$lib";
+    import { PlayerManager, StateManager } from "$lib";
 
-    export let states: Readable<any>;
+    export let states: StateManager;
     export let players: PlayerManager;
+
+    console.log($states.answers);
 </script>
 
 <div class="container">
-    {#if $states.answers !== undefined && players.storage.size != 0}
+    {#if $states.answers !== undefined && $states.engine_players.size != 0}
         {#each $states.answers as { time, name, content, verdict }}
-            <TextAnswer {time} name={players.name(name).name} {content} {verdict} />
+            <TextAnswer
+                {time}
+                name={PlayerManager.getDisplayName(name, $states.engine_players)}
+                {content}
+                {verdict}
+            />
         {/each}
     {/if}
 </div>

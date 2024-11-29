@@ -4,13 +4,15 @@
     import type { Timer, Player } from "client";
     import Load from "../../components/Load.svelte";
     import { readable, writable, get, type Writable, type Readable } from "svelte/store";
-    import ScoreBar from "../../components/ScoreBar.svelte";
     import KhoiDong from "../../components/panel/KhoiDong.svelte";
     import Vcnv from "../../components/panel/VCNV.svelte";
     import TimerControls from "../../components/panel/TimerControls.svelte";
     import TangToc from "../../components/panel/TangToc.svelte";
     import VeDich from "../../components/panel/VeDich.svelte";
     import PartSwitcher from "../../components/panel/PartSwitcher.svelte";
+    import ScoreJudge from "../../components/panel/ScoreJudge.svelte";
+    import TieBreaker from "../../components/panel/TieBreaker.svelte";
+    import Tkd from "../../components/panel/TKD.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -48,7 +50,6 @@
         }, 100);
 
         conn.on(Peeker.PacketType.State, async (update) => {
-            console.log(`Updated ${update.value.name}`);
             if (update.value.name === "current_part") {
                 await gm.updateAll();
             }
@@ -60,22 +61,28 @@
     <Load until={gm !== undefined && $states.available_parts !== undefined}>
         <div class="container">
             <h1>Trash control panel</h1>
-            <ScoreBar {players} {states} />
             <div class="horizontal">
                 <div>
                     <TimerControls {elapsed} timer={states.timerStore} {conn} />
-                    {#if $states.available_parts[$states.current_part] == "khoidong"}
-                        <KhoiDong {states} {conn} {players} />
-                    {:else if $states.available_parts[$states.current_part] == "vcnv"}
-                        <Vcnv {states} {conn} />
-                    {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-                        <TangToc {states} {conn} />
-                    {:else if $states.available_parts[$states.current_part] == "vedich"}
-                        <VeDich {states} {conn} />
-                    {/if}
+                    <div class="partcontrol">
+                        {#if $states.available_parts[$states.current_part] == "khoidong"}
+                            <KhoiDong {states} {conn} {players} />
+                        {:else if $states.available_parts[$states.current_part] == "vcnv"}
+                            <Vcnv {states} {conn} />
+                        {:else if $states.available_parts[$states.current_part] == "tangtoc"}
+                            <TangToc {states} {conn} />
+                        {:else if $states.available_parts[$states.current_part] == "vedich"}
+                            <VeDich {states} {conn} />
+                        {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
+                            <TieBreaker {states} {conn} {players} />
+                        {:else if $states.available_parts[$states.current_part] == "tkd"}
+                            <Tkd {conn} />
+                        {/if}
+                    </div>
                 </div>
-                <div>
+                <div class="right">
                     <PartSwitcher {states} {conn} />
+                    <ScoreJudge {conn} {states} {gm} />
                 </div>
             </div>
         </div>
@@ -87,6 +94,10 @@
         font-size: var(--font-large);
         font-weight: bold;
         width: fit-content;
+    }
+
+    .partcontrol {
+        max-width: 50vw;
     }
 
     .container {
@@ -105,9 +116,16 @@
         padding: 2em;
     }
 
+    .right {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
     .horizontal {
         display: grid;
         grid-template-columns: 50vw 50vw;
         flex-direction: row;
+        gap: 15px;
     }
 </style>

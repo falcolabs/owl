@@ -6,6 +6,8 @@
     import Load from "../Load.svelte";
     export let states: StateManager;
     export let conn: Connection;
+
+    let timer = states.timerStore;
 </script>
 
 <Load until={$states.media !== undefined}>
@@ -44,6 +46,12 @@
                                 on:click={async () => {
                                     let status = $states.media_status;
                                     status.playbackPaused = !status.playbackPaused;
+                                    if (status.playbackPaused) {
+                                        $timer.pause();
+                                    } else {
+                                        $timer.resume();
+                                    }
+                                    await states.setTimer($timer);
                                     await states.setObject("media_status", status);
                                 }}
                                 >{$states.media_status.playbackPaused
@@ -101,14 +109,6 @@
 
     .btn:hover {
         filter: brightness(120%);
-    }
-
-    .disabled-btn {
-        cursor: not-allowed;
-    }
-
-    .disabled-btn:hover {
-        filter: none;
     }
 
     div.big-gap {

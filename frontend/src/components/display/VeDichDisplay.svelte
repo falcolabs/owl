@@ -5,6 +5,7 @@
     import PillTag from "../PillTag.svelte";
     import Load from "../Load.svelte";
     import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
+    import { scoreOf } from "$lib/globals";
     import ScoreBar from "../ScoreBar.svelte";
     import TimerBar from "../TimerBar.svelte";
     const STAGE_CHOOSE: number = 0;
@@ -25,6 +26,9 @@
         stage: STAGE_COMPETE,
         qid: -1
     });
+    let videoElement: HTMLVideoElement;
+    let audioElement: HTMLAudioElement;
+    let imageElement: HTMLImageElement;
     export let players: PlayerManager;
 </script>
 
@@ -33,7 +37,33 @@
     <Load until={gm !== undefined && $states.package !== undefined}>
         <TitleBar activity="Về đích" />
         <div class="center-box">
-            {#if $states.stage == STAGE_CHOOSE}
+            {#if $states.media != null && $states.media_status.visible}
+                {#if $states.media != null}
+                    <div class="media-placeholder" />
+                    {#if $states.media.mediaType == "video"}
+                        <!-- svelte-ignore a11y-media-has-caption -->
+                        <video
+                            class="mmedia mobj"
+                            bind:this={videoElement}
+                            src={$states.media.uri}
+                            autoplay
+                        />
+                    {:else if $states.media.mediaType == "image"}
+                        <img
+                            class="mmedia mobj"
+                            src={$states.media.uri}
+                            alt="Question content"
+                            bind:this={imageElement}
+                        />
+                    {:else if $states.media.mediaType == "audio"}
+                        <audio
+                            class="mmedia mobj"
+                            src={$states.media.uri}
+                            bind:this={audioElement}
+                        />
+                    {/if}
+                {/if}
+            {:else if $states.stage == STAGE_CHOOSE}
                 {#if $states.current_player_username !== ""}
                     <div class="vertical">
                         <PackageChooser {states} />
@@ -45,7 +75,8 @@
                         <div class="qnum">
                             <PillTag
                                 text={`Câu ${$states.placement[$states.current_player_username].indexOf($states.qid) + 1}` +
-                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "")}
+                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "") +
+                                    " · " + `${scoreOf[$states.qid]}` + "đ"}
                             />
                         </div>
                         <p class="prompt">{$states.prompt}</p>
@@ -59,7 +90,7 @@
                 <div class="timerbar"><TimerBar {states} /></div>
             {/if}
         </div>
-        <div class="scorebar"><ScoreBar {players} {states} /></div>
+        <div class="scorebar"><ScoreBar {states} /></div>
     </Load>
 </div>
 

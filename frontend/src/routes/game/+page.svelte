@@ -9,6 +9,9 @@
     import KhoiDong from "../../components/player/KhoiDong.svelte";
     import Vcnv from "../../components/player/VCNV.svelte";
     import TangToc from "../../components/player/TangToc.svelte";
+    import VeDich from "../../components/player/VeDich.svelte";
+    import TieBreaker from "../../components/player/TieBreaker.svelte";
+    import Tkd from "../../components/display/TKD.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -22,6 +25,8 @@
         players = gm.players;
         conn.on(Peeker.PacketType.State, async (update) => {
             if (update.value.name === "current_part") {
+                states.flush();
+                console.log("afterstateflush", $states);
                 await gm.updateAll();
             }
         });
@@ -41,6 +46,10 @@
     {:else if $states.available_parts[$states.current_part] == "tangtoc"}
         <TangToc {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vedich"}
-        <VeDichDisplay {conn} {gm} {states} {players} />
+        <VeDich {conn} {gm} {states} {players} />
+    {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
+        <TieBreaker {conn} {gm} {states} {players} />
+    {:else if $states.available_parts[$states.current_part] == "tkd"}
+        <Tkd {states} />
     {/if}
 </Load>

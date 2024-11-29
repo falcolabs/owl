@@ -2,6 +2,7 @@
 
 export const ORG_NAME: string = "Đoàn trường THPT Chuyên Bắc Ninh · THPT Chuyên Bắc Ninh";
 export const SHOW_NAME: string = "Đường Đua Xanh";
+export const SUBTEXT: string = "Mùa 5, Bán kết 1"
 
 import type { PacketType, Packet, _PacketValue, _PacketVariant } from "client";
 type CBHandle<T extends PacketType> = (packet: Packet<T>) => void
@@ -43,7 +44,7 @@ export class Connection {
         Peeker = await import("client")
         let obj = new Connection();
         Peeker.ClientHandle.set_panic_hook()
-        obj.ws = new WebSocket("ws://localhost:6942/harlem");
+        obj.ws = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/harlem`);
         obj.callbacks = new Map()
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {

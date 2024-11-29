@@ -3,6 +3,7 @@ import engine
 import datetime
 import penguin
 from config import config
+import json
 
 STAGE_CHOOSE = 0
 """Phần chọn gói câu hỏi"""
@@ -50,6 +51,14 @@ class VeDich(penguin.PartImplementation):
                 config().credentials[3].username: [0, 0, 0],
             },
         )
+        self.plusminus = self.rpc.use_state(
+            "plusminus",
+            {
+                "add": [20, 30, 40, 60],
+                "rem": [-30, -20, -15, -10],
+            },
+        )
+        self.allow_bell = self.rpc.use_state("allow_bell", False)
         self.current_player_username = self.rpc.use_state("current_player_username", "")
         self.highlighted = self.rpc.use_state("highlighted", [])
         self.bell_player = self.rpc.use_state("bell_player", "")
@@ -58,6 +67,19 @@ class VeDich(penguin.PartImplementation):
         self.prompt = self.rpc.use_state("prompt", "")
         self.stage = self.rpc.use_state("stage", STAGE_CHOOSE)
         self.qid = self.rpc.use_state("qid", -1)
+        # TODO - SECURITY: encrypt this (with MC token or sth)
+        self.key = self.rpc.use_state("key", "")
+        self.media = self.rpc.use_state(
+            "media",
+            None,
+        )
+        self.media_status = self.rpc.use_state(
+            "media_status",
+            {
+                "visible": False,
+                "playback_paused": False,
+            },
+        )
         self.rpc.add_procedures(
             [
                 (
@@ -74,7 +96,7 @@ class VeDich(penguin.PartImplementation):
                     self.bell,
                     [
                         ("target", engine.PortableType.STRING),
-                        ("clientTime", engine.PortableType.NUMBER),
+                        ("clientTime", engine.PortableType.STRING),
                     ],
                 ),
             ]
@@ -89,8 +111,8 @@ class VeDich(penguin.PartImplementation):
 
         self.bell_player.subscribe(
             lambda name: self.highlighted.set(
-                self.highlighted.get()
-                + [
+                [
+                    self.current_player_username.get(),
                     name,
                 ]
             )
@@ -100,21 +122,26 @@ class VeDich(penguin.PartImplementation):
     def on_qid_change(self, qid: int):
         if qid == -1:
             self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
+            self.key.set("")
             return
         q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
         # TODO - add configuration entry for this
         # clears bell list automatically on question change.
         self.bell_player.set("")
-        self.current_player_username.subscribe(
-            lambda name: self.highlighted.set(
-                [
-                    name,
-                ]
-            )
-        )
         self.max_time.set(q.time)
+        self.key.set(q.key)
         self.show.timer.set(engine.Timer())
+        if q.media is None:
+            self.media.set(None)
+        else:
+            self.media.set(json.loads(q.media.pack()))
+        self.media_status.set(
+            {
+                "visible": False,
+                "playback_paused": False,
+            }
+        )
 
     def set_choice(
         self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2
@@ -135,11 +162,11 @@ class VeDich(penguin.PartImplementation):
             )
 
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
-        target = call.data.str_argno(0)
+        target = self.session_manager.playername(call.data.str_argno(0)).unwrap()
         clientTime = call.data.str_argno(1)
-        if self.bell_player != "":
+        if self.bell_player.get() != "" or not self.allow_bell.get():
             engine.log_info(
-                f"{target} tried to ring bell, being late to the game. {datetime.time().isoformat("microseconds")}"
+                f"{target} tried to ring bell, being late to the game, or the bell is not available yet. {self.bell_player.get()}"
             )
         else:
             engine.log_info(

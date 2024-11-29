@@ -26,6 +26,24 @@ export class PlayerManager implements Readable<Map<string, Player>> {
         return obj
     }
 
+    static getDisplayName(identifier: string, pl: any[]): string {
+        for (let p of pl) {
+            if (p.identifier == identifier) {
+                return p.name;
+            }
+        }
+        throw new Error(`Cannot find player with username ${identifier}`)
+    }
+
+    static getFromName(identifier: string, pl: any[]): Player {
+        for (let p of pl) {
+            if (p.identifier == identifier) {
+                return p;
+            }
+        }
+        throw new Error(`Cannot find player with username ${identifier}`)
+    }
+
     get list(): Player[] {
         return Array.from(this.storage.values());
     }

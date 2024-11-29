@@ -72,8 +72,15 @@ async fn sws(call_mpsc: MessageHandler, listen_on: String, serve_dir: String, st
             get(move |ws, option, connect_info| ws_handler(ws, option, connect_info, call_mpsc)),
         );
 
-    let listener = tokio::net::TcpListener::bind(listen_on).await.unwrap();
-    logging::info("Serving on localhost:6942...");
+    let listener = tokio::net::TcpListener::bind(listen_on.clone())
+        .await
+        .unwrap_or_else(|_| {
+            panic!(
+        "Bad host address. Make sure you provided a valid address (HOST:PORT) (you provided {})",
+        listen_on
+    )
+        });
+    logging::info(format!("Serving on {}...", listen_on));
     axum::serve(
         listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),

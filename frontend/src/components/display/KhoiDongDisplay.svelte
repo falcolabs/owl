@@ -4,12 +4,7 @@
     import ScoreBar from "../ScoreBar.svelte";
     import TitleBar from "../TitleBar.svelte";
 
-    import {
-        Connection,
-        GameMaster,
-        PlayerManager,
-        StateManager
-    } from "$lib";
+    import { Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import TimerBar from "../TimerBar.svelte";
     const STAGE_SEPERATED = 0;
     const STAGE_JOINT = 1;
@@ -32,7 +27,7 @@
                     <div class="qnum"><PillTag text="Chuẩn bị" /></div>
                     <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>
                 {/if}
-                <div class="sbar"><ScoreBar players={gm.players} {states} /></div>
+                <div class="sbar"><ScoreBar {states} /></div>
             </div>
             <div class="timerbar">
                 <TimerBar {states} />

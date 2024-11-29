@@ -1,3 +1,4 @@
+from traceback import print_stack
 from typing import final, override
 import typing
 import engine
@@ -7,7 +8,6 @@ import json
 from .session import SessionManager
 from .store import Writable
 from utils.crypt import gen_token
-
 
 from config import config
 
@@ -56,6 +56,30 @@ class PartImplementation:
 LOOP = asyncio.new_event_loop()
 
 
+def process_authentication(
+    session_manager: SessionManager,
+    packet: engine.Packet.CommenceSession,
+    handle: engine.IOHandle,
+) -> engine.Packet | None:
+    output = None
+    for detail in config().credentials:
+        if (detail.username, detail.accessKey) == (
+            packet.data.username,
+            packet.data.access_key,
+        ):
+            token = session_manager.link_player(detail.username, handle)
+            return engine.Packet.AuthStatus(
+                engine.AuthenticationStatus(True, "Authenticated.", token)
+            )
+        else:
+            output = engine.Packet.AuthStatus(
+                engine.AuthenticationStatus(
+                    False, "Authentication failed: invalid credentials.", ""
+                )
+            )
+    return output
+
+
 @final
 class Show:
     async def handle_webreq(self, req: engine.RawRequest):
@@ -73,25 +97,9 @@ class Show:
         response: engine.Packet | None = None
         if not isinstance(req.content, engine.Packet.Query):
             if isinstance(req.content, engine.Packet.CommenceSession):
-                for detail in config().credentials:
-                    if (detail.username, detail.accessKey) == (
-                        req.content.data.username,
-                        req.content.data.access_key,
-                    ):
-                        token = self.session_manager.link_player(
-                            detail.username, req.handle
-                        )
-                        print(self.session_manager.player_map)
-                        response = engine.Packet.AuthStatus(
-                            engine.AuthenticationStatus(True, "Authenticated.", token)
-                        )
-                        break
-                else:
-                    response = engine.Packet.AuthStatus(
-                        engine.AuthenticationStatus(
-                            False, "Authentication failed: invalid credentials.", ""
-                        )
-                    )
+                response = process_authentication(
+                    self.session_manager, req.content, req.handle
+                )
             if isinstance(req.content, engine.Packet.Unknown):
                 if req.content.data == "CONNECTION INITIATED":
                     self.session_manager.register_session(req.handle)
@@ -189,6 +197,63 @@ class Show:
         new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
 
+        TASK_POOL.append(
+            self.session_manager.broadcast(
+                engine.Packet.StateList(list(self.rpc.states.values())).pack()
+            )
+        )
+        TASK_POOL.append(
+            self.session_manager.broadcast(
+                engine.Packet.StateList(
+                    list(
+                        self.parts[
+                            self.current_part.get()
+                        ].implementation.rpc.states.values()  # type: ignore[reportAttributeAccessIssue]
+                    )
+                ).pack()
+            )
+        )
+
+    def set_score(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr: str,
+    ):
+        target = call.data.str_argno(0)
+        value = call.data.int_argno(1)
+        pl = self.players.get()
+        for p in pl:
+            if p.identifier == target:
+                p.score = value
+                self.players.set(pl)
+                break
+        else:
+            engine.log_warning(
+                f"Cannot find player with identifier {target}. Ignored score set request."
+            )
+
+    def add_score(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        handle: engine.IOHandle,
+        addr: str,
+    ):
+        target = call.data.str_argno(0)
+        value = call.data.int_argno(1)
+        pl = self.players.get()
+        for p in pl:
+            if p.identifier == target:
+                p.score += value
+                self.players.set(pl)
+                break
+        else:
+            engine.log_warning(
+                f"Cannot find player with identifier {target}. Ignored score add request."
+            )
+
     def timer_operation(
         self,
         _: "Show",
@@ -235,7 +300,8 @@ class Show:
 
         def _ser_players(inp: list[engine.Player]) -> engine.PortableValue:
             return engine.PortableValue(
-                json.dumps([i.pack() for i in inp]), engine.PortableType.OBJECT
+                json.dumps([json.loads(i.pack()) for i in inp]),
+                engine.PortableType.OBJECT,
             )
 
         def _der_players(inp: engine.PortableValue) -> list[engine.Player]:
@@ -271,6 +337,22 @@ class Show:
                     "timer_operation",
                     self.timer_operation,
                     [("operation", engine.PortableType.STRING)],
+                ),
+                (
+                    "set_score",
+                    self.set_score,
+                    [
+                        ("target", engine.PortableType.STRING),
+                        ("value", engine.PortableType.NUMBER),
+                    ],
+                ),
+                (
+                    "add_score",
+                    self.add_score,
+                    [
+                        ("target", engine.PortableType.STRING),
+                        ("value", engine.PortableType.NUMBER),
+                    ],
                 ),
             ]
         )

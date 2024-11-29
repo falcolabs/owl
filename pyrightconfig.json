@@ -1,7 +1,8 @@
 {
   "stubPath": "engine",
   "exclude": [
-    "engine"
+    "engine",
+    "frontend/node_modules"
   ],
   "reportUnusedCallResult": "none",
   "reportImplicitRelativeImport": "none",

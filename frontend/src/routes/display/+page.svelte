@@ -7,6 +7,8 @@
     import TangTocDisplay from "../../components/display/TangTocDisplay.svelte";
     import VeDichDisplay from "../../components/display/VeDichDisplay.svelte";
     import Standby from "../../components/display/Standby.svelte";
+    import TieBreakerDisplay from "../../components/display/TieBreakerDisplay.svelte";
+    import Tkd from "../../components/display/TKD.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -20,6 +22,7 @@
         players = gm.players;
         conn.on(Peeker.PacketType.State, async (update) => {
             if (update.value.name === "current_part") {
+                gm.states.flush();
                 await gm.updateAll();
             }
         });
@@ -35,6 +38,10 @@
         <TangTocDisplay {conn} {gm} {states} {players} />
     {:else if $states.available_parts[$states.current_part] == "vedich"}
         <VeDichDisplay {conn} {gm} {states} {players} />
+    {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
+        <TieBreakerDisplay {conn} {gm} {states} {players} />
+    {:else if $states.available_parts[$states.current_part] == "tkd"}
+        <Tkd {states} />
     {:else}
         <Standby />
     {/if}
