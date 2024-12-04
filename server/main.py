@@ -54,7 +54,7 @@ def main():
     )
 
     show.start(
-        config.config().listenOn.host + ":" + config.config().listenOn.port,
+        config.config().listenOn.host + ":" + str(config.config().listenOn.port),
         "dist",
         "static",
     )

@@ -6,6 +6,8 @@ import engine
 import abc
 import asyncio
 import json
+
+from . import timekeeper
 from .session import SessionManager
 from .store import Writable
 from utils.crypt import gen_token
@@ -159,7 +161,14 @@ class Show:
 
     def start(self, listen_on: str, serve_on: str, static_dir: str):
         engine.log_info("Starting show...")
-        engine.ws_task(listen_on, serve_on, static_dir, config().tickSpeed, self.tick)
+        engine.ws_task(
+            listen_on,
+            serve_on,
+            static_dir,
+            config().tickSpeed,
+            self.tick,
+            timekeeper.on_req,
+        )
 
         for p in self.parts:
             p.implementation.show = self  # type: ignore[reportAttributeAccessIssue]
@@ -350,6 +359,11 @@ class Show:
         self.timer.subscribe(lambda t: self.time.set(t.time_elapsed().total_seconds()))
 
         self.timer.subscribe(lambda t: self.timer_paused.set(t.is_paused))
+
+        def set_time(new_value: int):
+            asyncio.run_coroutine_threadsafe(timekeeper.timekeep(new_value), LOOP)
+
+        self.time.set = set_time
 
         self.rpc.add_procedures(
             [

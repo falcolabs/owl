@@ -308,6 +308,7 @@ def ws_task(
     static_dir: str,
     tick_speed: int,
     tick_hook: Callable[[bool, Literal[""] | RawRequest], None],
+    time_book: Callable[[RawRequest], None],
 ): ...
 
 class RawRequest:

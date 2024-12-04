@@ -1,23 +1,21 @@
 //! Webservice implementation for monkeys in the 21th century.
 use crate::{logging, Packet};
 use axum::{
-    extract::{
-        ws::{Message, WebSocket, WebSocketUpgrade},
-        ConnectInfo,
-    },
+    extract::ws::{Message, WebSocket},
     http::StatusCode,
     response::{Html, IntoResponse},
     routing::get,
     Router,
 };
-use axum_extra::{headers, TypedHeader};
-use futures::{stream::StreamExt, SinkExt};
+use futures::SinkExt;
 use pyo3::prelude::*;
 use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 use tokio::fs;
 use tokio::sync::Mutex;
 use tower::util::ServiceExt;
 use tower_http::services::ServeDir;
+
+use crate::net::{wsmain, wstime};
 
 pub type MessageHandler = std::sync::mpsc::Sender<Notifier>;
 /// Starts the web service. **This function contains
@@ -39,15 +37,29 @@ pub type MessageHandler = std::sync::mpsc::Sender<Notifier>;
 /// ```
 #[tokio::main]
 pub async fn start_webservice(
-    call_mpsc: MessageHandler,
+    call_mpsc_main: MessageHandler,
+    call_mpsc_time: MessageHandler,
     listen_on: String,
     serve_dir: String,
     static_dir: String,
 ) {
-    sws(call_mpsc, listen_on, serve_dir, static_dir).await;
+    sws(
+        call_mpsc_main,
+        call_mpsc_time,
+        listen_on,
+        serve_dir,
+        static_dir,
+    )
+    .await;
 }
 
-async fn sws(call_mpsc: MessageHandler, listen_on: String, serve_dir: String, static_dir: String) {
+async fn sws(
+    call_mpsc_main: MessageHandler,
+    call_mpsc_time: MessageHandler,
+    listen_on: String,
+    serve_dir: String,
+    static_dir: String,
+) {
     logging::info("Starting webserver initialization...");
     let app = Router::new()
         .fallback_service(get(|req| async move {
@@ -69,15 +81,23 @@ async fn sws(call_mpsc: MessageHandler, listen_on: String, serve_dir: String, st
         }))
         .route(
             "/harlem",
-            get(move |ws, option, connect_info| ws_handler(ws, option, connect_info, call_mpsc)),
+            get(move |ws, option, connect_info| {
+                wsmain::ws_handler(ws, option, connect_info, call_mpsc_main)
+            }),
+        )
+        .route(
+            "/time",
+            get(move |ws, option, connect_info| {
+                wstime::ws_handler(ws, option, connect_info, call_mpsc_time)
+            }),
         );
 
     let listener = tokio::net::TcpListener::bind(listen_on.clone())
         .await
-        .unwrap_or_else(|_| {
+        .unwrap_or_else(|e| {
             panic!(
-        "Bad host address. Make sure you provided a valid address (HOST:PORT) (you provided {})",
-        listen_on
+        "Bad host address. Make sure you provided a valid address (HOST:PORT) (you provided {:#?}): {}",
+        listen_on, e
     )
         });
     logging::info(format!("Serving on {}...", listen_on));
@@ -87,15 +107,6 @@ async fn sws(call_mpsc: MessageHandler, listen_on: String, serve_dir: String, st
     )
     .await
     .unwrap();
-}
-
-async fn ws_handler(
-    ws: WebSocketUpgrade,
-    _: Option<TypedHeader<headers::UserAgent>>,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    call_hook: MessageHandler,
-) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, addr, call_hook))
 }
 
 pub enum Notifier {
@@ -131,6 +142,20 @@ impl PartialEq for IOHandle {
 
 impl Eq for IOHandle {}
 
+impl IOHandle {
+    pub fn new(
+        sender: Arc<Mutex<futures::stream::SplitSink<WebSocket, axum::extract::ws::Message>>>,
+        receiver: Arc<Mutex<futures::stream::SplitStream<WebSocket>>>,
+        addr: String,
+    ) -> IOHandle {
+        IOHandle {
+            sender,
+            receiver,
+            addr,
+        }
+    }
+}
+
 #[pymethods]
 impl IOHandle {
     pub async fn send(&mut self, msg: String) -> PyResult<()> {
@@ -147,74 +172,4 @@ impl IOHandle {
     pub fn addr(&self) -> String {
         self.addr.clone()
     }
-}
-
-/// Actual websocket statemachine (one will be spawned per connection)
-async fn handle_socket(socket: WebSocket, who: SocketAddr, call_hook: MessageHandler) {
-    logging::info(format!("{} connected.", who));
-
-    let (s, r) = socket.split();
-    let sender = Arc::new(Mutex::new(s));
-    let receiver = Arc::new(Mutex::new(r));
-    call_hook
-        .send(Notifier::RawRequest(RawRequest {
-            handle: IOHandle {
-                sender: Arc::clone(&sender),
-                receiver: Arc::clone(&receiver),
-                addr: who.to_string(),
-            },
-            sender: who.to_string(),
-            content: Packet::Unknown {
-                data: "CONNECTION INITIATED".to_string(),
-            },
-        }))
-        .unwrap();
-
-    while let Some(Ok(msg)) = receiver.lock().await.next().await {
-        let content = msg.to_text().expect("Error extracting text from Message");
-        if call_hook
-            .send(Notifier::RawRequest(RawRequest {
-                handle: IOHandle {
-                    sender: Arc::clone(&sender),
-                    receiver: Arc::clone(&receiver),
-                    addr: who.to_string(),
-                },
-                sender: who.to_string(),
-                content: serde_json::from_str(content).unwrap_or(Packet::Unknown {
-                    data: content.to_string(),
-                }),
-            }))
-            .is_err()
-        {
-            logging::error("Failed to send RawRequest")
-        }
-        // let chbound = call_hook.bind(py);
-        // logging::info("bound py.");
-        // println!("{:#?}", chbound);
-        // let coroutine = chbound
-        //     .call1((
-        //         IOHandle {
-        //             sender: Arc::clone(&sender),
-        //             receiver: Arc::clone(&receiver),
-        //         },
-        //         who.to_string(),
-        //         msg.to_text().unwrap(),
-        //     ))
-        //     .expect("Unable to form coroutine.");
-        // tokio::spawn();
-    }
-
-    call_hook
-        .send(Notifier::RawRequest(RawRequest {
-            handle: IOHandle {
-                sender: Arc::clone(&sender),
-                receiver: Arc::clone(&receiver),
-                addr: who.to_string(),
-            },
-            sender: who.to_string(),
-            content: Packet::Unknown {
-                data: "CONNECTION HALTED".to_string(),
-            },
-        }))
-        .unwrap();
 }

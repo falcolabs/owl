@@ -5,9 +5,10 @@ export const SHOW_NAME: string = "Đường Đua Xanh";
 export const SUBTEXT: string = "Mùa 5, Bán kết 1"
 export const ANTICHEAT_ENABLED = true;
 
-import type { PacketType, Packet, _PacketValue, _PacketVariant } from "client";
+import { PacketType, type Packet, type _PacketValue, type _PacketVariant } from "client";
 type CBHandle<T extends PacketType> = (packet: Packet<T>) => void
 type CBHandleAll = (packet: _PacketVariant) => void
+import { Value } from "$lib/value";
 
 export var Peeker: typeof import("client");
 export { CallProcedure } from "$lib/rpcbuilder";
@@ -37,6 +38,7 @@ async function ensure(socket: WebSocket, timeout = 10000) {
 
 export class Connection {
     ws!: WebSocket
+    wstime!: WebSocket
     callbacks!: Map<PacketType, CBHandle<PacketType>[]>
     globalCB!: CBHandleAll[]
     public currentPart!: string
@@ -46,6 +48,7 @@ export class Connection {
         let obj = new Connection();
         Peeker.ClientHandle.set_panic_hook()
         obj.ws = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/harlem`);
+        obj.wstime = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/time`);
         obj.callbacks = new Map()
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {
@@ -56,6 +59,25 @@ export class Connection {
             }
             if (obj.callbacks.has(packet.variant)) {
                 obj.callbacks.get(packet.variant)?.forEach((handle) => handle(packet));
+            }
+            // @ts-ignore
+            obj.globalCB.forEach(async (handle) => handle(packet));
+        })
+        obj.wstime.onmessage = ((me) => {
+            let packet: Packet<PacketType.State> = {
+                variant: Peeker.PacketType.State,
+                value: {
+                    name: "time",
+                    data: {
+                        data: String(me.data),
+                        dataType: Peeker.PortableType.NUMBER
+                    }
+                },
+                pack: () => me.data
+
+            }
+            if (obj.callbacks.has(Peeker.PacketType.State)) {
+                obj.callbacks.get(Peeker.PacketType.State)?.forEach((handle) => handle(packet));
             }
             // @ts-ignore
             obj.globalCB.forEach(async (handle) => handle(packet));

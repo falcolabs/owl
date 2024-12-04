@@ -12,13 +12,16 @@ pub fn ws_task(
     static_dir: String,
     tick_speed: u32,
     tick_hook: Py<PyAny>,
+    time_hook: Py<PyAny>,
 ) {
-    let (tx, rx) = std::sync::mpsc::channel::<crate::net::wspy::Notifier>();
-    let tx1 = tx.clone();
+    let (tx_main, rx_main) = std::sync::mpsc::channel::<crate::net::wspy::Notifier>();
+    let (tx_time, rx_time) = std::sync::mpsc::channel::<crate::net::wspy::Notifier>();
+    let tx1_main = tx_main.clone();
+    let tx1_time = tx_time.clone();
     std::thread::spawn(move || {
-        crate::net::wspy::start_webservice(tx1, listen_on, serve_on, static_dir);
+        crate::net::wspy::start_webservice(tx1_main, tx1_time, listen_on, serve_on, static_dir);
     });
-    let tx2 = tx.clone();
+    let tx2 = tx_main.clone();
     std::thread::spawn(move || {
         // TODO - this is intentional wait time
         thread::sleep(Duration::from_secs(3));
@@ -30,7 +33,7 @@ pub fn ws_task(
     });
 
     std::thread::spawn(move || {
-        while let Ok(req) = rx.recv() {
+        while let Ok(req) = rx_main.recv() {
             Python::with_gil(|py| {
                 if let Notifier::RawRequest(raw_req) = req {
                     match tick_hook.bind(py).call1((true, raw_req)) {
@@ -42,6 +45,21 @@ pub fn ws_task(
                     }
                 } else {
                     match tick_hook.bind(py).call1((false, "")) {
+                        Ok(_) => {}
+                        Err(exp) => {
+                            exp.print(py);
+                            panic!("Python exception raised. See error above.")
+                        }
+                    }
+                }
+            })
+        }
+    });
+    std::thread::spawn(move || {
+        while let Ok(req) = rx_time.recv() {
+            Python::with_gil(|py| {
+                if let Notifier::RawRequest(raw_req) = req {
+                    match time_hook.bind(py).call1((raw_req,)) {
                         Ok(_) => {}
                         Err(exp) => {
                             exp.print(py);

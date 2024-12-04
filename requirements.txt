@@ -3,4 +3,3 @@ basedpyright
 black
 pillow
 tinydb
-websockets

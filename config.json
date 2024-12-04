@@ -1,7 +1,7 @@
 {
   "listenOn": {
     "host": "localhost",
-    "port": 6699
+    "port": 6942
   },
   "devServer": {
     "host": "localhost",
