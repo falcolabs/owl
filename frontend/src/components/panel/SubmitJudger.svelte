@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Connection, type StateManager, CallProcedure } from "$lib";
+    import Load from "../Load.svelte";
     export let states: StateManager;
     export let conn: Connection;
     export let prefix: string;
@@ -7,52 +8,53 @@
 
 <div>
     <div class="vertical">
-        <p class="code">TODO - move this to judges' panel</p>
-        <h1>Judges' Panel</h1>
-        {#if $states.answers.length == 0}
-            <p>No answers submitted</p>
-        {:else}
-            {#each $states.answers as { time, name, content }}
-                <p class="code">{time.toFixed(2).padStart(5, "0")} {name}: {content}</p>
-            {/each}
-
-            <div class="horizontal">
-                <div class="vertical">
-                    {#each $states.answers as { name }}
-                        <p class="btn disabled-btn smol code">{name}</p>
-                    {/each}
+        <Load until={$states.answers !== undefined}>
+            {#if $states.answers.length == 0}
+                <p>No answers submitted</p>
+            {:else}
+                <div class="horizontal">
+                    <div class="vertical">
+                        {#each $states.answers as { time }}
+                            <p class="btn disabled-btn smol code">
+                                {time.toFixed(2).padStart(5, "0")}
+                            </p>
+                        {/each}
+                    </div>
+                    <div class="vertical">
+                        {#each $states.answers as { name }}
+                            <p class="btn disabled-btn smol code">{name}</p>
+                        {/each}
+                    </div>
+                    <div class="vertical">
+                        {#each $states.answers as { content }}
+                            <p class="btn disabled-btn smol code">{content}</p>
+                        {/each}
+                    </div>
+                    <div class="vertical">
+                        {#each $states.answers as { name, verdict }}
+                            <div class="horizontal">
+                                {#each [true, false] as r}
+                                    <button
+                                        class="btn smol code"
+                                        class:accent={verdict == r}
+                                        on:click={async () => {
+                                            if (verdict != r) {
+                                                await conn.send(
+                                                    CallProcedure.name(`${prefix}::verdict`)
+                                                        .string("target", name)
+                                                        .string("verdict", JSON.stringify(r))
+                                                        .build()
+                                                );
+                                            }
+                                        }}>{r ? "đúng" : "sai"}</button
+                                    >
+                                {/each}
+                            </div>
+                        {/each}
+                    </div>
                 </div>
-                <div class="vertical">
-                    {#each $states.answers as { name, verdict }}
-                        <div class="horizontal">
-                            {#each [true, false] as r}
-                                <button
-                                    class="btn smol code"
-                                    class:accent={verdict == r}
-                                    on:click={async () => {
-                                        if (verdict == r) {
-                                            await conn.send(
-                                                CallProcedure.name(`${prefix}::verdict`)
-                                                    .string("target", name)
-                                                    .string("verdict", "null")
-                                                    .build()
-                                            );
-                                        } else {
-                                            await conn.send(
-                                                CallProcedure.name(`${prefix}::verdict`)
-                                                    .string("target", name)
-                                                    .string("verdict", JSON.stringify(r))
-                                                    .build()
-                                            );
-                                        }
-                                    }}>{r}</button
-                                >
-                            {/each}
-                        </div>
-                    {/each}
-                </div>
-            </div>
-        {/if}
+            {/if}
+        </Load>
     </div>
 </div>
 

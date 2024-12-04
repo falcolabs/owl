@@ -18,17 +18,25 @@
                 <p class="code">Question #{$states.qid + 1}. {$states.prompt}</p>
             </div>
             <div>
-                <h1>Display Controls</h1>
+                <h1>Hiển thị</h1>
                 <button
                     class="btn"
                     class:accent={$states.show_key}
                     on:click={async () => {
-                        await states.setBoolean("show_key", !$states.show_key);
-                    }}>{$states.show_key ? "Keys Shown" : "Keys Hidden"}</button
+                        if (!$states.show_key) {
+                            await gm.sound.play("tangtoc-showanswers");
+                            console.log("1.5s delay before showing answer");
+                            setTimeout(async () => {
+                                await states.setBoolean("show_key", !$states.show_key);
+                            }, 1500);
+                        } else {
+                            await states.setBoolean("show_key", !$states.show_key);
+                        }
+                    }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
                 >
             </div>
             <div class="vertical big-gap">
-                <h1>Media Controls</h1>
+                <h1>Đa phương tiện</h1>
                 {#if $states.media !== null}
                     <div class="horizontal">
                         <button
@@ -38,7 +46,7 @@
                                 let status = $states.media_status;
                                 status.visible = !status.visible;
                                 await states.setObject("media_status", status);
-                            }}>{$states.media_status.visible ? "Shown" : "Hidden"}</button
+                            }}>{$states.media_status.visible ? "Ẩn" : "Hiện"}</button
                         >
                         {#if $states.media.mediaType == "video"}
                             <button
@@ -55,8 +63,8 @@
                                     await states.setObject("media_status", status);
                                 }}
                                 >{$states.media_status.playbackPaused
-                                    ? "Paused"
-                                    : "Playing"}</button
+                                    ? "Khồng chạy"
+                                    : "Đang chạy"}</button
                             >
                         {/if}
                     </div>
@@ -81,17 +89,20 @@
                                 status.playbackPaused = true;
                                 await states.setObject("media_status", status);
                                 await states.setNumber("qid", qi);
+                                await gm.sound.play("tangtoc-revealquestion");
                             }}>{qi}</button
                         >
                     {/each}
                 </div>
             </div>
         </div>
-        <SubmitJudger {conn} {states} prefix="tangtoc" />
     </div>
 </Load>
 
 <style>
+    h1 {
+        font-weight: bold;
+    }
     .nofat {
         max-width: 30vw;
     }

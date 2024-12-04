@@ -16,9 +16,7 @@ class TieBreaker(penguin.PartImplementation):
 
         self.timer = engine.Timer()
         self.timer.pause()
-        self.current_question_content = self.rpc.use_state(
-            "current_question_content", ""
-        )
+        self.prompt = self.rpc.use_state("prompt", "")
         self.allow_bell = self.rpc.use_state("allow_bell", False)
         self.plusminus = self.rpc.use_state("plusminus", {"add": [0], "rem": [0]})
         # TODO - SECURITY: encrypt this (with MC token or sth)
@@ -83,16 +81,14 @@ class TieBreaker(penguin.PartImplementation):
     def on_qid_change(self, qid: int):
         self.allow_bell.set(False)
         if qid == -1:
-            self.current_question_content.set(
-                "Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút."
-            )
+            self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
             self.display_qid.set("Chuẩn bị")
             self.max_time.set(15)
             self.plusminus.set({"add": [0], "rem": [0]})
             self.key.set("")
             return
         q = self.show.qbank.get_question(qid)
-        self.current_question_content.set(q.prompt)
+        self.prompt.set(q.prompt)
         self.display_qid.set(self.question_placement.index(qid) + 1)
         self.key.set(q.key)
         self.max_time.set(q.time)

@@ -1,22 +1,25 @@
-import { CallProcedure, Connection, Peeker } from "$lib";
+import { Connection, GameMaster, Peeker, StateManager } from "$lib";
 import { openDB, type IDBPDatabase, type IDBPObjectStore } from 'idb';
 import { writable, type Writable } from "svelte/store";
-import type { AvailableSound } from "client";
+import type { AvailableSound, Packet, PacketType } from "client";
 
 export class SoundManager {
-    connection!: Connection;
+    gm!: GameMaster;
+    states!: StateManager;
     db!: IDBPDatabase;
     soundStore!: IDBPObjectStore;
     downloadText!: Writable<string>;
     onready!: (db: IDBPDatabase) => void;
     isReady!: boolean;
+    soundHandles!: Map<AvailableSound, HTMLAudioElement>
 
-    static async create(conn: Connection) {
+    static async create(gm: GameMaster) {
         let obj = new SoundManager();
-        obj.connection = conn;
+        obj.gm = gm;
         obj.downloadText = writable("")
         obj.onready = (_) => { }
         obj.isReady = false
+        obj.soundHandles = new Map();
 
         const db = await openDB("owlSound", 1, {
             upgrade(db) {
@@ -28,9 +31,21 @@ export class SoundManager {
         });
         obj.db = db;
 
-        conn.on(Peeker.PacketType.PlaySound, async (psp) => {
-            await new Audio(URL.createObjectURL((await db.get("sounds", psp.value)).blob)).play()
+        gm.connection.on(Peeker.PacketType.PlaySound, async (psp: Packet<PacketType.PlaySound>) => {
+            // @ts-ignore
+            await obj.play(psp.value);
         })
+        gm.states.on("active_sounds", async (data: any) => {
+            obj.soundHandles.forEach((handle, sn) => {
+                if (!data.includes(sn)) {
+                    console.log("removing", sn)
+                    handle.pause();
+                    handle.remove();
+                    obj.soundHandles.delete(sn);
+                }
+            })
+        }
+        )
 
         if (window.localStorage.getItem("owlSoundDownloaded") != "true") {
             console.log(`Fetching sound catalog`)
@@ -61,6 +76,17 @@ export class SoundManager {
     }
 
     async play(sound_name: AvailableSound) {
-        await new Audio(URL.createObjectURL((await this.db.get("sounds", sound_name)).blob)).play()
+        if (this.soundHandles.has(sound_name)) {
+            let el = this.soundHandles.get(sound_name);
+            el?.pause();
+            el?.remove();
+            this.soundHandles.delete(sound_name);
+        }
+        let ae = new Audio(URL.createObjectURL((await this.db.get("sounds", sound_name)).blob))
+        this.soundHandles.set(sound_name, ae);
+        ae.onended = async (_) => {
+            await this.gm.sound.stop(sound_name);
+        }
+        await ae.play()
     }
 }

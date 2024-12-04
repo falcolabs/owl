@@ -157,6 +157,12 @@
     },
     {
         "part": "VCNV",
+        "fileName": "vcnv-open",
+        "description": "Lật mở mảnh ghép",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/4/40/VCNV_m%E1%BB%9F_h%C3%ACnh_%E1%BA%A3nh_left_O11.ogg/revision/latest?cb=20230127112221&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
         "fileName": "vcnv-bell",
         "description": "Thí sinh bấm chuông trả lời CNV",
         "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/38/VCNV_t%C3%ADn_hi%E1%BB%87u_tr%E1%BA%A3_l%E1%BB%9Di_left_O11.mp3/revision/latest?cb=20210905110033&path-prefix=vi"
@@ -256,6 +262,12 @@
         "fileName": "vedich-20secs",
         "description": "Đếm giờ 20 giây",
         "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/d/d3/V%C4%90_20s_right_O22.mp3/revision/latest?cb=20230518164407&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-star",
+        "description": "Ngôi sao hy vọng",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/e/e9/V%C4%90_ng%C3%B4i_sao_left_O8.mp3/revision/latest?cb=20210404071412&path-prefix=vi"
     },
     {
         "part": "Về đích",

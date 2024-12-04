@@ -8,6 +8,7 @@
 </script>
 
 <form
+    class="fscore"
     on:submit={async () => {
         if (inp == null || inp == undefined) return;
         await gm.set_score(identifier, inp);
@@ -30,7 +31,11 @@
         font-weight: bold;
         font-size: var(--font-normal);
         transition: 100ms ease-in;
-        width: 10rem;
+        width: 100%;
+    }
+
+    .fscore {
+        width: 248px;
     }
 
     .scoreset:hover,

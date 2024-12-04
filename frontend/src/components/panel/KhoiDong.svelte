@@ -40,16 +40,20 @@
         if ($states.stage == STAGE_SEPERATED) {
             if (ev.key === "+") {
                 await gm.add_score($states.seperated_candidate, $states.plusminus.add[0]);
+                await gm.sound.play("khoidong-correct");
             }
             if (ev.key === "-") {
                 await gm.add_score($states.seperated_candidate, $states.plusminus.rem[0]);
+                await gm.sound.play("khoidong-incorrect");
             }
         } else {
             if (ev.key === "+") {
-                await gm.add_score($states.bell_player, $states.plusminus.add[0]);
+                await gm.add_score($states.joint_bell, $states.plusminus.add[0]);
+                await gm.sound.play("khoidong-correct");
             }
             if (ev.key === "-") {
-                await gm.add_score($states.bell_player, $states.plusminus.rem[0]);
+                await gm.add_score($states.joint_bell, $states.plusminus.rem[0]);
+                await gm.sound.play("khoidong-incorrect");
             }
         }
     };
@@ -111,11 +115,7 @@
 <svelte:window on:keydown={onKeyDown} />
 
 <div>
-    <p class="code">Question #{$states.qid + 1}. {$states.current_question_content}</p>
-</div>
-
-<div>
-    <h1>Game Master Controls</h1>
+    <h1>Game Master</h1>
     <div class="bgroup-hor">
         <button
             on:click={$states.qid != -1
@@ -169,7 +169,7 @@
                 class="btn smol sep"
                 class:accent={$states.seperated_candidate == ""}
             >
-                unset
+                chưa chọn
             </button>
             {#each $players as [ident, p]}
                 <button
@@ -186,7 +186,7 @@
         <h1>Câu hỏi cho thí sinh</h1>
         <div class="setq">
             <button on:click={setQuestion(-1)} class="btn smol" class:accent={$states.qid == -1}>
-                prepare
+                chuẩn bị
             </button>
             {#if $question_placement[$states.stage][$states.seperated_candidate] !== undefined}
                 {#each $question_placement[$states.stage][$states.seperated_candidate] as q}
@@ -220,6 +220,10 @@
         </div>
     </div>
 {/if}
+<div class="qdisplay">
+    <p>Câu {$states.qid + 1}. {$states.prompt}</p>
+    <p style="font-weight: bold;">{$states.key}</p>
+</div>
 
 <style>
     .setq {
@@ -290,5 +294,9 @@
         height: auto;
         align-items: center;
         justify-content: center;
+    }
+    .qdisplay {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 </style>

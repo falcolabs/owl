@@ -1,5 +1,5 @@
 from traceback import print_stack
-from typing import final, override
+from typing import Literal, final, override
 import threading
 import typing
 import engine
@@ -148,7 +148,22 @@ class Show:
             self.session_manager.broadcast(engine.Packet.PlaySound(sound_name).pack()),
             LOOP,
         )
-        # )
+        self.active_sounds.set(
+            self.active_sounds.inner
+            + [
+                sound_name,
+            ]
+        )
+
+    def stop_sound(self, sound_name: "engine.AvailableSound | Literal['*']") -> None:
+        if sound_name == "*":
+            self.active_sounds.set([])
+        else:
+            output = []
+            for s in self.active_sounds.inner:
+                if s != sound_name:
+                    output.append(s)
+            self.active_sounds.set(output)
 
     def procedure_playsound(
         self,
@@ -158,6 +173,15 @@ class Show:
         _3,
     ):
         self.play_sound(call.data.str_argno(0))  # type: ignore[reportArgumentType]
+
+    def procedure_stopsound(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        _2: engine.IOHandle,
+        _3,
+    ):
+        self.stop_sound(call.data.str_argno(0))  # type: ignore[reportArgumentType]
 
     def start(self, listen_on: str, serve_on: str, static_dir: str):
         engine.log_info("Starting show...")
@@ -219,6 +243,10 @@ class Show:
     ):
         new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
+        self._part = self.parts[self.current_part.get()]
+        self._part.implementation.__init__()
+        self._part.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
+
         self.timer.set(engine.Timer())
         asyncio.run_coroutine_threadsafe(
             self.session_manager.broadcast(
@@ -357,7 +385,7 @@ class Show:
         self.time = self.rpc.use_state("time", 0)
         self.timer_paused = self.rpc.use_state("timer_paused", True)
         self.timer.subscribe(lambda t: self.time.set(t.time_elapsed().total_seconds()))
-
+        self.active_sounds = self.rpc.use_state("active_sounds", [])
         self.timer.subscribe(lambda t: self.timer_paused.set(t.is_paused))
 
         def set_time(new_value: int):
@@ -371,6 +399,11 @@ class Show:
                 (
                     "play_sound",
                     self.procedure_playsound,
+                    [("soundName", engine.PortableType.STRING)],
+                ),
+                (
+                    "stop_sound",
+                    self.procedure_stopsound,
                     [("soundName", engine.PortableType.STRING)],
                 ),
                 (

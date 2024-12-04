@@ -1,8 +1,6 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import PillTag from "../PillTag.svelte";
     import ScoreBar from "../ScoreBar.svelte";
-    import TitleBar from "../TitleBar.svelte";
 
     import { CallProcedure, Connection, GameMaster, PlayerManager, StateManager } from "$lib";
     import TimerBar from "../TimerBar.svelte";
@@ -13,7 +11,7 @@
     export let states: StateManager;
     export let players: PlayerManager;
 
-    const onKeyDown = async (_) => {
+    const onKeyDown = async (_: any) => {
         if ($states.stage == STAGE_SEPERATED) return;
         await conn.send(
             CallProcedure.name("khoidong::ring_bell").string("token", gm.authToken!).build()
@@ -28,7 +26,7 @@
             <div class="box">
                 {#if $states.qid > -1}
                     <div class="qnum"><PillTag text="Câu {$states.display_qid}" /></div>
-                    <p class="prompt">{$states.current_question_content}</p>
+                    <p class="prompt">{$states.prompt}</p>
                 {:else}
                     <div class="qnum"><PillTag text="Chuẩn bị" /></div>
                     <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>

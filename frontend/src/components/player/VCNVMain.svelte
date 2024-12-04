@@ -11,8 +11,8 @@
     export let states: StateManager;
 
     let answer: string;
+    let myans: string = "";
     let time = states.time;
-    let timeElapsed = 30;
     let inputBox: HTMLInputElement;
     let lines = writable(
         new Map<string, Writable<{ status: string; content: string; tag: string }>>()
@@ -20,6 +20,7 @@
     states.on("puzzle_data", (_) => {
         // @ts-ignore
         answer = undefined
+        myans = ""
     })
 
     states.subscribe((s) => {
@@ -93,9 +94,9 @@
                     <p class="reminder">Bấm Enter để gửi</p>
                     {#if !$states.allow_input}
                         <p class="reminder">Chưa đếm ngược</p>
-                    {:else if hasMine}
+                    {:else if hasMine && myans !== ""}
                         <p class="reminder">
-                            Đã nộp lúc <span class="code">{timeElapsed.toFixed(2)}</span>s
+                            Đã nộp {myans}
                         </p>
                     {:else}
                         <p class="reminder">Chưa nộp</p>
@@ -106,6 +107,7 @@
                         if (!$states.allow_input) {
                             return;
                         }
+                        myans = answer;
                         await conn.send(
                             CallProcedure.name("vcnv::submit_answer")
                                 .string("answer", answer)

@@ -10,7 +10,7 @@
 </script>
 
 <div>
-    <h1>Timer Controls</h1>
+    <h1>Bộ đếm giờ</h1>
     <p>
         Time Left: <span class="code"
             >{$states.timer_paused ? "(PAUSED)" : "(RUNNING)"}&nbsp{$elapsed}</span
@@ -26,7 +26,7 @@
                     }}
                     class="btn"
                 >
-                    {ops}
+                    {ops == "start" ? "chạy" : ops == "pause" ? "tạm dừng" : "đặt lại"}
                 </button>
             {/each}
         {:else}
@@ -38,7 +38,7 @@
                     }}
                     class="btn"
                 >
-                    {ops}
+                    {ops == "start" ? "chạy" : ops == "pause" ? "tạm dừng" : "đặt lại"}
                 </button>
             {/each}
         {/if}

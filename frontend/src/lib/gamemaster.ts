@@ -18,6 +18,15 @@ export class GameMaster {
     public authToken!: string;
     public username: string = "";
 
+    public sound = {
+        play: async (sound_name: AvailableSound) => {
+            await this.connection.send(CallProcedure.name("engine::play_sound").string("soundName", sound_name).build());
+        },
+        stop: async (sound_name: AvailableSound | "*") => {
+            await this.connection.send(CallProcedure.name("engine::stop_sound").string("soundName", sound_name).build());
+        }
+    }
+
     static async create(connection: Connection): Promise<GameMaster> {
         let obj = new GameMaster();
         obj.states = await StateManager.create(connection);
@@ -74,10 +83,6 @@ export class GameMaster {
                 accessKey: accessKey,
             })
         );
-    }
-
-    async play_sound(sound_name: AvailableSound) {
-        await this.connection.send(CallProcedure.name("engine::play_sound").string("soundName", sound_name).build());
     }
 
     async add_score(of: string, amount: number) {

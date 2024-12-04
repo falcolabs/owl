@@ -1,8 +1,10 @@
 <script lang="ts">
-    import { Connection, Peeker, type StateManager, CallProcedure } from "$lib";
+    import { Connection, Peeker, type StateManager, CallProcedure, GameMaster } from "$lib";
     import { scoreOf } from "$lib/globals";
+    import { getAllContexts } from "svelte";
     import Load from "../Load.svelte";
     export let states: StateManager;
+    export let gm: GameMaster;
     export let conn: Connection;
 
     const STAGE_CHOOSE: number = 0;
@@ -34,8 +36,11 @@
             >
             <button
                 class="btn"
-                class:accent={$states.stage == STAGE_COMPETE}
+                class:accent={$states.stage == STAGE_CHOOSE}
                 on:click={async () => {
+                    if ($states.stage == STAGE_CHOOSE) {
+                        await gm.sound.play("vedich-confirmchoice");
+                    }
                     await states.setNumber(
                         "stage",
                         $states.stage == STAGE_CHOOSE ? STAGE_COMPETE : STAGE_CHOOSE
@@ -52,7 +57,13 @@
                 class="btn"
                 class:accent={$states.allow_bell}
                 on:click={async () => {
+                    if (!$states.allow_bell) {
+                        await gm.sound.play("vedich-poll");
+                    } else {
+                        await gm.sound.stop("vedich-poll");
+                    }
                     await states.setBoolean("allow_bell", !$states.allow_bell);
+
                     setTimeout(async () => {
                         await states.setBoolean("allow_bell", false);
                     }, 5000);
@@ -72,13 +83,14 @@
         </div>
 
         <div class="vertical">
-            <h1>Player Controls</h1>
+            <h1>Thí sinh</h1>
             <div class="horizontal">
                 <button
                     class="btn smol nomargin-horizontal"
                     class:accent={$states.current_player_username == ""}
                     on:click={async () => {
                         await states.setString("current_player_username", "");
+                        await states.setNumber("stage", STAGE_CHOOSE);
                     }}>unset</button
                 >
                 {#each Object.keys($states.package) as ident}
@@ -86,7 +98,9 @@
                         class="btn smol nomargin-horizontal"
                         class:accent={$states.current_player_username == ident}
                         on:click={async () => {
+                            await gm.sound.play("vedich-packagechoice");
                             await states.setString("current_player_username", ident);
+                            await states.setNumber("stage", STAGE_CHOOSE);
                         }}>{ident}</button
                     >
                 {/each}
@@ -120,7 +134,7 @@
                 </div>
                 <div class="horizontal big-gap">
                     <div class="vertical">
-                        <h1>Question Controls</h1>
+                        <h1>Câu hỏi</h1>
                         <div class="horizontal">
                             <button
                                 class="btn smol nomargin-horizontal"
@@ -141,7 +155,7 @@
                         </div>
                     </div>
                     <div class="vertical">
-                        <h1>Hope Stars</h1>
+                        <h1>Ngôi sao hy vọng</h1>
                         <div class="horizontal">
                             {#each $states.placement[$states.current_player_username] as qid}
                                 <button
@@ -152,8 +166,10 @@
                                         if (hs.includes(qid)) {
                                             const index = hs.indexOf(qid);
                                             hs.splice(index, 1);
+                                            await gm.sound.stop("vedich-star");
                                         } else {
                                             hs.push(qid);
+                                            await gm.sound.play("vedich-star");
                                         }
                                         await states.setArray("hope_stars", hs);
                                     }}>{qid == -1 ? "unset" : qid}</button
@@ -163,9 +179,13 @@
                     </div>
                 </div>
             {:else}
-                <p>Không người chơi nào được chọn</p>
+                <p>Chưa chọn thí sinh nào</p>
             {/if}
         </div>
+    </div>
+    <div>
+        <p>Câu {$states.qid}. {$states.prompt}</p>
+        <p style="font-weight: bold;">{$states.key}</p>
     </div>
 </Load>
 

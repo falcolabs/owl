@@ -3,3 +3,4 @@ basedpyright
 black
 pillow
 tinydb
+pylightxl

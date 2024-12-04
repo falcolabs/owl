@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { Connection, Peeker, type StateManager, CallProcedure } from "$lib";
+    import { Connection, Peeker, type StateManager, CallProcedure, GameMaster } from "$lib";
     import type { Timer, Player } from "client";
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import SubmitJudger from "./SubmitJudger.svelte";
     import Load from "../Load.svelte";
     export let states: StateManager;
+    export let gm: GameMaster;
     export let conn: Connection;
 
     const isTile = (tile: string, s: string): boolean => {
@@ -30,12 +31,21 @@
     <div class="horizontal big-gap">
         <div class="vertical">
             <div>
-                <h1>GameMaster Controls</h1>
+                <h1>Game Master</h1>
                 <button
                     class="btn"
                     class:accent={$states.show_key}
-                    on:click={async () => await states.setBoolean("show_key", !$states.show_key)}
-                    >{$states.show_key ? "Key: Shown" : "Key: Hidden"}</button
+                    on:click={async () => {
+                        if (!$states.show_key) {
+                            await gm.sound.play("vcnv-showanswers");
+                            console.log("2s delay before showing answer");
+                            setTimeout(async () => {
+                                await states.setBoolean("show_key", !$states.show_key);
+                            }, 2000);
+                        } else {
+                            await states.setBoolean("show_key", !$states.show_key);
+                        }
+                    }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
                 >
                 <button
                     class="btn"
@@ -48,8 +58,14 @@
                     >Clear Bell</button
                 >
             </div>
+            <div>
+                <h1>Thứ tự trả lời CNV</h1>
+                {#each $states.highlighted as p}
+                    <p>{p}</p>
+                {/each}
+            </div>
             <div class="vertical big-gap">
-                <h1>Selected Row</h1>
+                <h1>Các hàng ngang</h1>
                 <div class="vertical">
                     {#each [...$states.puzzle_data.normal.map(extractTag), "M", "K"] as r}
                         <div class="horizontal">
@@ -76,8 +92,21 @@
                                                     .string("status", op)
                                                     .build()
                                             );
+                                            if (op == "selected") {
+                                                await gm.sound.play("vcnv-selectrow");
+                                            }
+                                            if (op == "shown") {
+                                                await gm.sound.play("vcnv-open");
+                                            }
                                         }
-                                    }}>{op}</button
+                                    }}
+                                    >{op == "hidden"
+                                        ? "ẩn"
+                                        : op == "selected"
+                                          ? "chọn"
+                                          : op == "shown"
+                                            ? "hiện"
+                                            : "khóa"}</button
                                 >
                             {/each}
                         </div>
@@ -85,7 +114,6 @@
                 </div>
             </div>
         </div>
-        <SubmitJudger {conn} {states} prefix="vcnv" />
     </div>
 </Load>
 
@@ -95,7 +123,6 @@
         font-size: var(--font-normal);
         color: var(--text);
         padding: 1rem;
-        margin: 1rem;
         margin-left: 0;
         user-select: none;
         cursor: pointer;
@@ -137,6 +164,10 @@
 
     .accent {
         background-color: var(--accent);
+    }
+
+    .btn {
+        margin: 0.5rem;
     }
 
     .smol {

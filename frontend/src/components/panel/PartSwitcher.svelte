@@ -7,7 +7,7 @@
 </script>
 
 <div>
-    <h1>Show Master Controls</h1>
+    <h1>Chỉnh phần</h1>
     <Load until={$states.available_parts !== undefined}>
         <div class="horizontal">
             {#each Object.entries($states.available_parts) as [index, name]}

@@ -32,7 +32,7 @@
         gm = await GameMaster.create(conn);
         states = gm.states;
         players = gm.players;
-        sound = await SoundManager.create(conn);
+        sound = await SoundManager.create(gm);
         downloadText = sound.downloadText;
         conn.on(Peeker.PacketType.State, async (update) => {
             if (update.value.name === "current_part") {

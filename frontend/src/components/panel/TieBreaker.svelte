@@ -36,10 +36,6 @@
 </script>
 
 <div>
-    <p class="code">Question #{$states.qid + 1}. {$states.current_question_content}</p>
-</div>
-
-<div>
     <h1>Game Master Controls</h1>
     <div class="bgroup-hor">
         <button
@@ -87,6 +83,10 @@
             </button>
         {/each}
     </div>
+</div>
+<div class="qdisplay">
+    <p>Câu {$states.qid + 1}. {$states.prompt}</p>
+    <p style="font-weight: bold;">{$states.key}</p>
 </div>
 
 <style>
@@ -158,5 +158,10 @@
         height: auto;
         align-items: center;
         justify-content: center;
+    }
+
+    .qdisplay {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 </style>

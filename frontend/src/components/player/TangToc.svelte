@@ -33,7 +33,7 @@
     let videoProgress = writable(1);
     let blobs: { [key: string]: string } = {};
     let answer: string;
-    let timeElapsed = 30;
+    let myans: string = "";
     let hasMine = false;
     let inputBox: HTMLInputElement;
     let time = states.time;
@@ -75,6 +75,7 @@
         states.on("qid", (_) => {
             // @ts-ignore
             answer = undefined;
+            myans = "";
         });
 
         inputBox.focus();
@@ -92,7 +93,6 @@
                 return;
             }
             for (let ans of s.answers) {
-                console.log(ans, gm.username, ans.time);
                 if (ans.name == gm.username && ans.content != "" && ans.time != 30) {
                     hasMine = true;
                     return;
@@ -165,8 +165,8 @@
                                 <p class="reminder">Bấm Enter để gửi</p>
                                 {#if !$states.allow_input}
                                     <p class="reminder">Đồng hồ không chạy</p>
-                                {:else if hasMine}
-                                    <p class="reminder">Đã nộp</p>
+                                {:else if hasMine && myans !== ""}
+                                    <p class="reminder">Đã nộp {myans}</p>
                                 {:else}
                                     <p class="reminder">Chưa nộp</p>
                                 {/if}
@@ -176,6 +176,7 @@
                                     if (!$states.allow_input) {
                                         return;
                                     }
+                                    myans = answer;
                                     await conn.send(
                                         CallProcedure.name("tangtoc::submit_answer")
                                             .string("answer", answer)
