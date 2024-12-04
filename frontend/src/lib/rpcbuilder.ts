@@ -36,7 +36,6 @@ export class CallProcedure {
     }
 
     string(name: string, str: string): CallProcedure {
-        console.log("strarg", str)
         return this.arg(name, Value.string(str))
     }
 

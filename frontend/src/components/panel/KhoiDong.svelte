@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Connection, StateManager } from "$lib";
+    import type { Connection, GameMaster, StateManager } from "$lib";
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import { CallProcedure } from "$lib";
     import type { Timer, Player } from "client";
@@ -20,6 +20,7 @@
         qid: -1
     });
     export let conn: Connection;
+    export let gm: GameMaster;
     export let players: Readable<Map<string, Player>>;
 
     let question_placement: Writable<any> = writable({
@@ -31,6 +32,27 @@
         },
         [Number(STAGE_JOINT)]: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
     });
+
+    const onKeyDown = async (ev: KeyboardEvent) => {
+        if (ev.key === " ") {
+            await incrementQuestion();
+        }
+        if ($states.stage == STAGE_SEPERATED) {
+            if (ev.key === "+") {
+                await gm.add_score($states.seperated_candidate, $states.plusminus.add[0]);
+            }
+            if (ev.key === "-") {
+                await gm.add_score($states.seperated_candidate, $states.plusminus.rem[0]);
+            }
+        } else {
+            if (ev.key === "+") {
+                await gm.add_score($states.bell_player, $states.plusminus.add[0]);
+            }
+            if (ev.key === "-") {
+                await gm.add_score($states.bell_player, $states.plusminus.rem[0]);
+            }
+        }
+    };
 
     onMount(async () => {
         let player_list = $states.engine_players;
@@ -86,6 +108,8 @@
     };
 </script>
 
+<svelte:window on:keydown={onKeyDown} />
+
 <div>
     <p class="code">Question #{$states.qid + 1}. {$states.current_question_content}</p>
 </div>
@@ -127,10 +151,12 @@
                 Phần thi chung
             </button>
         {/if}
-        <button class="btn" class:accent={$states.allow_bell} on:click={async () => {
-            states.setBoolean("allow_bell", !$states.allow_bell)
-        }}
-            >{$states.allow_bell ? "Chuông bật" : "Chuông tắt"}</button
+        <button
+            class="btn"
+            class:accent={$states.allow_bell}
+            on:click={async () => {
+                states.setBoolean("allow_bell", !$states.allow_bell);
+            }}>{$states.allow_bell ? "Chuông bật" : "Chuông tắt"}</button
         >
     </div>
 </div>

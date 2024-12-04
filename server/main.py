@@ -21,7 +21,7 @@ import config
 
 def main():
     qbank = engine.QuestionBank()
-    qbank.load("../assets/question_template.json")
+    qbank.load("../assets/question_official.json")
     config.load("../config.json")
     penguin.set_error_hook()
     if config.config().debug:
@@ -54,7 +54,7 @@ def main():
     )
 
     show.start(
-        config.config().listenOn,
+        config.config().listenOn.host + ":" + config.config().listenOn.port,
         "dist",
         "static",
     )

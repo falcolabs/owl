@@ -3,7 +3,8 @@
 </script>
 
 <div class="bg">
-    <div></div>
+    <img alt="" src="/bg.jpg" />
+    <!-- <div></div>
     <div class="titlegroup">
         <h2 class="caps">{ORG_NAME}</h2>
         <h1>
@@ -11,10 +12,14 @@
         </h1>
         <h2 class="caps subtext">{SUBTEXT}</h2>
     </div>
-    <p class="cpy">Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.</p>
+    <p class="cpy">Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.</p> -->
 </div>
 
 <style>
+    img {
+        width: 100%;
+        height: 100%;
+    }
     .bg {
         width: 100%;
         height: 100vh;

@@ -62,7 +62,7 @@
                     <TimerControls {elapsed} {gm} {states} {conn} />
                     <div class="partcontrol">
                         {#if $states.available_parts[$states.current_part] == "khoidong"}
-                            <KhoiDong {states} {conn} {players} />
+                            <KhoiDong {gm} {states} {conn} {players} />
                         {:else if $states.available_parts[$states.current_part] == "vcnv"}
                             <Vcnv {states} {conn} />
                         {:else if $states.available_parts[$states.current_part] == "tangtoc"}

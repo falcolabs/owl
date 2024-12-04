@@ -80,6 +80,24 @@ export class GameMaster {
         await this.connection.send(CallProcedure.name("engine::play_sound").string("soundName", sound_name).build());
     }
 
+    async add_score(of: string, amount: number) {
+        await this.connection.send(
+            CallProcedure.name("engine::add_score")
+                .string("target", of)
+                .number("value", amount)
+                .build()
+        );
+    }
+
+    async set_score(of: string, amount: number) {
+        await this.connection.send(
+            CallProcedure.name("engine::set_score")
+                .string("target", of)
+                .number("value", amount)
+                .build()
+        );
+    }
+
     async timer_operation(operation: "start" | "pause" | "reset") {
         await this.connection.send(CallProcedure.name("engine::timer_operation").string("operation", operation).build());
     }

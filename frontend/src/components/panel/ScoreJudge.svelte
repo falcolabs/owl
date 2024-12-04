@@ -18,12 +18,7 @@
                         <button
                             class="btn destructive"
                             on:click={async () => {
-                                await conn.send(
-                                    CallProcedure.name("engine::add_score")
-                                        .string("target", player.identifier)
-                                        .number("value", i)
-                                        .build()
-                                );
+                                await gm.add_score(player.identifier, i)
                             }}>{i}</button
                         >
                     {/each}
@@ -32,7 +27,7 @@
                         name={player.name}
                         score={player.score}
                     />
-                    <SetScoreOf {conn} identifier={player.identifier} players={gm.players} {states}/>
+                    <SetScoreOf {gm} identifier={player.identifier}/>
 
                     {#each $states.plusminus.add as i}
                         <button

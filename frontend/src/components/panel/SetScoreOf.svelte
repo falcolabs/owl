@@ -1,23 +1,17 @@
 <script lang="ts">
-    import { CallProcedure, PlayerManager, StateManager, type Connection } from "$lib";
+    import { CallProcedure, GameMaster, PlayerManager, StateManager, type Connection } from "$lib";
     import { onMount } from "svelte";
 
-    export let conn: Connection;
+    export let gm: GameMaster;
     export let identifier: string;
-    export let players: PlayerManager;
-    export let states: StateManager;
     let inp: number;
 </script>
 
 <form
     on:submit={async () => {
         if (inp == null || inp == undefined) return;
-        await conn.send(
-            CallProcedure.name("engine::set_score")
-                .string("target", identifier)
-                .number("value", inp)
-                .build()
-        );
+        await gm.set_score(identifier, inp);
+
         // @ts-ignore
         inp = undefined;
     }}
