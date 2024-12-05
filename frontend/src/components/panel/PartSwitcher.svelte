@@ -10,15 +10,24 @@
     <h1>Chỉnh phần</h1>
     <Load until={$states.available_parts !== undefined}>
         <div class="horizontal">
-            {#each Object.entries($states.available_parts) as [index, name]}
-                <button
-                    class="btn smol"
-                    class:accent={$states.current_part == index}
-                    on:click={async () => {
-                        await states.setNumber("current_part", Number(index));
-                    }}>{name}</button
-                >
-            {/each}
+            <div class="horizontal parts">
+                {#each Object.entries($states.available_parts) as [index, name]}
+                    <button
+                        class="btn smol"
+                        class:accent={$states.current_part == index}
+                        on:click={async () => {
+                            await states.setNumber("current_part", Number(index));
+                        }}>{name}</button
+                    >
+                {/each}
+            </div>
+            <button
+                class="btn smol bfreeze"
+                class:accent={!$states.engine_freeze}
+                on:click={async () => {
+                    await states.setBoolean("engine_freeze", !$states.engine_freeze);
+                }}>{$states.engine_freeze ? "Đóng băng" : "Trực tiếp"}</button
+            >
         </div>
     </Load>
 </div>
@@ -35,6 +44,16 @@
         display: flex;
         flex-direction: row;
         gap: 5px;
+        height: max-content;
+    }
+
+    .parts {
+        width: 70%;
+        flex-wrap: wrap;
+    }
+
+    .bfreeze {
+        height: fit-content;
     }
 
     .btn {

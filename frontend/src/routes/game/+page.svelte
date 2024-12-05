@@ -44,9 +44,7 @@
     <Load until={gm !== undefined && $states.__init}>
         {#if !isAuthenticated}
             <AuthPlayer {gm} />
-
-        {:else}
-        {#if $states.available_parts[$states.current_part] == "standby"}
+        {:else if $states.available_parts[$states.current_part] == "standby" || $states.engine_freeze}
             <Standby />
         {:else if $states.available_parts[$states.current_part] == "auth"}
             <!-- TODO - SECURITY: make this login portal always show up when unauthenticated -->
@@ -63,7 +61,6 @@
             <TieBreaker {conn} {gm} {states} {players} />
         {:else if $states.available_parts[$states.current_part] == "tkd"}
             <Tkd {states} />
-        {/if}
         {/if}
         {#if ANTICHEAT_ENABLED}
             <AntiCheat url="" data={{}} />

@@ -202,6 +202,13 @@ class Show:
         self.ticker: engine.Ticker = engine.Ticker()
         self._part = self.parts[self.current_part.get()]
         self._sleep_time = 1 / config().tickSpeed
+
+        def on_partchange(pname):
+            self._part = self.parts[self.current_part.get()]
+            self._part.implementation.__init__()
+            self._part.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
+
+        self.current_part.subscribe(on_partchange)
         LOOP.run_forever()
 
     def tick(self, is_packet: bool, a):
@@ -241,11 +248,9 @@ class Show:
         handle: engine.IOHandle,
         addr: str,
     ):
+        print("Setting new part")
         new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
-        self._part = self.parts[self.current_part.get()]
-        self._part.implementation.__init__()
-        self._part.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
 
         self.timer.set(engine.Timer())
         asyncio.run_coroutine_threadsafe(
@@ -371,6 +376,8 @@ class Show:
         self.tick_speed: int = tick_speed
         self.qbank: engine.QuestionBank = question_bank
         self.current_part: Writable[int] = self.rpc.use_state("current_part", 0)
+        self.engine_freeze: Writable[int] = self.rpc.use_state("engine_freeze", False)
+
         self.ticker = engine.Ticker()
         self.sid: Writable[str] = self.rpc.use_state("sid", gen_token(8))
         self.session_manager = SESSION_MAN

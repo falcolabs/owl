@@ -239,6 +239,7 @@ class VCNV(penguin.PartImplementation):
             self.selected.set("")
             self.prompt.set("Thí sinh hãy lựa chọn hàng ngang.")
         self.puzzle_data.set(mod)
+        self.show.timer.set(engine.Timer())
         self.image.set(
             utils.vcnv.get_imgdata(
                 [

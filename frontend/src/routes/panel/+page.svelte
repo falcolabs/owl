@@ -29,22 +29,6 @@
         players = gm.players;
         time = states.time;
 
-        setInterval(async () => {
-            let e = $time;
-            if ($states.max_time !== undefined) {
-                if ($states.max_time - e <= 0) {
-                    $elapsed = "0";
-                    if (!$states.timer_paused) {
-                        await gm.timer_operation("pause");
-                    }
-                } else {
-                    $elapsed = ($states.max_time - e).toFixed(2);
-                }
-            } else {
-                $elapsed = `Video progress: ${e.toFixed(2)}`;
-            }
-        }, 100);
-
         conn.on(Peeker.PacketType.State, async (update) => {
             if (update.value.name === "current_part") {
                 await gm.updateAll();
@@ -58,8 +42,6 @@
         <div class="container">
             <div class="horizontal">
                 <div>
-                    <TimerControls {elapsed} {gm} {states} {conn} />
-
                     {#if $states.available_parts[$states.current_part] == "khoidong"}
                         <KhoiDong {gm} {states} {conn} {players} />
                     {:else if $states.available_parts[$states.current_part] == "vcnv"}
@@ -135,6 +117,7 @@
                                 { displayName: "Xác nhận", fileName: "vedich-confirmchoice" },
                                 { displayName: "15s", fileName: "vedich-15secs" },
                                 { displayName: "20s", fileName: "vedich-20secs" },
+                                { displayName: "40s", fileName: "tangtoc-40secs" },
                                 { displayName: "Hy vọng", fileName: "vedich-star" },
                                 { displayName: "Cơ hội", fileName: "vedich-poll" },
                                 { displayName: "Chuông", fileName: "vedich-bell" },

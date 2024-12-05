@@ -23,7 +23,7 @@
                         // @ts-ignore
                         await gm.sound.stop(sound.fileName);
                     }
-                    console.log($states.active_sounds)
+                    console.log($states.active_sounds);
                     // @ts-ignore
                     // prevents space bar or enter from triggering the button
                     ev.target?.blur();
@@ -35,8 +35,8 @@
 
 <style>
     .sboardbtn {
-        width: 200px;
-        height: 200px;
+        width: 170px;
+        height: 170px;
     }
 
     .btn {

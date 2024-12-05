@@ -3,6 +3,7 @@
     import { scoreOf } from "$lib/globals";
     import { getAllContexts } from "svelte";
     import Load from "../Load.svelte";
+    import TimerControls from "./TimerControls.svelte";
     export let states: StateManager;
     export let gm: GameMaster;
     export let conn: Connection;
@@ -14,7 +15,7 @@
 <Load until={$states.package !== undefined}>
     <div class="vertical">
         <div class="vertical">
-            <h1>Quản trò</h1>
+            <h1>Game Master</h1>
             <button
                 class="btn"
                 on:click={async () => {
@@ -81,7 +82,22 @@
                 >
             {/if}
         </div>
-
+        <TimerControls
+            {gm}
+            onstart={async () => {
+                switch ($states.max_time) {
+                    case 15:
+                        await gm.sound.play("vedich-15secs");
+                        break;
+                    case 20:
+                        await gm.sound.play("vedich-20secs");
+                        break;
+                    case 40:
+                        await gm.sound.play("tangtoc-40secs");
+                        break;
+                }
+            }}
+        />
         <div class="vertical">
             <h1>Thí sinh</h1>
             <div class="horizontal">

@@ -4,6 +4,7 @@
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import SubmitJudger from "./SubmitJudger.svelte";
     import Load from "../Load.svelte";
+    import TimerControls from "./TimerControls.svelte";
     export let states: StateManager;
     export let gm: GameMaster;
     export let conn: Connection;
@@ -58,6 +59,15 @@
                     >Clear Bell</button
                 >
             </div>
+            <TimerControls
+                {gm}
+                onstart={async () => {
+                    await gm.sound.play("vcnv-15secs");
+                }}
+                onreset={async () => {
+                    await gm.sound.stop("vcnv-15secs");
+                }}
+            />
             <div>
                 <h1>Thứ tự trả lời CNV</h1>
                 {#each $states.highlighted as p}

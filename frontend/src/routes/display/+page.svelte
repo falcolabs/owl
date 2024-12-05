@@ -48,7 +48,9 @@
         {#if !sound.isReady}
             <p>{$downloadText}</p>
         {:else}
-            {#if $states.available_parts[$states.current_part] == "khoidong"}
+            {#if $states.engine_freeze}
+                <Standby />
+            {:else if $states.available_parts[$states.current_part] == "khoidong"}
                 <KhoiDongDisplay {conn} {gm} {states} {players} />
             {:else if $states.available_parts[$states.current_part] == "vcnv"}
                 <VcnvDisplay {conn} {gm} {states} {players} />

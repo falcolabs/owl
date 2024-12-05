@@ -11,7 +11,7 @@ def ddx_loader(db: Worksheet):
         output.append(
             {
                 "prompt": db.address(f"D{i}"),
-                "key": db.address(f"E{i}"),
+                "key": str(db.address(f"E{i}")),
                 "score": int(db.address(f"F{i}")),
                 "time": int(db.address(f"H{i}")),
                 "media": None,
@@ -49,7 +49,7 @@ def ddx_loader(db: Worksheet):
         output.append(
             {
                 "prompt": db.address(f"D{i}"),
-                "key": db.address(f"E{i}"),
+                "key": str(db.address(f"E{i}")),
                 "score": int(db.address(f"F{i}")),
                 "time": int(db.address(f"H{i}")),
                 "media": None,
@@ -124,7 +124,7 @@ def olympus_loader(db: Worksheet):
         p1.append(
             {
                 "prompt": db.address(f"B{i}"),
-                "key": db.address(f"C{i}"),
+                "key": str(db.address(f"C{i}")),
                 "score": 10,
                 "time": 3,
                 "media": None,
@@ -136,7 +136,7 @@ def olympus_loader(db: Worksheet):
         p2.append(
             {
                 "prompt": db.address(f"D{i}"),
-                "key": db.address(f"E{i}"),
+                "key": str(db.address(f"E{i}")),
                 "score": 10,
                 "time": 3,
                 "media": None,
@@ -148,7 +148,7 @@ def olympus_loader(db: Worksheet):
         p3.append(
             {
                 "prompt": db.address(f"F{i}"),
-                "key": db.address(f"G{i}"),
+                "key": str(db.address(f"G{i}")),
                 "score": 10,
                 "time": 3,
                 "media": None,
@@ -160,7 +160,7 @@ def olympus_loader(db: Worksheet):
         p4.append(
             {
                 "prompt": db.address(f"H{i}"),
-                "key": db.address(f"I{i}"),
+                "key": str(db.address(f"I{i}")),
                 "score": 10,
                 "time": 3,
                 "media": None,
@@ -175,7 +175,7 @@ def olympus_loader(db: Worksheet):
         output.append(
             {
                 "prompt": db.address(f"B{i}"),
-                "key": db.address(f"C{i}"),
+                "key": str(db.address(f"C{i}")),
                 "score": 10,
                 "time": 3,
                 "media": None,
@@ -213,7 +213,7 @@ def olympus_loader(db: Worksheet):
     output += [
         {
             "prompt": db.address(f"B30"),
-            "key": db.address(f"C30"),
+            "key": str(db.address(f"C30")),
             "score": 0,
             "time": 10,
             "media": None,
@@ -223,7 +223,7 @@ def olympus_loader(db: Worksheet):
         },
         {
             "prompt": db.address(f"B31"),
-            "key": db.address(f"C31"),
+            "key": str(db.address(f"C31")),
             "score": 0,
             "time": 20,
             "media": None,
@@ -233,7 +233,7 @@ def olympus_loader(db: Worksheet):
         },
         {
             "prompt": db.address(f"B32"),
-            "key": db.address(f"C32"),
+            "key": str(db.address(f"C32")),
             "score": 0,
             "time": 30,
             "media": None,
@@ -243,7 +243,7 @@ def olympus_loader(db: Worksheet):
         },
         {
             "prompt": db.address(f"B33"),
-            "key": db.address(f"C33"),
+            "key": str(db.address(f"C33")),
             "score": 0,
             "time": 40,
             "media": None,
@@ -257,7 +257,7 @@ def olympus_loader(db: Worksheet):
         p1.append(
             {
                 "prompt": db.address(f"B{i}"),
-                "key": db.address(f"C{i}"),
+                "key": str(db.address(f"C{i}")),
                 "score": 20,
                 "time": 15,
                 "media": None,
@@ -269,7 +269,7 @@ def olympus_loader(db: Worksheet):
         p2.append(
             {
                 "prompt": db.address(f"D{i}"),
-                "key": db.address(f"E{i}"),
+                "key": str(db.address(f"E{i}")),
                 "score": 20,
                 "time": 15,
                 "media": None,
@@ -281,7 +281,7 @@ def olympus_loader(db: Worksheet):
         p3.append(
             {
                 "prompt": db.address(f"F{i}"),
-                "key": db.address(f"G{i}"),
+                "key": str(db.address(f"G{i}")),
                 "score": 20,
                 "time": 15,
                 "media": None,
@@ -293,7 +293,7 @@ def olympus_loader(db: Worksheet):
         p4.append(
             {
                 "prompt": db.address(f"H{i}"),
-                "key": db.address(f"I{i}"),
+                "key": str(db.address(f"I{i}")),
                 "score": 20,
                 "time": 15,
                 "media": None,
@@ -306,7 +306,7 @@ def olympus_loader(db: Worksheet):
         p1.append(
             {
                 "prompt": db.address(f"B{i}"),
-                "key": db.address(f"C{i}"),
+                "key": str(db.address(f"C{i}")),
                 "score": 30,
                 "time": 20,
                 "media": None,
@@ -318,7 +318,7 @@ def olympus_loader(db: Worksheet):
         p2.append(
             {
                 "prompt": db.address(f"D{i}"),
-                "key": db.address(f"E{i}"),
+                "key": str(db.address(f"E{i}")),
                 "score": 30,
                 "time": 20,
                 "media": None,
@@ -330,7 +330,7 @@ def olympus_loader(db: Worksheet):
         p3.append(
             {
                 "prompt": db.address(f"F{i}"),
-                "key": db.address(f"G{i}"),
+                "key": str(db.address(f"G{i}")),
                 "score": 30,
                 "time": 20,
                 "media": None,
@@ -342,7 +342,7 @@ def olympus_loader(db: Worksheet):
         p4.append(
             {
                 "prompt": db.address(f"H{i}"),
-                "key": db.address(f"I{i}"),
+                "key": str(db.address(f"I{i}")),
                 "score": 30,
                 "time": 20,
                 "media": None,
@@ -358,7 +358,7 @@ def olympus_loader(db: Worksheet):
         output.append(
             {
                 "prompt": db.address(f"B{i}"),
-                "key": db.address(f"C{i}"),
+                "key": str(db.address(f"C{i}")),
                 "score": 10,
                 "time": 15,
                 "media": None,

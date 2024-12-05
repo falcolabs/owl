@@ -4,6 +4,7 @@
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import SubmitJudger from "./SubmitJudger.svelte";
     import Load from "../Load.svelte";
+    import TimerControls from "./TimerControls.svelte";
     export let gm: GameMaster;
     export let states: StateManager;
     export let conn: Connection;
@@ -14,11 +15,8 @@
 <Load until={$states.media !== undefined}>
     <div class="horizontal big-gap">
         <div class="vertical big-gap">
-            <div class="nofat">
-                <p class="code">Question #{$states.qid + 1}. {$states.prompt}</p>
-            </div>
             <div>
-                <h1>Hiển thị</h1>
+                <h1>Game Master</h1>
                 <button
                     class="btn"
                     class:accent={$states.show_key}
@@ -35,6 +33,25 @@
                     }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
                 >
             </div>
+            <TimerControls
+                {gm}
+                onstart={async () => {
+                    switch ($states.max_time) {
+                        case 10:
+                            await gm.sound.play("tangtoc-10secs");
+                            break;
+                        case 20:
+                            await gm.sound.play("tangtoc-20secs");
+                            break;
+                        case 30:
+                            await gm.sound.play("tangtoc-30secs");
+                            break;
+                        case 40:
+                            await gm.sound.play("tangtoc-40secs");
+                            break;
+                    }
+                }}
+            />
             <div class="vertical big-gap">
                 <h1>Đa phương tiện</h1>
                 {#if $states.media !== null}
@@ -94,6 +111,10 @@
                         >
                     {/each}
                 </div>
+            </div>
+            <div class="nofat">
+                <p>Câu {$states.qid + 1}. {$states.prompt}</p>
+                <p style="font-weight: bold;">{$states.key}</p>
             </div>
         </div>
     </div>
