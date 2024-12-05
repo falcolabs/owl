@@ -3,7 +3,8 @@
 </script>
 
 <div class="bg">
-    <div></div>
+    <img alt="" src="/bg.jpg" />
+    <!-- <div></div>
     <div class="titlegroup">
         <h2 class="caps">{ORG_NAME}</h2>
         <h1>
@@ -11,10 +12,14 @@
         </h1>
         <h2 class="caps subtext">{SUBTEXT}</h2>
     </div>
-    <p class="cpy">Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.</p>
+    <p class="cpy">Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.</p> -->
 </div>
 
 <style>
+    img {
+        width: 100%;
+        height: 100%;
+    }
     .bg {
         width: 100%;
         height: 100vh;
@@ -24,39 +29,5 @@
         align-items: center;
         justify-content: space-between;
         overflow: hidden;
-    }
-
-    .titlegroup {
-        display: flex;
-        flex-direction: column;
-        justify-self: center;
-        align-items: center;
-    }
-
-    .cpy {
-        font-size: 16px;
-        text-align: center;
-        color: #888ebf;
-        margin-bottom: 15px;
-        width: 540px;
-    }
-
-    .caps {
-        text-transform: uppercase;
-        margin-bottom: 0.5em;
-    }
-
-    h2 {
-        font-size: 1.5rem;
-        color: var(--text-2);
-        font-weight: bold;
-    }
-    h1 {
-        font-size: 4rem;
-        color: var(--text);
-        font-weight: bold;
-    }
-    .subtext {
-        margin: 1rem;
     }
 </style>

@@ -223,5 +223,8 @@ Cargo.lock
 #.idea/
 assets/question_test.json
 assets/question_quickinsert.json
+assets/question_official.json
 /gamedata.json
 /TODO.md
+/config.xlsx
+/config.csv

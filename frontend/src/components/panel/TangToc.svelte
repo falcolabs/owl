@@ -4,30 +4,56 @@
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import SubmitJudger from "./SubmitJudger.svelte";
     import Load from "../Load.svelte";
+    import TimerControls from "./TimerControls.svelte";
+    export let gm: GameMaster;
     export let states: StateManager;
     export let conn: Connection;
 
-    let timer = states.timerStore;
+    let time = states.time;
 </script>
 
 <Load until={$states.media !== undefined}>
     <div class="horizontal big-gap">
         <div class="vertical big-gap">
-            <div class="nofat">
-                <p class="code">Question #{$states.qid + 1}. {$states.prompt}</p>
-            </div>
             <div>
-                <h1>Display Controls</h1>
+                <h1>Game Master</h1>
                 <button
                     class="btn"
                     class:accent={$states.show_key}
                     on:click={async () => {
-                        await states.setBoolean("show_key", !$states.show_key);
-                    }}>{$states.show_key ? "Keys Shown" : "Keys Hidden"}</button
+                        if (!$states.show_key) {
+                            await gm.sound.play("tangtoc-showanswers");
+                            console.log("1.5s delay before showing answer");
+                            setTimeout(async () => {
+                                await states.setBoolean("show_key", !$states.show_key);
+                            }, 1500);
+                        } else {
+                            await states.setBoolean("show_key", !$states.show_key);
+                        }
+                    }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
                 >
             </div>
+            <TimerControls
+                {gm}
+                onstart={async () => {
+                    switch ($states.max_time) {
+                        case 10:
+                            await gm.sound.play("tangtoc-10secs");
+                            break;
+                        case 20:
+                            await gm.sound.play("tangtoc-20secs");
+                            break;
+                        case 30:
+                            await gm.sound.play("tangtoc-30secs");
+                            break;
+                        case 40:
+                            await gm.sound.play("tangtoc-40secs");
+                            break;
+                    }
+                }}
+            />
             <div class="vertical big-gap">
-                <h1>Media Controls</h1>
+                <h1>Đa phương tiện</h1>
                 {#if $states.media !== null}
                     <div class="horizontal">
                         <button
@@ -37,7 +63,7 @@
                                 let status = $states.media_status;
                                 status.visible = !status.visible;
                                 await states.setObject("media_status", status);
-                            }}>{$states.media_status.visible ? "Shown" : "Hidden"}</button
+                            }}>{$states.media_status.visible ? "Ẩn" : "Hiện"}</button
                         >
                         {#if $states.media.mediaType == "video"}
                             <button
@@ -47,16 +73,15 @@
                                     let status = $states.media_status;
                                     status.playbackPaused = !status.playbackPaused;
                                     if (status.playbackPaused) {
-                                        $timer.pause();
+                                        await gm.timer_operation("pause");
                                     } else {
-                                        $timer.resume();
+                                        await gm.timer_operation("start");
                                     }
-                                    await states.setTimer($timer);
                                     await states.setObject("media_status", status);
                                 }}
                                 >{$states.media_status.playbackPaused
-                                    ? "Paused"
-                                    : "Playing"}</button
+                                    ? "Khồng chạy"
+                                    : "Đang chạy"}</button
                             >
                         {/if}
                     </div>
@@ -67,7 +92,12 @@
             <div class="vertical big-gap">
                 <h1>Question Controls</h1>
                 <div class="horizontal">
-                    {#each [41, 42, 43, 44] as qi}
+                    <button
+                        class="btn smol nomargin-horizontal"
+                        class:accent={$states.qid == -1}
+                        on:click={async () => await states.setNumber("qid", -1)}>unset</button
+                    >
+                    {#each [42, 43, 44, 45] as qi}
                         <button
                             class="btn smol code"
                             class:accent={$states.qid == qi}
@@ -76,17 +106,24 @@
                                 status.playbackPaused = true;
                                 await states.setObject("media_status", status);
                                 await states.setNumber("qid", qi);
+                                await gm.sound.play("tangtoc-revealquestion");
                             }}>{qi}</button
                         >
                     {/each}
                 </div>
             </div>
+            <div class="nofat">
+                <p>Câu {$states.qid + 1}. {$states.prompt}</p>
+                <p style="font-weight: bold;">{$states.key}</p>
+            </div>
         </div>
-        <SubmitJudger {conn} {states} prefix="tangtoc" />
     </div>
 </Load>
 
 <style>
+    h1 {
+        font-weight: bold;
+    }
     .nofat {
         max-width: 30vw;
     }

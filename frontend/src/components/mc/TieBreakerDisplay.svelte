@@ -19,7 +19,7 @@
             <div class="box">
                 {#if $states.qid > -1}
                     <div class="qnum"><PillTag text="Câu {$states.display_qid}" /></div>
-                    <p class="prompt">{$states.current_question_content}</p>
+                    <p class="prompt">{$states.prompt}</p>
                 {:else}
                     <div class="qnum"><PillTag text="Chuẩn bị" /></div>
                     <p class="prompt">Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.</p>

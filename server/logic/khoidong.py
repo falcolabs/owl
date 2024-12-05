@@ -26,14 +26,12 @@ class KhoiDong(penguin.PartImplementation):
             },
             STAGE_JOINT: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
         }
-
         self.timer = engine.Timer()
         self.timer.pause()
+        self.allow_bell = self.rpc.use_state("allow_bell", False)
         self.stage = self.rpc.use_state("stage", STAGE_SEPERATED)
         """Trạng thái phần thi."""
-        self.current_question_content = self.rpc.use_state(
-            "current_question_content", ""
-        )
+        self.prompt = self.rpc.use_state("prompt", "")
         # TODO - SECURITY: encrypt this
         self.key = self.rpc.use_state("key", "")
         self.plusminus = self.rpc.use_state("plusminus", {"add": [0], "rem": [0]})
@@ -96,6 +94,8 @@ class KhoiDong(penguin.PartImplementation):
         # TODO - SECURITY: uses the addr (see rpc.py:97) to distinguish the bell ringer,
         # not the call's argument
         ringer_token = call.data.str_argno(0)
+        if not self.allow_bell.get():
+            return
         match self.session_manager.playername(ringer_token):
             case Some(name):
                 if self.joint_bell.get() == "":
@@ -110,17 +110,16 @@ class KhoiDong(penguin.PartImplementation):
                 )
 
     def on_qid_change(self, qid: int):
+        self.allow_bell.set(False)
         if qid == -1:
-            self.current_question_content.set(
-                "Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút."
-            )
+            self.prompt.set("Thí sinh hãy chuẩn bị. Phần thi sẽ bắt đầu trong ít phút.")
             self.display_qid.set("Chuẩn bị")
             self.key.set("")
             self.max_time.set(3)
             self.plusminus.set({"add": [0], "rem": [0]})
             return
         q = self.show.qbank.get_question(qid)
-        self.current_question_content.set(q.prompt)
+        self.prompt.set(q.prompt)
         if self.stage.get() == STAGE_SEPERATED:
             self.display_qid.set(str((qid % 6) + 1))
         else:
@@ -152,7 +151,7 @@ class KhoiDong(penguin.PartImplementation):
         #     engine.log_debug(
         #         f"Setting new question content: {show.qbank.get_question(self.lastqid).prompt}"
         #     )
-        #     self.set_current_question_content(
+        #     self.set_prompt(
         #         show.qbank.get_question(self.lastqid).prompt
         #     )
         #     # self.set_current_question(show.qbank.get_question(self.get_qid()))

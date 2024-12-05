@@ -1,4 +1,5 @@
-import { Peeker, Connection } from "$lib";
+import { Peeker, Connection, CallProcedure } from "$lib";
+import type { AvailableSound } from "client";
 import { PlayerManager } from "$lib/player";
 import { StateManager } from "$lib/state";
 import { writable, type Writable } from "svelte/store";
@@ -16,6 +17,15 @@ export class GameMaster {
     public isAuthenticated!: Writable<boolean>;
     public authToken!: string;
     public username: string = "";
+
+    public sound = {
+        play: async (sound_name: AvailableSound) => {
+            await this.connection.send(CallProcedure.name("engine::play_sound").string("soundName", sound_name).build());
+        },
+        stop: async (sound_name: AvailableSound | "*") => {
+            await this.connection.send(CallProcedure.name("engine::stop_sound").string("soundName", sound_name).build());
+        }
+    }
 
     static async create(connection: Connection): Promise<GameMaster> {
         let obj = new GameMaster();
@@ -73,6 +83,28 @@ export class GameMaster {
                 accessKey: accessKey,
             })
         );
+    }
+
+    async add_score(of: string, amount: number) {
+        await this.connection.send(
+            CallProcedure.name("engine::add_score")
+                .string("target", of)
+                .number("value", amount)
+                .build()
+        );
+    }
+
+    async set_score(of: string, amount: number) {
+        await this.connection.send(
+            CallProcedure.name("engine::set_score")
+                .string("target", of)
+                .number("value", amount)
+                .build()
+        );
+    }
+
+    async timer_operation(operation: "start" | "pause" | "reset") {
+        await this.connection.send(CallProcedure.name("engine::timer_operation").string("operation", operation).build());
     }
 
     async updateAll() {

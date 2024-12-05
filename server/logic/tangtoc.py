@@ -33,6 +33,8 @@ class TangToc(penguin.PartImplementation):
             "media",
             None,
         )
+        self.allow_input = self.rpc.use_state("allow_input", False)
+
         self.plusminus = self.rpc.use_state(
             "plusminus", {"add": [10, 20, 30, 40], "rem": [0]}
         )
@@ -62,7 +64,6 @@ class TangToc(penguin.PartImplementation):
                     [
                         ("answer", engine.PortableType.STRING),
                         ("token", engine.PortableType.STRING),
-                        ("time", engine.PortableType.NUMBER),
                     ],
                 ),
                 (
@@ -83,17 +84,13 @@ class TangToc(penguin.PartImplementation):
         handle: engine.IOHandle,
         addr,
     ):
-        answer, token, time = (
+        answer, token = (
             call.data.str_argno(0),
             call.data.str_argno(1),
-            call.data.float_argno(2),
         )
         match self.show.session_manager.playername(token):
             case Some(name):
                 elapsed: float = self.show.timer.get().time_elapsed().total_seconds()
-                engine.log_info(
-                    f"Timing mismatch report: client: {time:.4f}, server:{elapsed:.4f}, delta: ±{abs(elapsed-time):.4f}"
-                )
                 anslist = self.answers.get()
                 output = anslist.copy()
                 for i, a in enumerate(anslist):
@@ -114,6 +111,7 @@ class TangToc(penguin.PartImplementation):
                             "verdict": False,
                         }
                     )
+                output = sorted(output, key=lambda x: x["time"])
                 self.answers.set(output)
             case Null():
                 engine.log_warning(
@@ -123,11 +121,13 @@ class TangToc(penguin.PartImplementation):
     @override
     def on_ready(self, show: penguin.Show):
         a, b, c, d = (
-            show.qbank.get_question(41).media,
             show.qbank.get_question(42).media,
             show.qbank.get_question(43).media,
             show.qbank.get_question(44).media,
+            show.qbank.get_question(45).media,
         )
+        self.show.timer.subscribe(lambda t: self.allow_input.set(not t.is_paused))
+
         self.preload_list.set(
             {
                 41: a.pack() if a is not None else None,
@@ -151,6 +151,7 @@ class TangToc(penguin.PartImplementation):
         q = self.show.qbank.get_question(qid)
         self.prompt.set(q.prompt)
         self.answers.set(self.DEFAULT_ANSWERS)
+        self.show_key.set(False)
         self.max_time = self.rpc.use_state("max_time", q.time)
         self.key.set(q.key)
         self.show.timer.set(engine.Timer())

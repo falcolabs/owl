@@ -11,19 +11,22 @@
     export let states: StateManager;
 
     let answer: string;
-    let timer = states.timerStore;
-    let timeElapsed = 30;
+    let myans: string = "";
+    let time = states.time;
     let inputBox: HTMLInputElement;
     let lines = writable(
         new Map<string, Writable<{ status: string; content: string; tag: string }>>()
     );
+    states.on("puzzle_data", (_) => {
+        // @ts-ignore
+        answer = undefined
+        myans = ""
+    })
+
     states.subscribe((s) => {
-        console.log("checking");
         if (s.puzzle_data == undefined) return;
-        console.log("passed checkpoint1", s);
         if (s.final_hint) {
             if ($lines.size != 1) {
-                console.log("M");
                 let o = new Map();
                 o.set(s.puzzle_data.center.tag, writable(s.puzzle_data.center));
                 lines.set(o);
@@ -50,9 +53,9 @@
 
     onMount(() => {
         inputBox.focus();
-        timer.subscribe((t) => {
+        time.subscribe((t) => {
             try {
-                if (!t.isPaused()) {
+                if (t !== 0) {
                     inputBox.focus();
                 }
             } catch (e) {}
@@ -89,11 +92,11 @@
             <div>
                 <div class="answergroup">
                     <p class="reminder">Bấm Enter để gửi</p>
-                    {#if $timer.isPaused()}
+                    {#if !$states.allow_input}
                         <p class="reminder">Chưa đếm ngược</p>
-                    {:else if hasMine}
+                    {:else if hasMine && myans !== ""}
                         <p class="reminder">
-                            Đã nộp lúc <span class="code">{timeElapsed.toFixed(2)}</span>s
+                            Đã nộp {myans}
                         </p>
                     {:else}
                         <p class="reminder">Chưa nộp</p>
@@ -101,24 +104,25 @@
                 </div>
                 <form
                     on:submit|preventDefault={async () => {
-                        if ($timer.isPaused()) {
+                        if (!$states.allow_input) {
                             return;
                         }
-                        timeElapsed = $timer.elapsedSecs();
+                        myans = answer;
                         await conn.send(
                             CallProcedure.name("vcnv::submit_answer")
                                 .string("answer", answer)
-                                // @ts-ignore
                                 .string("token", gm.authToken)
-                                .number("time", timeElapsed)
                                 .build()
                         );
+                        // @ts-ignore
+                        answer = null;
                     }}
                 >
                     <input
                         class="inp"
                         bind:value={answer}
                         bind:this={inputBox}
+                        readonly={!$states.allow_input}
                         type="text"
                         placeholder="Nhập đáp án"
                         spellcheck="false"

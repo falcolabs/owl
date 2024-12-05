@@ -12,29 +12,28 @@
     export let conn: Connection;
     export let players: Readable<Map<string, Player>>;
 
-    let question_placement: Writable<any> = writable([69, 70, 71]);
-
-    onMount(async () => {
-        let player_list = $states.engine_players;
-        if (player_list.length === 0) {
-            return;
-        }
-    });
+    let question_placement: Writable<any> = writable([70, 71, 72]);
 
     const incrementQuestion = async () => {
         if ($states.qid == $question_placement.at(-1)) {
             await setQuestion(-1)();
             return;
         }
+        setTimeout(async () => {
+            await states.setBoolean("allow_bell", true);
+        }, 2000);
         await conn.send(CallProcedure.name("tiebreaker::next_question").build());
     };
 
-    const setQuestion = (qid: number) => async () => await states.setNumber("qid", qid);
+    const setQuestion = (qid: number) => async () => {
+        await states.setNumber("qid", qid);
+        if (qid != -1) {
+            setTimeout(async () => {
+                await states.setBoolean("allow_bell", true);
+            }, 2000);
+        }
+    };
 </script>
-
-<div>
-    <p class="code">Question #{$states.qid + 1}. {$states.current_question_content}</p>
-</div>
 
 <div>
     <h1>Game Master Controls</h1>
@@ -58,6 +57,13 @@
         >
             Xóa chuông
         </button>
+        <button
+            class="btn"
+            class:accent={$states.allow_bell}
+            on:click={async () => {
+                states.setBoolean("allow_bell", !$states.allow_bell);
+            }}>{$states.allow_bell ? "Chuông bật" : "Chuông tắt"}</button
+        >
     </div>
 </div>
 
@@ -77,6 +83,10 @@
             </button>
         {/each}
     </div>
+</div>
+<div class="qdisplay">
+    <p>Câu {$states.qid + 1}. {$states.prompt}</p>
+    <p style="font-weight: bold;">{$states.key}</p>
 </div>
 
 <style>
@@ -148,5 +158,10 @@
         height: auto;
         align-items: center;
         justify-content: center;
+    }
+
+    .qdisplay {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 </style>

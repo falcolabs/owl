@@ -1,3 +1,4 @@
+#![allow(static_mut_refs)]
 use core::panic;
 
 use crate::logging::Color;

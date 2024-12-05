@@ -92,7 +92,7 @@ class UserCredentials(ConfigurationValue):
 
 
 class ConfigHive(ConfigurationValue):
-    listenOn: str
+    listenOn: Any
     serveDir: str
     staticDir: str
     checkRPCTypes: bool

@@ -10,61 +10,50 @@
 </script>
 
 <div class="bar">
-    {#if $states.highlighted !== undefined}
-        {#each $states.engine_players as player}
-            <Load until={$states.plusminus !== undefined}>
-                <div class="scorestack">
-                    {#each $states.plusminus.rem as i}
-                        <button
-                            class="btn destructive"
-                            on:click={async () => {
-                                await conn.send(
-                                    CallProcedure.name("engine::add_score")
-                                        .string("target", player.identifier)
-                                        .number("value", i)
-                                        .build()
-                                );
-                            }}>{i}</button
-                        >
-                    {/each}
-                    <ScorePillSmall
-                        activated={$states.highlighted.includes(player.identifier)}
-                        name={player.name}
-                        score={player.score}
-                    />
-                    <SetScoreOf {conn} identifier={player.identifier} players={gm.players} {states}/>
-
-                    {#each $states.plusminus.add as i}
-                        <button
-                            class="btn"
-                            on:click={async () => {
-                                console.log(
-                                    CallProcedure.name("engine::add_score")
-                                        .string("target", player.identifier)
-                                        .number("value", i)
-                                        .build()
-                                        .pack()
-                                );
-                                await conn.send(
-                                    CallProcedure.name("engine::add_score")
-                                        .string("target", player.identifier)
-                                        .number("value", i)
-                                        .build()
-                                );
-                            }}>+{i}</button
-                        >
-                    {/each}
-                </div>
-            </Load>
-        {/each}
-    {/if}
+    {#each $states.engine_players as player}
+        <div class="scorestack">
+            {#if $states.plusminus !== undefined}
+                {#each $states.plusminus.rem as i}
+                    <button
+                        class="btn destructive"
+                        on:click={async () => {
+                            await gm.add_score(player.identifier, i);
+                        }}>{i}</button
+                    >
+                {/each}
+            {/if}
+            <ScorePillSmall
+                activated={$states.highlighted == undefined
+                    ? false
+                    : $states.highlighted.includes(player.identifier)}
+                name={player.name}
+                score={player.score}
+            />
+            <SetScoreOf {gm} identifier={player.identifier} />
+            {#if $states.plusminus !== undefined}
+                {#each $states.plusminus.add as i}
+                    <button
+                        class="btn"
+                        on:click={async () => {
+                            await conn.send(
+                                CallProcedure.name("engine::add_score")
+                                    .string("target", player.identifier)
+                                    .number("value", i)
+                                    .build()
+                            );
+                        }}>+{i}</button
+                    >
+                {/each}
+            {/if}
+        </div>
+    {/each}
 </div>
 
 <style>
     .bar {
         display: flex;
         flex-direction: row;
-        gap: 25px;
+        gap: 10px;
         width: fit-content;
         justify-content: flex-start;
         align-items: flex-start;

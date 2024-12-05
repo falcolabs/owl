@@ -37,6 +37,7 @@
     "@types/debug": "^4.1.12",
     "@wasm-tool/rollup-plugin-rust": "^2.4.5",
     "debug": "^4.3.7",
+    "idb": "^8.0.0",
     "path": "^0.12.7",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0"

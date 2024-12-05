@@ -6,22 +6,24 @@
 </script>
 
 <div class="container">
-    {#each [0, 1, 2] as i}
-        <div class="line">
-            <div
-                class="prompt pillbutton left"
-                class:activated={$states.package[$states.current_player_username][i] == 20}
-            >
-                20
+    {#if $states.current_player_username !== ""}
+        {#each [0, 1, 2] as i}
+            <div class="line">
+                <div
+                    class="prompt pillbutton left"
+                    class:activated={$states.package[$states.current_player_username][i] == 20}
+                >
+                    20
+                </div>
+                <div
+                    class="prompt pillbutton right"
+                    class:activated={$states.package[$states.current_player_username][i] == 30}
+                >
+                    30
+                </div>
             </div>
-            <div
-                class="prompt pillbutton right"
-                class:activated={$states.package[$states.current_player_username][i] == 30}
-            >
-                30
-            </div>
-        </div>
-    {/each}
+        {/each}
+    {/if}
 </div>
 
 <style>

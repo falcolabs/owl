@@ -72,7 +72,7 @@ class SessionManager:
         for handle in self.active_sessions:
             try:
                 await handle.send(message)
-            except ConnectionResetError as e:
+            except Exception as e:
                 purgelist.append(handle)
 
         for handle in purgelist:

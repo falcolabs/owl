@@ -3,7 +3,7 @@
     import TitleBar from "../TitleBar.svelte";
     import ShowAnswer from "../ShowAnswer.svelte";
     import { onMount } from "svelte";
-    import { Peeker, Connection, GameMaster, StateManager } from "$lib";
+    import { Peeker, Connection, GameMaster, StateManager, CallProcedure } from "$lib";
     import Load from "../Load.svelte";
     import ScoreBar from "../ScoreBar.svelte";
     import type { PlayerManager } from "$lib/player";
@@ -24,7 +24,7 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
-    let timerStore = states.timerStore;
+    let time = states.time;
     export let conn: Connection;
     export let gm: GameMaster;
     export let players: PlayerManager;
@@ -57,15 +57,14 @@
                 if (!s.media_status.playbackPaused) {
                     if (videoElement.paused) {
                         if (videoElement.currentTime == 0) {
-                            let t = new Peeker.Timer();
-                            t.resume();
-                            states.setTimer(t);
+                            gm.timer_operation("reset");
                         }
                         await videoElement.play();
-                        $timerStore.resume();
+                        await gm.timer_operation("start");
 
                         videoElement.onended = (ev) => {
-                            states.setTimer(new Peeker.Timer());
+                            gm.timer_operation("reset");
+
                             states.setObject("media_status", {
                                 visible: true,
                                 playbackPaused: true
@@ -75,9 +74,8 @@
                     }
                 } else {
                     videoElement?.pause();
-                    $timerStore.pause();
+                    await gm.timer_operation("pause");
                 }
-                states.setTimer($timerStore);
             }
             previousState = s.media_status.playbackPaused;
         });
@@ -95,7 +93,7 @@
     <Load until={gm !== undefined && $states.__init}>
         <div class="center-box upper">
             {#if $states.show_key}
-                <ShowAnswer {states} />
+                <ShowAnswer {states} {players} />
             {:else}
                 <div class="padded box mmedia">
                     <p class="prompt midalign">{$states.prompt}</p>

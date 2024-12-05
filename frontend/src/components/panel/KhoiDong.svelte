@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Connection, StateManager } from "$lib";
+    import type { Connection, GameMaster, StateManager } from "$lib";
     import { writable, readable, type Readable, type Writable } from "svelte/store";
     import { CallProcedure } from "$lib";
     import type { Timer, Player } from "client";
@@ -20,6 +20,7 @@
         qid: -1
     });
     export let conn: Connection;
+    export let gm: GameMaster;
     export let players: Readable<Map<string, Player>>;
 
     let question_placement: Writable<any> = writable({
@@ -32,9 +33,34 @@
         [Number(STAGE_JOINT)]: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
     });
 
+    const onKeyDown = async (ev: KeyboardEvent) => {
+        if (ev.key === " ") {
+            await incrementQuestion();
+        }
+        if ($states.stage == STAGE_SEPERATED) {
+            if (ev.key === "+") {
+                await gm.add_score($states.seperated_candidate, $states.plusminus.add[0]);
+                await gm.sound.play("khoidong-correct");
+            }
+            if (ev.key === "-") {
+                await gm.add_score($states.seperated_candidate, $states.plusminus.rem[0]);
+                await gm.sound.play("khoidong-incorrect");
+            }
+        } else {
+            if (ev.key === "+") {
+                await gm.add_score($states.joint_bell, $states.plusminus.add[0]);
+                await gm.sound.play("khoidong-correct");
+            }
+            if (ev.key === "-") {
+                await gm.add_score($states.joint_bell, $states.plusminus.rem[0]);
+                await gm.sound.play("khoidong-incorrect");
+            }
+        }
+    };
+
     onMount(async () => {
         let player_list = $states.engine_players;
-        if (player_list.length === 0) {
+        if (player_list === undefined || player_list.length === 0) {
             return;
         }
         $question_placement = {
@@ -64,23 +90,32 @@
             if ($states.qid == $question_placement[$states.stage].at(-1)) {
                 await setQuestion(-1)();
                 return;
+            } else {
+                setTimeout(async () => {
+                    await states.setBoolean("allow_bell", true);
+                }, 2000);
             }
         }
         await conn.send(CallProcedure.name("khoidong::next_question").build());
     };
 
-    const setQuestion = (qid: number) => async () => await states.setNumber("qid", qid);
+    const setQuestion = (qid: number) => async () => {
+        await states.setNumber("qid", qid);
+        if ($states.stage == STAGE_JOINT && qid != -1) {
+            setTimeout(async () => {
+                await states.setBoolean("allow_bell", true);
+            }, 2000);
+        }
+    };
     const setPlayerSeperate = (playerName: string) => async () => {
         await states.setString("seperated_candidate", playerName);
     };
 </script>
 
-<div>
-    <p class="code">Question #{$states.qid + 1}. {$states.current_question_content}</p>
-</div>
+<svelte:window on:keydown={onKeyDown} />
 
 <div>
-    <h1>Game Master Controls</h1>
+    <h1>Game Master</h1>
     <div class="bgroup-hor">
         <button
             on:click={$states.qid != -1
@@ -116,6 +151,13 @@
                 Phần thi chung
             </button>
         {/if}
+        <button
+            class="btn"
+            class:accent={$states.allow_bell}
+            on:click={async () => {
+                states.setBoolean("allow_bell", !$states.allow_bell);
+            }}>{$states.allow_bell ? "Chuông bật" : "Chuông tắt"}</button
+        >
     </div>
 </div>
 {#if $states.stage == STAGE_SEPERATED}
@@ -127,7 +169,7 @@
                 class="btn smol sep"
                 class:accent={$states.seperated_candidate == ""}
             >
-                unset
+                chưa chọn
             </button>
             {#each $players as [ident, p]}
                 <button
@@ -144,7 +186,7 @@
         <h1>Câu hỏi cho thí sinh</h1>
         <div class="setq">
             <button on:click={setQuestion(-1)} class="btn smol" class:accent={$states.qid == -1}>
-                prepare
+                chuẩn bị
             </button>
             {#if $question_placement[$states.stage][$states.seperated_candidate] !== undefined}
                 {#each $question_placement[$states.stage][$states.seperated_candidate] as q}
@@ -178,6 +220,10 @@
         </div>
     </div>
 {/if}
+<div class="qdisplay">
+    <p>Câu {$states.qid + 1}. {$states.prompt}</p>
+    <p style="font-weight: bold;">{$states.key}</p>
+</div>
 
 <style>
     .setq {
@@ -248,5 +294,9 @@
         height: auto;
         align-items: center;
         justify-content: center;
+    }
+    .qdisplay {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 </style>

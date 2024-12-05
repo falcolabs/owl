@@ -1,10 +1,13 @@
 from traceback import print_stack
-from typing import final, override
+from typing import Literal, final, override
+import threading
 import typing
 import engine
 import abc
 import asyncio
 import json
+
+from . import timekeeper
 from .session import SessionManager
 from .store import Writable
 from utils.crypt import gen_token
@@ -12,7 +15,7 @@ from utils.crypt import gen_token
 from config import config
 
 SESSION_MAN = SessionManager()
-TASK_POOL: list = []
+# TASK_POOL: list = []
 
 
 class PartImplementation:
@@ -53,7 +56,10 @@ class PartImplementation:
 # engine.log_info(
 #     "Non-CPython implementation or non-Linux OS detected. Falling back to asyncio."
 # )
+
+
 LOOP = asyncio.new_event_loop()
+asyncio.set_event_loop(LOOP)
 
 
 def process_authentication(
@@ -89,10 +95,6 @@ class Show:
         self.session_manager.register_session(req.handle)
 
         # Process task pool entries
-        global TASK_POOL
-        for t in TASK_POOL:
-            await t
-        TASK_POOL = []
         (await self.rpc.handle(self, req.content, req.handle, req.sender)).unwrap()
         response: engine.Packet | None = None
         if not isinstance(req.content, engine.Packet.Query):
@@ -140,8 +142,46 @@ class Show:
             engine.log_debug(engine.mccolor(f"&6< ") + f"{req.sender}: {str_content}")
             await req.handle.send(str_content)
 
-    def on_req(self, req: engine.RawRequest):
-        LOOP.run_until_complete(self.handle_webreq(req))
+    def play_sound(self, sound_name: "engine.AvailableSound") -> None:
+        # TASK_POOL.append(
+        asyncio.run_coroutine_threadsafe(
+            self.session_manager.broadcast(engine.Packet.PlaySound(sound_name).pack()),
+            LOOP,
+        )
+        self.active_sounds.set(
+            self.active_sounds.inner
+            + [
+                sound_name,
+            ]
+        )
+
+    def stop_sound(self, sound_name: "engine.AvailableSound | Literal['*']") -> None:
+        if sound_name == "*":
+            self.active_sounds.set([])
+        else:
+            output = []
+            for s in self.active_sounds.inner:
+                if s != sound_name:
+                    output.append(s)
+            self.active_sounds.set(output)
+
+    def procedure_playsound(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        _2: engine.IOHandle,
+        _3,
+    ):
+        self.play_sound(call.data.str_argno(0))  # type: ignore[reportArgumentType]
+
+    def procedure_stopsound(
+        self,
+        _: "Show",
+        call: engine.Packet.CallProcedure,
+        _2: engine.IOHandle,
+        _3,
+    ):
+        self.stop_sound(call.data.str_argno(0))  # type: ignore[reportArgumentType]
 
     def start(self, listen_on: str, serve_on: str, static_dir: str):
         engine.log_info("Starting show...")
@@ -149,7 +189,9 @@ class Show:
             listen_on,
             serve_on,
             static_dir,
-            self.on_req,
+            config().tickSpeed,
+            self.tick,
+            timekeeper.on_req,
         )
 
         for p in self.parts:
@@ -158,34 +200,46 @@ class Show:
             p.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
 
         self.ticker: engine.Ticker = engine.Ticker()
-        part = self.parts[self.current_part.get()]
-        while True:
-            # TODO - remove this if there are no parts that require a loop
-            status = part.implementation.on_update(self)
-            match status:
-                case engine.Status.STOP:
-                    engine.log_info("Show stopped by logic.")
-                    exit(0)
-                case engine.Status.SKIP:
-                    if self.current_part.get() >= len(self.parts):
-                        engine.log_info(
-                            "There is no more parts after this in the show."
-                        )
-                        exit(0)
-                    self.current_part.set(self.current_part.get() + 1)
-                    part = self.parts[self.current_part.get()]
-                case engine.Status.REWIND:
-                    if self.current_part.get() == len(self.parts):
-                        engine.log_info(
-                            "There is no more parts in front of this in the show."
-                        )
-                        exit(0)
-                    self.current_part.set(self.current_part.get() - 1)
-                    part = self.parts[self.current_part.get()]
-                case _:
-                    pass
+        self._part = self.parts[self.current_part.get()]
+        self._sleep_time = 1 / config().tickSpeed
 
-        # return super().start(listen_on, serve_on, static_dir)
+        def on_partchange(pname):
+            self._part = self.parts[self.current_part.get()]
+            self._part.implementation.__init__()
+            self._part.implementation.on_ready(self)  # type: ignore[reportAttributeAccessIssue]
+
+        self.current_part.subscribe(on_partchange)
+        LOOP.run_forever()
+
+    def tick(self, is_packet: bool, a):
+        if is_packet:
+            asyncio.run_coroutine_threadsafe(self.handle_webreq(a), LOOP)
+        asyncio.run_coroutine_threadsafe(self._tick(), LOOP)
+
+    async def _tick(self):
+        self.time.set(self.timer.inner.time_elapsed().total_seconds())
+        # TODO - remove this if there are no parts that require a loop
+        status = self._part.implementation.on_update(self)
+        match status:
+            case engine.Status.STOP:
+                engine.log_info("Show stopped by logic.")
+                exit(0)
+            case engine.Status.SKIP:
+                if self.current_part.get() >= len(self.parts):
+                    engine.log_info("There is no more parts after this in the show.")
+                    exit(0)
+                self.current_part.set(self.current_part.get() + 1)
+                self._part = self.parts[self.current_part.get()]
+            case engine.Status.REWIND:
+                if self.current_part.get() == len(self.parts):
+                    engine.log_info(
+                        "There is no more parts in front of this in the show."
+                    )
+                    exit(0)
+                self.current_part.set(self.current_part.get() - 1)
+                self._part = self.parts[self.current_part.get()]
+            case _:
+                pass
 
     def set_part(
         self,
@@ -194,15 +248,18 @@ class Show:
         handle: engine.IOHandle,
         addr: str,
     ):
+        print("Setting new part")
         new_part = call.data.int_argno(0)
         self.current_part.set(new_part)
 
-        TASK_POOL.append(
+        self.timer.set(engine.Timer())
+        asyncio.run_coroutine_threadsafe(
             self.session_manager.broadcast(
                 engine.Packet.StateList(list(self.rpc.states.values())).pack()
-            )
+            ),
+            LOOP,
         )
-        TASK_POOL.append(
+        asyncio.run_coroutine_threadsafe(
             self.session_manager.broadcast(
                 engine.Packet.StateList(
                     list(
@@ -211,7 +268,8 @@ class Show:
                         ].implementation.rpc.states.values()  # type: ignore[reportAttributeAccessIssue]
                     )
                 ).pack()
-            )
+            ),
+            LOOP,
         )
 
     def set_score(
@@ -318,6 +376,8 @@ class Show:
         self.tick_speed: int = tick_speed
         self.qbank: engine.QuestionBank = question_bank
         self.current_part: Writable[int] = self.rpc.use_state("current_part", 0)
+        self.engine_freeze: Writable[int] = self.rpc.use_state("engine_freeze", False)
+
         self.ticker = engine.Ticker()
         self.sid: Writable[str] = self.rpc.use_state("sid", gen_token(8))
         self.session_manager = SESSION_MAN
@@ -329,10 +389,30 @@ class Show:
             ),
             deserializer=lambda x: engine.Timer.from_json(x.json),
         )
+        self.time = self.rpc.use_state("time", 0)
+        self.timer_paused = self.rpc.use_state("timer_paused", True)
+        self.timer.subscribe(lambda t: self.time.set(t.time_elapsed().total_seconds()))
+        self.active_sounds = self.rpc.use_state("active_sounds", [])
+        self.timer.subscribe(lambda t: self.timer_paused.set(t.is_paused))
+
+        def set_time(new_value: int):
+            asyncio.run_coroutine_threadsafe(timekeeper.timekeep(new_value), LOOP)
+
+        self.time.set = set_time
 
         self.rpc.add_procedures(
             [
                 ("set_part", self.set_part, [("index", engine.PortableType.NUMBER)]),
+                (
+                    "play_sound",
+                    self.procedure_playsound,
+                    [("soundName", engine.PortableType.STRING)],
+                ),
+                (
+                    "stop_sound",
+                    self.procedure_stopsound,
+                    [("soundName", engine.PortableType.STRING)],
+                ),
                 (
                     "timer_operation",
                     self.timer_operation,

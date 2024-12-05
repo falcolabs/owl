@@ -1,7 +1,8 @@
 {
   "version": "4",
   "specifiers": {
-    "npm:@sveltejs/kit@^2.8.0": "2.8.0_@sveltejs+vite-plugin-svelte@4.0.0__svelte@5.1.13___acorn@8.14.0__vite@5.4.10_svelte@5.1.13__acorn@8.14.0_vite@5.4.10"
+    "npm:@sveltejs/kit@^2.8.0": "2.8.0_@sveltejs+vite-plugin-svelte@4.0.0__svelte@5.1.13___acorn@8.14.0__vite@5.4.10_svelte@5.1.13__acorn@8.14.0_vite@5.4.10",
+    "npm:idb@8": "8.0.0"
   },
   "npm": {
     "@ampproject/remapping@2.3.0": {
@@ -286,6 +287,9 @@
     "globrex@0.1.2": {
       "integrity": "sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg=="
     },
+    "idb@8.0.0": {
+      "integrity": "sha512-l//qvlAKGmQO31Qn7xdzagVPPaHTxXx199MhrAFuVBTPqydcPYBWjkrbv4Y0ktB+GmWOiwHl237UUOrLmQxLvw=="
+    },
     "import-meta-resolve@4.1.0": {
       "integrity": "sha512-I6fiaX09Xivtk+THaMfAwnA3MVA5Big1WHF1Dfx9hFuvNIWpXnorlkzhcQf6ehrqQiiZECRt1poOAkPmer3ruw=="
     },
@@ -424,7 +428,8 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:@sveltejs/kit@^2.8.0"
+      "npm:@sveltejs/kit@^2.8.0",
+      "npm:idb@8"
     ]
   }
 }

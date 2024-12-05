@@ -28,6 +28,7 @@ class VCNV(penguin.PartImplementation):
             "3": 38,
             "4": 39,
             "M": 40,
+            "K": 41,
         }
 
         self.DEFAULT_ANSWERS: list[PlayerAnswer] = []
@@ -43,6 +44,7 @@ class VCNV(penguin.PartImplementation):
                     {"status": "hidden", "content": "", "tag": "4"},
                 ],
                 "center": {"status": "hidden", "content": "", "tag": "M"},
+                "key": {"status": "hidden", "content": "", "tag": "M"},
             },
         )
         self.prompt = self.rpc.use_state(
@@ -58,6 +60,7 @@ class VCNV(penguin.PartImplementation):
         self.image = self.rpc.use_state(
             "image", utils.vcnv.get_imgdata(["1", "2", "3", "4", "M"])
         )
+        self.allow_input = self.rpc.use_state("allow_input", False)
         self.show_key = self.rpc.use_state("show_key", False)
         self.max_time = self.rpc.use_state("max_time", 15)
         self.final_hint = self.rpc.use_state("final_hint", False)
@@ -97,7 +100,6 @@ class VCNV(penguin.PartImplementation):
                     self.bell,
                     [
                         ("token", engine.PortableType.STRING),
-                        ("timeMs", engine.PortableType.NUMBER),
                     ],
                 ),
             ]
@@ -110,6 +112,7 @@ class VCNV(penguin.PartImplementation):
             for p in show.players.get()
         ]
         self.answers.set(self.DEFAULT_ANSWERS)
+        self.show.timer.subscribe(lambda t: self.allow_input.set(not t.is_paused))
 
         self.puzzle_data.set(
             {
@@ -137,8 +140,13 @@ class VCNV(penguin.PartImplementation):
                 ],
                 "center": {
                     "status": "hidden",
-                    "content": self.show.qbank.get_question(36).key,
+                    "content": self.show.qbank.get_question(40).key,
                     "tag": "M",
+                },
+                "key": {
+                    "status": "hidden",
+                    "content": self.show.qbank.get_question(41).key,
+                    "tag": "K",
                 },
             },
         )
@@ -150,17 +158,13 @@ class VCNV(penguin.PartImplementation):
         handle: engine.IOHandle,
         addr,
     ):
-        answer, token, time = (
+        answer, token = (
             call.data.str_argno(0),
             call.data.str_argno(1),
-            call.data.float_argno(2),
         )
         match self.show.session_manager.playername(token):
             case Some(name):
                 elapsed: float = self.show.timer.get().time_elapsed().total_seconds()
-                engine.log_info(
-                    f"Timing mismatch report: client: {time:.4f}, server:{elapsed:.4f}, delta: ±{abs(elapsed-time):.4f}"
-                )
                 anslist = self.answers.get()
                 output = anslist.copy()
                 for i, a in enumerate(anslist):
@@ -181,6 +185,7 @@ class VCNV(penguin.PartImplementation):
                             "verdict": False,
                         }
                     )
+                output = sorted(output, key=lambda x: x["time"])
                 self.answers.set(output)
             case Null():
                 engine.log_warning(
@@ -206,6 +211,8 @@ class VCNV(penguin.PartImplementation):
         # Set the required status
         if target == "M":
             mod["center"]["status"] = new_status
+        elif target == "K":
+            mod["key"]["status"] = new_status
         else:
             for i in mod["normal"]:
                 if i["tag"] == target:
@@ -219,9 +226,11 @@ class VCNV(penguin.PartImplementation):
                     i["status"] = "hidden"
             if target != "M" and mod["center"]["status"] == "selected":
                 mod["center"]["status"] = "hidden"
+            if target != "K" and mod["key"]["status"] == "selected":
+                mod["key"]["status"] = "hidden"
 
         # Set selected variable
-        for i in mod["normal"] + [mod["center"]]:
+        for i in mod["normal"] + [mod["center"], mod["key"]]:
             if i["status"] == "selected":
                 self.selected.set(i["tag"])
                 self.prompt.set(show.qbank.get_question(self.sel2qidmap[target]).prompt)
@@ -230,6 +239,7 @@ class VCNV(penguin.PartImplementation):
             self.selected.set("")
             self.prompt.set("Thí sinh hãy lựa chọn hàng ngang.")
         self.puzzle_data.set(mod)
+        self.show.timer.set(engine.Timer())
         self.image.set(
             utils.vcnv.get_imgdata(
                 [
@@ -239,6 +249,8 @@ class VCNV(penguin.PartImplementation):
                     "4" if mod["normal"][3]["status"] != "shown" else "",
                     "M" if mod["center"]["status"] != "shown" else "",
                 ]
+                if mod["key"]["status"] != "shown"
+                else []
             )
         )
 

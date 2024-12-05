@@ -7,6 +7,10 @@
 ![meme1](https://forthebadge.com/images/featured/featured-powered-by-electricity.svg)
 
 Open source development for a high performance Rust communication engine, primarily for game show use.
+## Usage
+Configure the software using an Excel file. Both the DDX format (to be finalized later), and the Olympus Online format may be used.
+
+Sound must be configured beforehand (see [assets/public/sounds/README.md](assets/public/sounds/README.md)). The list of all required sounds as well as their samples (not bundled because of size and copyright reasons) resides at `assets/public/sounds/catalog.json`.
 
 ## Technical overview
 The server software will host a web service and a WebSockets server on a
@@ -46,7 +50,7 @@ See Hacking (above) for requirements. After that, the project may be built. Note
   * See the [chick project](https://github.com/falcolabs/chick).
   * For client, use `chick front`. The Rust module will be automatically
     compiled and bundled, and hot-reload enabled Vite starts serving on
-    `localhost:5173`.
+    the address provided in `config.json`.
   * For server, use `chick run`. The Rust module will be compiled,
     the Python binding generated, the wheel built and installed automatically.
     `server/main.py` is subsequenly called, with `server/` as current directory.

@@ -1,37 +1,20 @@
 <script lang="ts">
-    import { CallProcedure, PlayerManager, StateManager, type Connection } from "$lib";
+    import { CallProcedure, GameMaster, PlayerManager, StateManager, type Connection } from "$lib";
     import { onMount } from "svelte";
 
-    export let conn: Connection;
+    export let gm: GameMaster;
     export let identifier: string;
-    export let players: PlayerManager;
-    export let states: StateManager;
     let inp: number;
-
-    const refreshScore = () => {
-        // @ts-ignore
-        inp = null;
-        // inp = PlayerManager.getFromName(identifier, $states.engine_players).score;
-    };
-
-    onMount(() => {
-        states.subscribe(() => {
-            refreshScore();
-        });
-    });
 </script>
 
 <form
+    class="fscore"
     on:submit={async () => {
-        await conn.send(
-            CallProcedure.name("engine::set_score")
-                .string("target", identifier)
-                .number("value", inp)
-                .build()
-        );
-        setTimeout(() => {
-            refreshScore();
-        }, 200);
+        if (inp == null || inp == undefined) return;
+        await gm.set_score(identifier, inp);
+
+        // @ts-ignore
+        inp = undefined;
     }}
 >
     <input type="number" class="scoreset" bind:value={inp} />
@@ -48,7 +31,11 @@
         font-weight: bold;
         font-size: var(--font-normal);
         transition: 100ms ease-in;
-        width: 10rem;
+        width: 100%;
+    }
+
+    .fscore {
+        width: 248px;
     }
 
     .scoreset:hover,

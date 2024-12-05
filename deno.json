@@ -1,5 +1,6 @@
 {
   "imports": {
-    "@sveltejs/kit": "npm:@sveltejs/kit@^2.8.0"
+    "@sveltejs/kit": "npm:@sveltejs/kit@^2.8.0",
+    "idb": "npm:idb@^8.0.0"
   }
 }

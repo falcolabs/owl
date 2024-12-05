@@ -22,8 +22,9 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        gap: 15px;
         /* height: 60px; */
+        max-width: 250px;
+        width: 200px;
         border-radius: 18px;
         box-shadow: 0 4px 4px 0 #00000040;
         border: solid 1px #6a72b4;

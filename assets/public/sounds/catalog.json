@@ -1,0 +1,296 @@
+[
+    {
+        "part": "Mở đầu",
+        "fileName": "op-introduction",
+        "description": "Nhạc giới thiệu cuộc thi",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/Gi%E1%BB%9Bi_thi%E1%BB%87u_cu%E1%BB%99c_thi_O22.mp3/revision/latest?cb=20231228154537&path-prefix=vi"
+    },
+    {
+        "part": "Mở đầu",
+        "fileName": "op-introducecontestants",
+        "description": "Nhạc giới thiệu thí sinh",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/61/Gi%E1%BB%9Bi_thi%E1%BB%87u_th%C3%AD_sinh_O9.ogg/revision/latest?cb=20240411120804&path-prefix=vi"
+    },
+    {
+        "part": "Chung",
+        "fileName": "common-startsection",
+        "description": "Nhạc bắt đầu phần của chương trình",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/7c/H%C3%ACnh_hi%E1%BB%87u_ph%E1%BA%A7n_thi_O21.ogg/revision/latest?cb=20231207150356&path-prefix=vi"
+    },
+    {
+        "part": "Chung",
+        "fileName": "common-dotdotdot",
+        "description": "Chỗ trống",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/b0/%C3%94_tr%E1%BB%91ng_O9.ogg/revision/latest?cb=20210409152506&path-prefix=vi"
+    },
+    {
+        "part": "Chung",
+        "fileName": "common-scoresum",
+        "description": "Nhạc nền tổng kết điểm sau mỗi vòng",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/T%E1%BB%95ng_k%E1%BA%BFt_%C4%91i%E1%BB%83m_left_O9.mp3/revision/latest?cb=20210404071635&path-prefix=vi"
+    },
+    {
+        "part": "Tổng kết",
+        "fileName": "tongket-4th",
+        "description": "Đứng thứ 4",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/33/Trao_gi%E1%BA%A3i_th%C6%B0%E1%BB%9Fng_left_O9.ogg/revision/latest?cb=20230118012119&path-prefix=vi"
+    },
+    {
+        "part": "Tổng kết",
+        "fileName": "tongket-3rd",
+        "description": "Đứng thứ 3",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/33/Trao_gi%E1%BA%A3i_th%C6%B0%E1%BB%9Fng_left_O9.ogg/revision/latest?cb=20230118012119&path-prefix=vi"
+    },
+    {
+        "part": "Tổng kết",
+        "fileName": "tongket-2nd",
+        "description": "Đứng thứ 2",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/33/Trao_gi%E1%BA%A3i_th%C6%B0%E1%BB%9Fng_left_O9.ogg/revision/latest?cb=20230118012119&path-prefix=vi"
+    },
+    {
+        "part": "Tổng kết",
+        "fileName": "tongket-1st",
+        "description": "Đứng thứ 1",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/33/Trao_gi%E1%BA%A3i_th%C6%B0%E1%BB%9Fng_left_O9.ogg/revision/latest?cb=20230118012119&path-prefix=vi"
+    },
+    {
+        "part": "Tổng kết",
+        "fileName": "tongket-award",
+        "description": "Nhạc trao giải",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/33/Trao_gi%E1%BA%A3i_th%C6%B0%E1%BB%9Fng_left_O9.ogg/revision/latest?cb=20230118012119&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-start",
+        "description": "Nhạc bắt đầu phần khởi động",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/6e/K%C4%90_b%E1%BA%AFt_%C4%91%E1%BA%A7u_O22.mp3/revision/latest?cb=20221126152556&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-ready",
+        "description": "Nhạc chuẩn bị bắt đầu phần thi khởi động của thí sinh",
+        "sample": "[Olympia Wiki: Chuẩn bị](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/1/18/K%C4%90_chu%E1%BA%A9n_b%E1%BB%8B_left_O9.mp3/revision/latest?cb=20210209032349&path-prefix=vi + [Olympia Wiki: Mở câu hỏi](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/0/0d/K%C4%90_m%E1%BB%9F_c%C3%A2u_h%E1%BB%8Fi_left_O11.mp3/revision/latest?cb=20220312044044&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-3secs",
+        "description": "Âm thanh đếm giờ 3s",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/d/d9/K%C4%90_3s_ch%E1%BB%9D_t%C3%ADn_hi%E1%BB%87u_O22.mp3/revision/latest?cb=20220309113358&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-bgm",
+        "description": "Nhạc nền trong các phần thi của Khởi động",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/7c/K%C4%90_60s_left_O10.mp3/revision/latest?cb=20221219045625&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-correct",
+        "description": "Trả lời đúng",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/b9/K%C4%90_%C4%91%C3%BAng_left_O10.mp3/revision/latest?cb=20220711040233&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-incorrect",
+        "description": "Trả lời sai",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/6a/V%C4%90_sai_left_O7.ogg/revision/latest?cb=20201216152804&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-bell",
+        "description": "Thí sinh bấm chuông",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/b8/K%C4%90_t%C3%ADn_hi%E1%BB%87u_tr%E1%BA%A3_l%E1%BB%9Di_O22.mp3/revision/latest?cb=20230625155418&path-prefix=vi"
+    },
+    {
+        "part": "Khởi động",
+        "fileName": "khoidong-complete",
+        "description": "Hoàn thành phần thi (cắt đoạn cuối khoidong-bgm",
+        "sample": "Không có"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-start",
+        "description": "Nhạc bắt đầu phần thi Vượt chướng ngại vật",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/1/1f/VCNV_b%E1%BA%AFt_%C4%91%E1%BA%A7u_O22.mp3/revision/latest?cb=20221126172446&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-questionbox",
+        "description": "Nhạc hiện hộp câu hỏi",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/31/VCNV_m%E1%BB%9F_%C3%B4_ch%E1%BB%AF_right_O7.mp3/revision/latest?cb=20210209141944&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-selectrow",
+        "description": "Nhạc chọn một hàng ngang",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/4/4d/VCNV_ch%E1%BB%8Dn_%C3%B4_ch%E1%BB%AF_right_O11.mp3/revision/latest?cb=20220614171419&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-showquestion",
+        "description": "**TODO** - Nhạc hiện câu hỏi sau khi chọn từ hàng ngang",
+        "sample": "Không có"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-15secs",
+        "description": "Nhạc đếm giờ 15s",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/c/c5/VCNV_15s_left_O11.mp3/revision/latest?cb=20231217025517&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-showanswers",
+        "description": "Hiện đáp án của thí sinh",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/1/16/VCNV_m%E1%BB%9F_%C4%91%C3%A1p_%C3%A1n_right_O11.ogg/revision/latest?cb=20220506151357&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-correct",
+        "description": "Có thí sinh trả lời đúng hàng ngang",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/bd/K%C4%90_ho%C3%A0n_th%C3%A0nh_left_O7.mp3/revision/latest?cb=20210209144230&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-incorrect",
+        "description": "Không thí sinh nào trả lời đúng hàng ngang/sai CNV",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/74/K%C4%90_sai_O7.mp3/revision/latest?cb=20230827122808&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-open",
+        "description": "Lật mở mảnh ghép",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/4/40/VCNV_m%E1%BB%9F_h%C3%ACnh_%E1%BA%A3nh_left_O11.ogg/revision/latest?cb=20230127112221&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-bell",
+        "description": "Thí sinh bấm chuông trả lời CNV",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/38/VCNV_t%C3%ADn_hi%E1%BB%87u_tr%E1%BA%A3_l%E1%BB%9Di_left_O11.mp3/revision/latest?cb=20210905110033&path-prefix=vi"
+    },
+    {
+        "part": "VCNV",
+        "fileName": "vcnv-bellcorrect",
+        "description": "Thí sinh trả lời CNV chính xác",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ae/VCNV_%C4%91%C3%BAng_ch%C6%B0%E1%BB%9Bng_ng%E1%BA%A1i_v%E1%BA%ADt_left_O7.mp3/revision/latest?cb=20210209144639&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-start",
+        "description": "Bắt đầu phần thi tăng tốc",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/a4/TT_b%E1%BA%AFt_%C4%91%E1%BA%A7u_O22.mp3/revision/latest?cb=20221126152658&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-revealquestion",
+        "description": "Mở ô câu hỏi phần thi tăng tốc",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/f/f2/TT_m%E1%BB%9F_c%C3%A2u_h%E1%BB%8Fi_left_O11.mp3/revision/latest?cb=20220312043027&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-10secs",
+        "description": "Nhạc đếm giờ 10s",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/72/TT_10s_right_O22.mp3/revision/latest?cb=20230209064004&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-20secs",
+        "description": "Nhạc đếm giờ 20s",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/d/dc/TT_20s_right_O22.mp3/revision/latest?cb=20230209064212&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-30secs",
+        "description": "Nhạc đếm giờ 30s",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/9/90/TT_30s_right_O22.mp3/revision/latest?cb=20230724145511&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-40secs",
+        "description": "Nhạc đếm giờ 40s",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/TT_40s_right_O22.mp3/revision/latest?cb=20230209064620&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-showanswers",
+        "description": "Nhạc hiện đáp án",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/71/TT_m%E1%BB%9F_%C4%91%C3%A1p_%C3%A1n_right_O11.mp3/revision/latest?cb=20220711041228&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-correct",
+        "description": "Có thí sinh trả lời đúng",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/bd/K%C4%90_ho%C3%A0n_th%C3%A0nh_left_O7.mp3/revision/latest?cb=20210209144230&path-prefix=vi"
+    },
+    {
+        "part": "Tăng tốc",
+        "fileName": "tangtoc-wrong",
+        "description": "Không có thí sinh nào trả lời đúng",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/6a/V%C4%90_sai_left_O7.ogg/revision/latest?cb=20201216152804&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-start",
+        "description": "Bắt đầu phần thi về đích",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/4/48/V%C4%90_b%E1%BA%AFt_%C4%91%E1%BA%A7u_O22.mp3/revision/latest?cb=20221126152730&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-onstage",
+        "description": "Thí sinh tiến lên phía trước",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/c/c5/V%C4%90_l%C3%AAn_s%C3%A2n_kh%E1%BA%A5u_left_O9.mp3/revision/latest?cb=20210303154537&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-packagechoice",
+        "description": "Hiện màn hình chọn gói câu hỏi",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/70/V%C4%90_ch%E1%BB%8Dn_g%C3%B3i_%C4%91i%E1%BB%83m_O11.ogg/revision/latest?cb=20220312042611&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-confirmchoice",
+        "description": "Thí sinh chốt gói câu hỏi",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/8/82/V%C4%90_m%E1%BB%9F_c%C3%A2u_h%E1%BB%8Fi_left_O11.mp3/revision/latest?cb=20220312042827&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-15secs",
+        "description": "Đếm giờ 15 giây",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/75/V%C4%90_15s_right_O22.mp3/revision/latest?cb=20220812063839&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-20secs",
+        "description": "Đếm giờ 20 giây",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/d/d3/V%C4%90_20s_right_O22.mp3/revision/latest?cb=20230518164407&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-star",
+        "description": "Ngôi sao hy vọng",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/e/e9/V%C4%90_ng%C3%B4i_sao_left_O8.mp3/revision/latest?cb=20210404071412&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-poll",
+        "description": "Đợi các thí sinh khác bấm chuông",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/8/84/V%C4%90_5s_th%C3%AD_sinh_c%C3%B2n_l%E1%BA%A1i_left_O10.mp3/revision/latest?cb=20210404071136&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-bell",
+        "description": "Tiếng chuông thí sinh",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/5/51/V%C4%90_t%C3%ADn_hi%E1%BB%87u_tr%E1%BA%A3_l%E1%BB%9Di_left_O8.mp3/revision/latest?cb=20210404070931&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-correct",
+        "description": "Thí sinh được cộng điểm",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/5/5c/V%C4%90_%C4%91%C3%BAng_left_O7.mp3/revision/latest?cb=20210404071249&path-prefix=vi"
+    },
+    {
+        "part": "Về đích",
+        "fileName": "vedich-complete",
+        "description": "Thí sinh hoàn thành phần thi",
+        "sample": "https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/f/f0/V%C4%90_v%E1%BB%81_v%E1%BB%8B_tr%C3%AD_left_O8.mp3/revision/latest?cb=20210404070609&path-prefix=vi"
+    }
+]

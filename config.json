@@ -1,44 +1,47 @@
 {
-  "listenOn": "192.168.128.36:6942",
-  "devServer": {
-    "host": "192.168.128.36",
-    "port": 6699
-  },
-  "serveDir": "dist",
-  "staticDir": "static",
-  "checkRPCTypes": true,
-  "debug": true,
-  "tickSpeed": 60,
-  "credentials": [
-    {
-      "fullName": "Bảo Ngọc",
-      "username": "baongoc",
-      "accessKey": "1234"
+    "listenOn": {
+        "host": "localhost",
+        "port": 6942
     },
-    {
-      "fullName": "Thùy An",
-      "username": "thuyan",
-      "accessKey": "1234"
+    "devServer": {
+        "host": "localhost",
+        "port": 6699
     },
-    {
-      "fullName": "Đại Phong",
-      "username": "daiphong",
-      "accessKey": "1234"
-    },
-    {
-      "fullName": "Test Player",
-      "username": "1",
-      "accessKey": "1"
+    "serveDir": "dist",
+    "staticDir": "static",
+    "checkRPCTypes": true,
+    "debug": true,
+    "tickSpeed": 10,
+    "credentials": [
+        {
+            "fullName": "Văn An",
+            "username": "vanan",
+            "accessKey": "asdasd"
+        },
+        {
+            "fullName": "Thị Bình",
+            "username": "thibinh",
+            "accessKey": "dasdw33"
+        },
+        {
+            "fullName": "Linh Chi",
+            "username": "linhchi",
+            "accessKey": "#$TQasdf"
+        },
+        {
+            "fullName": "Văn Dũng",
+            "username": "vandung",
+            "accessKey": "eq3dasd"
+        }
+    ],
+    "game": {
+        "vcnv": {
+            "keyLength": 10,
+            "qualityPercentage": 85,
+            "keyResolution": {
+                "width": 784,
+                "height": 666
+            }
+        }
     }
-  ],
-  "game": {
-    "vcnv": {
-      "keyLength": 10,
-      "qualityPercentage": 85,
-      "keyResolution": {
-        "width": 784,
-        "height": 666
-      }
-    }
-  }
 }

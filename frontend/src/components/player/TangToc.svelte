@@ -23,7 +23,6 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
-    let timerStore = states.timerStore;
     export let conn: Connection;
     export let gm: GameMaster;
     export let players: PlayerManager;
@@ -34,11 +33,10 @@
     let videoProgress = writable(1);
     let blobs: { [key: string]: string } = {};
     let answer: string;
-    let timeElapsed = 30;
+    let myans: string = "";
     let hasMine = false;
-    let timer = states.timerStore;
     let inputBox: HTMLInputElement;
-
+    let time = states.time;
     onMount(async () => {
         // @ts-ignore
         states.on("preload_list", (l: any) => {
@@ -60,35 +58,30 @@
                 if (videoElement == null) return;
                 if (!s.media_status.playbackPaused) {
                     if (videoElement.paused) {
-                        if (videoElement.currentTime == 0) {
-                            // states.setTimer(new Peeker.Timer());
-                        }
                         videoElement.muted = true;
                         await videoElement.play();
-                        $timerStore.resume();
 
                         videoElement.onended = (ev) => {
-                            // states.setTimer(new Peeker.Timer());
-                            // states.setObject("media_status", {
-                            // visible: true,
-                            // playbackPaused: true
-                            // });
                             videoProgress.set(0);
                         };
                     }
                 } else {
                     videoElement?.pause();
-                    $timerStore.pause();
                 }
-                // states.setTimer($timerStore);
             }
             previousState = s.media_status.playbackPaused;
         });
 
+        states.on("qid", (_) => {
+            // @ts-ignore
+            answer = undefined;
+            myans = "";
+        });
+
         inputBox.focus();
-        timer.subscribe((t) => {
+        time.subscribe((t) => {
             try {
-                if (!t.isPaused()) {
+                if (t !== 0) {
                     inputBox.focus();
                 }
             } catch (e) {}
@@ -100,7 +93,6 @@
                 return;
             }
             for (let ans of s.answers) {
-                console.log(ans, gm.username, ans.time);
                 if (ans.name == gm.username && ans.content != "" && ans.time != 30) {
                     hasMine = true;
                     return;
@@ -171,31 +163,29 @@
                         <div>
                             <div class="answergroup">
                                 <p class="reminder">Bấm Enter để gửi</p>
-                                {#if $timer.isPaused()}
+                                {#if !$states.allow_input}
                                     <p class="reminder">Đồng hồ không chạy</p>
-                                {:else if hasMine}
-                                    <p class="reminder">
-                                        Đã nộp lúc <span class="code">{timeElapsed.toFixed(2)}</span
-                                        >s
-                                    </p>
+                                {:else if hasMine && myans !== ""}
+                                    <p class="reminder">Đã nộp {myans}</p>
                                 {:else}
                                     <p class="reminder">Chưa nộp</p>
                                 {/if}
                             </div>
                             <form
                                 on:submit|preventDefault={async () => {
-                                    if ($timer.isPaused()) {
+                                    if (!$states.allow_input) {
                                         return;
                                     }
-                                    timeElapsed = $timer.elapsedSecs();
+                                    myans = answer;
                                     await conn.send(
                                         CallProcedure.name("tangtoc::submit_answer")
                                             .string("answer", answer)
                                             // @ts-ignore
                                             .string("token", gm.authToken)
-                                            .number("time", timeElapsed)
                                             .build()
                                     );
+                                    // @ts-ignore
+                                    answer = null;
                                 }}
                             >
                                 <input
@@ -203,6 +193,7 @@
                                     type="text"
                                     placeholder="Nhập đáp án"
                                     spellcheck="false"
+                                    readonly={!$states.allow_input}
                                     bind:value={answer}
                                     bind:this={inputBox}
                                 />

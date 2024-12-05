@@ -20,16 +20,16 @@ class VeDich(penguin.PartImplementation):
         self.qdb = {
             config()
             .credentials[0]
-            .username: [{20: 45, 30: 48}, {20: 46, 30: 49}, {20: 47, 30: 50}],
+            .username: [{20: 46, 30: 49}, {20: 47, 30: 50}, {20: 48, 30: 51}],
             config()
             .credentials[1]
-            .username: [{20: 51, 30: 54}, {20: 52, 30: 55}, {20: 53, 30: 56}],
+            .username: [{20: 52, 30: 55}, {20: 53, 30: 56}, {20: 54, 30: 57}],
             config()
             .credentials[2]
-            .username: [{20: 57, 30: 60}, {20: 58, 30: 61}, {20: 59, 30: 62}],
+            .username: [{20: 58, 30: 61}, {20: 59, 30: 62}, {20: 60, 30: 63}],
             config()
             .credentials[3]
-            .username: [{20: 63, 30: 66}, {20: 64, 30: 67}, {20: 65, 30: 68}],
+            .username: [{20: 64, 30: 67}, {20: 65, 30: 68}, {20: 66, 30: 69}],
         }
 
         self.placement: penguin.Writable[dict[str, list[int]]] = self.rpc.use_state(
@@ -67,6 +67,7 @@ class VeDich(penguin.PartImplementation):
         self.prompt = self.rpc.use_state("prompt", "")
         self.stage = self.rpc.use_state("stage", STAGE_CHOOSE)
         self.qid = self.rpc.use_state("qid", -1)
+        self.stage.subscribe(lambda _: self.qid.set(-1))
         # TODO - SECURITY: encrypt this (with MC token or sth)
         self.key = self.rpc.use_state("key", "")
         self.media = self.rpc.use_state(
