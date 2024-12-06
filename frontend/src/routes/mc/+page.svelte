@@ -35,6 +35,12 @@
             }
         });
     });
+
+    const kbehandler = async (kde: KeyboardEvent) => {
+        if (kde.key == " ") {
+            await gm.sound.play("common-dotdotdot");
+        }
+    };
 </script>
 
 <div class:noselect={ANTICHEAT_ENABLED}>
@@ -59,3 +65,4 @@
         {/if}
     </Load>
 </div>
+<svelte:window on:keydown={kbehandler} />

@@ -9,8 +9,8 @@
     let states = gm.states;
 </script>
 
-<div class="container">
-    <Load until={$states.active_sounds !== undefined}>
+<Load until={$states.active_sounds !== undefined}>
+    <div class="container">
         {#each sounds as sound}
             <button
                 class="btn sboardbtn"
@@ -23,24 +23,28 @@
                         // @ts-ignore
                         await gm.sound.stop(sound.fileName);
                     }
-                    console.log($states.active_sounds);
                     // @ts-ignore
                     // prevents space bar or enter from triggering the button
                     ev.target?.blur();
-                }}>{sound.displayName}</button
+                }}><p>{sound.displayName}</p></button
             >
         {/each}
-    </Load>
-</div>
+    </div>
+</Load>
 
 <style>
-    .sboardbtn {
-        width: 170px;
-        height: 170px;
+    .container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 15px;
     }
 
-    .btn {
-        margin: 0.5rem;
+    .sboardbtn {
+        width: 170px;
+        padding: 1rem;
+        height: 170px;
+        text-wrap: wrap;
     }
 
     .accent {

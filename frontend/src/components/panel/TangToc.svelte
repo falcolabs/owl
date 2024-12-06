@@ -32,6 +32,13 @@
                         }
                     }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
                 >
+                <button
+                    class="btn"
+                    class:accent={$states.reveal_answer}
+                    on:click={async () =>
+                        await states.setBoolean("reveal_answer", !$states.reveal_answer)}
+                    >Hiện đáp án</button
+                >
             </div>
             <TimerControls
                 {gm}
@@ -73,8 +80,10 @@
                                     let status = $states.media_status;
                                     status.playbackPaused = !status.playbackPaused;
                                     if (status.playbackPaused) {
+                                        await gm.sound.stop("tangtoc-40secs");
                                         await gm.timer_operation("pause");
                                     } else {
+                                        await gm.sound.play("tangtoc-40secs");
                                         await gm.timer_operation("start");
                                     }
                                     await states.setObject("media_status", status);

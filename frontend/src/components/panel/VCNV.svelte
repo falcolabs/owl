@@ -58,6 +58,9 @@
                 <button class="btn" on:click={async () => await states.setArray("highlighted", [])}
                     >Clear Bell</button
                 >
+                <button class="btn" class:accent={$states.reveal_answer} on:click={async () => await states.setBoolean("reveal_answer", !$states.reveal_answer)}
+                    >Hiện đáp án</button
+                >
             </div>
             <TimerControls
                 {gm}

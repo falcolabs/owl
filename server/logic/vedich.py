@@ -173,6 +173,7 @@ class VeDich(penguin.PartImplementation):
             engine.log_info(
                 f"{target} bell registered. {datetime.time().isoformat("microseconds")}"
             )
+            self.show.play_sound("vedich-bell")
             self.bell_player.set(target)
 
     @override

@@ -285,6 +285,8 @@ class Show:
         for p in pl:
             if p.identifier == target:
                 p.score = value
+                if p.score < 0:
+                    p.score = 0
                 self.players.set(pl)
                 break
         else:
@@ -305,6 +307,8 @@ class Show:
         for p in pl:
             if p.identifier == target:
                 p.score += value
+                if p.score < 0:
+                    p.score = 0
                 self.players.set(pl)
                 break
         else:

@@ -64,6 +64,7 @@ class VCNV(penguin.PartImplementation):
         self.show_key = self.rpc.use_state("show_key", False)
         self.max_time = self.rpc.use_state("max_time", 15)
         self.final_hint = self.rpc.use_state("final_hint", False)
+        self.reveal_answer = self.rpc.use_state("reveal_answer", False)
         self.answers: penguin.Writable[list[PlayerAnswer]] = self.rpc.use_state(
             "answers",
             [],
@@ -108,7 +109,7 @@ class VCNV(penguin.PartImplementation):
     @override
     def on_ready(self, show: penguin.Show):
         self.DEFAULT_ANSWERS = [
-            {"time": 30, "name": p.identifier, "content": "", "verdict": False}
+            {"time": 30, "name": p.identifier, "content": "", "verdict": True}
             for p in show.players.get()
         ]
         self.answers.set(self.DEFAULT_ANSWERS)
@@ -173,7 +174,7 @@ class VCNV(penguin.PartImplementation):
                             "time": elapsed,
                             "name": name,
                             "content": answer,
-                            "verdict": False,
+                            "verdict": True,
                         }
                         break
                 else:
@@ -182,7 +183,7 @@ class VCNV(penguin.PartImplementation):
                             "time": elapsed,
                             "name": name,
                             "content": answer,
-                            "verdict": False,
+                            "verdict": True,
                         }
                     )
                 output = sorted(output, key=lambda x: x["time"])
@@ -239,6 +240,7 @@ class VCNV(penguin.PartImplementation):
             self.selected.set("")
             self.prompt.set("Thí sinh hãy lựa chọn hàng ngang.")
         self.puzzle_data.set(mod)
+        self.reveal_answer.set(False)
         self.show.timer.set(engine.Timer())
         self.image.set(
             utils.vcnv.get_imgdata(
@@ -271,8 +273,11 @@ class VCNV(penguin.PartImplementation):
         engine.log_info(
             f"{target} pressed bell on {datetime.time().isoformat("microseconds")}"
         )
+        if target in self.highlighted.inner:
+            return
         bell_list = self.highlighted.get()
-        bell_list.insert(0, target)
+        bell_list.append(target)
+        self.show.play_sound("vcnv-bell")
         self.highlighted.set(bell_list)
 
     @override

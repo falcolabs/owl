@@ -1,13 +1,15 @@
 <script lang="ts">
+    import type { StateManager } from "$lib";
     import PillTag from "./PillTag.svelte";
 
+    export let states: StateManager;
     export let name: string;
     export let time: number;
     export let content: string;
     export let verdict: boolean | null;
 </script>
 
-<div class="container" class:wrong={!verdict && verdict !== null}>
+<div class="container" class:wrong={!verdict && verdict !== null && $states.reveal_answer}>
     <div class="nametag">
         <PillTag text={name} />
     </div>

@@ -35,7 +35,17 @@
 
     const onKeyDown = async (ev: KeyboardEvent) => {
         if (ev.key === " ") {
-            await incrementQuestion();
+            if ($states.qid != -1) {
+                await incrementQuestion();
+            } else {
+                if ($states.stage == STAGE_SEPERATED) {
+                    await setQuestion(
+                        $question_placement[$states.stage][$states.seperated_candidate][0]
+                    )();
+                } else {
+                    await setQuestion($question_placement[$states.stage][0])();
+                }
+            }
         }
         if ($states.stage == STAGE_SEPERATED) {
             if (ev.key === "+") {
@@ -109,6 +119,7 @@
     };
     const setPlayerSeperate = (playerName: string) => async () => {
         await states.setString("seperated_candidate", playerName);
+        await setQuestion(-1)();
     };
 </script>
 

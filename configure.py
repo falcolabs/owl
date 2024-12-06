@@ -58,6 +58,10 @@ def ddx_loader(db: Worksheet):
                 "explaination": db.address(f"I{i}"),
             }
         )
+    output[42]["media"] = {"mediaType": "image", "uri": "/tangtoc/q1.png"}
+    output[43]["media"] = {"mediaType": "image", "uri": "/tangtoc/q2.png"}
+    output[44]["media"] = {"mediaType": "image", "uri": "/tangtoc/q3.png"}
+    output[45]["media"] = {"mediaType": "video", "uri": "/tangtoc/q4.mp4"}
     with open(
         os.path.join("assets", "question_official.json"), "w", encoding="utf8"
     ) as f:
@@ -367,6 +371,11 @@ def olympus_loader(db: Worksheet):
                 "explaination": "",
             }
         )
+
+    output[42]["media"] = {"mediaType": "image", "uri": "/tangtoc/q1.png"}
+    output[43]["media"] = {"mediaType": "image", "uri": "/tangtoc/q2.png"}
+    output[44]["media"] = {"mediaType": "image", "uri": "/tangtoc/q3.png"}
+    output[45]["media"] = {"mediaType": "video", "uri": "/tangtoc/q4.mp4"}
 
     with open(
         os.path.join("assets", "question_official.json"), "w", encoding="utf8"

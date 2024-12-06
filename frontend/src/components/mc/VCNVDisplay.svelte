@@ -35,11 +35,23 @@
 <div class="bg">
     <Load until={$states.selected !== undefined}>
         <div class="center-box">
-            <div class="main">
-                <VcnvMainReduced {states} />
+            <div class="col">
+                {#if $states.highlighted.length > 0}
+                    <h1 style="font-weight: bold;">Thứ tự chuông trả lời CNV</h1>
+                {/if}
+                <div class="row">
+                    {#each $states.highlighted.entries() as [i, p]}
+                        <p>{i + 1}. {p}</p>
+                    {/each}
+                </div>
             </div>
-            <div class="answers">
-                <ShowAnswerColored {states} {players} />
+            <div class="row">
+                <div class="main">
+                    <VcnvMainReduced {states} />
+                </div>
+                <div class="answers">
+                    <ShowAnswerColored {states} {players} />
+                </div>
             </div>
         </div>
         <div class="bottom"><ScoreBar {states} /></div>
@@ -54,15 +66,25 @@
         background: var(--bg-gradient);
     }
 
+    .row {
+        display: flex;
+        flex-direction: row;
+        gap: 50px;
+    }
+
+    .col {
+        display: flex;
+        flex-direction: column;
+    }
+
     .center-box {
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100vw;
         height: 100vh;
-        flex-direction: row;
-        gap: 50px;
-        transform: translateY(2rem);
+        flex-direction: column;
+        gap: 100px;
     }
 
     .bottom {

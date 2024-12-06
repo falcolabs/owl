@@ -14,29 +14,29 @@
     "tickSpeed": 10,
     "credentials": [
         {
-            "fullName": "Văn An",
-            "username": "vanan",
-            "accessKey": "asdasd"
+            "fullName": "Test 1",
+            "username": "1",
+            "accessKey": "1234"
         },
         {
-            "fullName": "Thị Bình",
-            "username": "thibinh",
-            "accessKey": "dasdw33"
+            "fullName": "Test 2",
+            "username": "2",
+            "accessKey": "1234"
         },
         {
-            "fullName": "Linh Chi",
-            "username": "linhchi",
-            "accessKey": "#$TQasdf"
+            "fullName": "Test 3",
+            "username": "3",
+            "accessKey": "1234"
         },
         {
-            "fullName": "Văn Dũng",
-            "username": "vandung",
-            "accessKey": "eq3dasd"
+            "fullName": "Test 4",
+            "username": "4",
+            "accessKey": "1234"
         }
     ],
     "game": {
         "vcnv": {
-            "keyLength": 10,
+            "keyLength": 6,
             "qualityPercentage": 85,
             "keyResolution": {
                 "width": 784,

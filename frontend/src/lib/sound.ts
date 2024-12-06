@@ -38,7 +38,6 @@ export class SoundManager {
         gm.states.on("active_sounds", async (data: any) => {
             obj.soundHandles.forEach((handle, sn) => {
                 if (!data.includes(sn)) {
-                    console.log("removing", sn)
                     handle.pause();
                     handle.remove();
                     obj.soundHandles.delete(sn);
@@ -69,7 +68,6 @@ export class SoundManager {
         }
         window.localStorage.setItem("owlSoundDownloaded", "true");
         obj.downloadText.set(`Download complete.`)
-        console.log(`Download complete.`)
         obj.isReady = true
         obj.onready(obj.db);
         return obj;

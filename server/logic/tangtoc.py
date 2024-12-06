@@ -33,6 +33,7 @@ class TangToc(penguin.PartImplementation):
             "media",
             None,
         )
+        self.reveal_answer = self.rpc.use_state("reveal_answer", False)
         self.allow_input = self.rpc.use_state("allow_input", False)
 
         self.plusminus = self.rpc.use_state(
@@ -99,7 +100,7 @@ class TangToc(penguin.PartImplementation):
                             "time": elapsed,
                             "name": name,
                             "content": answer,
-                            "verdict": False,
+                            "verdict": True,
                         }
                         break
                 else:
@@ -108,7 +109,7 @@ class TangToc(penguin.PartImplementation):
                             "time": elapsed,
                             "name": name,
                             "content": answer,
-                            "verdict": False,
+                            "verdict": True,
                         }
                     )
                 output = sorted(output, key=lambda x: x["time"])
@@ -137,7 +138,7 @@ class TangToc(penguin.PartImplementation):
             }
         )
         self.DEFAULT_ANSWERS = [
-            {"time": 30, "name": p.identifier, "content": "", "verdict": False}
+            {"time": 30, "name": p.identifier, "content": "", "verdict": True}
             for p in show.players.get()
         ]
         self.answers.set(self.DEFAULT_ANSWERS)
@@ -152,8 +153,10 @@ class TangToc(penguin.PartImplementation):
         self.prompt.set(q.prompt)
         self.answers.set(self.DEFAULT_ANSWERS)
         self.show_key.set(False)
-        self.max_time = self.rpc.use_state("max_time", q.time)
+        self.reveal_answer.set(False)
+        self.max_time.set(q.time)
         self.key.set(q.key)
+
         self.show.timer.set(engine.Timer())
         if q.media is None:
             self.media.set(None)

@@ -99,6 +99,7 @@ class KhoiDong(penguin.PartImplementation):
         match self.session_manager.playername(ringer_token):
             case Some(name):
                 if self.joint_bell.get() == "":
+                    self.show.play_sound("khoidong-bell")
                     self.joint_bell.set(name)
                     engine.log_info(f"rang the bell: {self.joint_bell.get()}")
                 else:

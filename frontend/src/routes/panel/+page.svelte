@@ -87,9 +87,10 @@
                                 { displayName: "Chọn hàng", fileName: "vcnv-selectrow" },
                                 { displayName: "15s", fileName: "vcnv-15secs" },
                                 { displayName: "Đáp án", fileName: "vcnv-showanswers" },
-                                { displayName: "Đúng", fileName: "vcnv-correct" },
+                                { displayName: "Đúng", fileName: "tangtoc-correct" },
                                 { displayName: "Sai", fileName: "vcnv-incorrect" },
                                 { displayName: "Mở mảnh ghép", fileName: "vcnv-open" },
+                                { displayName: "Chuông CNV", fileName: "vcnv-bell" },
                                 { displayName: "Đúng CNV", fileName: "vcnv-bellcorrect" }
                             ]}
                         />

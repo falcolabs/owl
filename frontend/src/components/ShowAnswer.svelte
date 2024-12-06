@@ -14,6 +14,7 @@
     {#if $states.answers !== undefined && $states.engine_players.size != 0}
         {#each $states.answers as { time, name, content, verdict }}
             <TextAnswer
+                {states}
                 {time}
                 name={PlayerManager.getDisplayName(name, $states.engine_players)}
                 {content}

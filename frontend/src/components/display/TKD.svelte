@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { StateManager } from "$lib";
+    import { PlayerManager, StateManager } from "$lib";
     import Load from "../Load.svelte";
 
     export let states: StateManager;
@@ -9,13 +9,14 @@
 <div class="bg">
     <Load until={$states.appear !== undefined}>
         <div class="container">
-            {#each $states.engine_players as { identifier, name, score }}
-                <div
-                    class="scoregroup"
-                    class:disappear={!Object.hasOwn($states.appear, identifier)}
-                >
-                    <div class="name pill">{name}</div>
-                    <div class="score box prompt">{score}</div>
+            {#each Object.entries($states.appear) as [_, {displayName, score}]}
+                <div class="scoregroup">
+                    <div class="name pill">
+                        {displayName}
+                    </div>
+                    <div class="score box prompt">
+                        {score}
+                    </div>
                 </div>
             {/each}
         </div>
@@ -34,15 +35,12 @@
         overflow: hidden;
     }
 
-    .scoregroup.disappear {
-        opacity: 0;
-    }
-
     .container {
         display: flex;
-        flex-direction: column;
+        flex-direction: column-reverse;
         align-items: center;
-        justify-content: center;
+        justify-content: end;
+        height: 80vh;
         gap: 60px;
     }
 
@@ -74,7 +72,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 50px 300px;
+        padding: 50px 0;
+        width: 600px;
         font-weight: bold;
     }
 </style>

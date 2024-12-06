@@ -6,8 +6,6 @@
 
     export let states: StateManager;
     export let players: PlayerManager;
-
-    console.log($states.answers);
 </script>
 
 <div class="container">

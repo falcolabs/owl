@@ -36,7 +36,7 @@ class TKD(penguin.PartImplementation):
         p = []
         for i in self.show.players.get():
             p.append(json.loads(i.pack()))
-        p.sort(key=lambda x: x["score"], reverse=True)
+        p.sort(key=lambda x: x["score"])
 
         for pl in p:
             self.org_list[pl["identifier"]] = {
