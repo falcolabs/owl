@@ -5,7 +5,9 @@
         GameMaster,
         PlayerManager,
         StateManager,
-        ANTICHEAT_ENABLED
+        ANTICHEAT_ENABLED,
+        AssetManager
+
     } from "$lib";
     import { writable, type Readable, type Writable } from "svelte/store";
     import { onMount } from "svelte";
@@ -24,11 +26,13 @@
     let gm: GameMaster;
     let players: PlayerManager;
     let states: StateManager;
+    let assets: AssetManager;
     let isAuthenticated: Writable<boolean> = writable(false);
     onMount(async () => {
         conn = await Connection.create();
         gm = await GameMaster.create(conn);
         states = gm.states;
+        assets = await AssetManager.create(states);
         players = gm.players;
         isAuthenticated = gm.isAuthenticated;
         conn.on(Peeker.PacketType.State, async (update) => {
@@ -54,7 +58,7 @@
         {:else if $states.available_parts[$states.current_part] == "vcnv"}
             <Vcnv {conn} {gm} {states} {players} />
         {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-            <TangToc {conn} {gm} {states} {players} />
+            <TangToc {conn} {gm} {states} {players} {assets} />
         {:else if $states.available_parts[$states.current_part] == "vedich"}
             <VeDich {conn} {gm} {states} {players} />
         {:else if $states.available_parts[$states.current_part] == "tiebreaker"}

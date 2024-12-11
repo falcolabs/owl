@@ -15,7 +15,7 @@
     </div>
     <div class="answerbox box">
         {#if content != ""}
-            <p class="prompt">{content}</p>
+            <p class="prompt">{content.toUpperCase()}</p>
         {:else}
             <p class="prompt">&nbsp</p>
         {/if}

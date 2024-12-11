@@ -100,6 +100,7 @@ class ConfigHive(ConfigurationValue):
     tickSpeed: int
     credentials: list[UserCredentials]
     game: Any
+    gameAssets: list[str]
 
 
 CFG_HIVE: ConfigHive

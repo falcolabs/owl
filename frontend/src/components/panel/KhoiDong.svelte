@@ -20,7 +20,6 @@
         qid: -1
     });
     export let conn: Connection;
-    export let gm: GameMaster;
     export let players: Readable<Map<string, Player>>;
 
     let question_placement: Writable<any> = writable({
@@ -32,41 +31,6 @@
         },
         [Number(STAGE_JOINT)]: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
     });
-
-    const onKeyDown = async (ev: KeyboardEvent) => {
-        if (ev.key === " ") {
-            if ($states.qid != -1) {
-                await incrementQuestion();
-            } else {
-                if ($states.stage == STAGE_SEPERATED) {
-                    await setQuestion(
-                        $question_placement[$states.stage][$states.seperated_candidate][0]
-                    )();
-                } else {
-                    await setQuestion($question_placement[$states.stage][0])();
-                }
-            }
-        }
-        if ($states.stage == STAGE_SEPERATED) {
-            if (ev.key === "+") {
-                await gm.add_score($states.seperated_candidate, $states.plusminus.add[0]);
-                await gm.sound.play("khoidong-correct");
-            }
-            if (ev.key === "-") {
-                await gm.add_score($states.seperated_candidate, $states.plusminus.rem[0]);
-                await gm.sound.play("khoidong-incorrect");
-            }
-        } else {
-            if (ev.key === "+") {
-                await gm.add_score($states.joint_bell, $states.plusminus.add[0]);
-                await gm.sound.play("khoidong-correct");
-            }
-            if (ev.key === "-") {
-                await gm.add_score($states.joint_bell, $states.plusminus.rem[0]);
-                await gm.sound.play("khoidong-incorrect");
-            }
-        }
-    };
 
     onMount(async () => {
         let player_list = $states.engine_players;
@@ -122,8 +86,6 @@
         await setQuestion(-1)();
     };
 </script>
-
-<svelte:window on:keydown={onKeyDown} />
 
 <div>
     <h1>Game Master</h1>

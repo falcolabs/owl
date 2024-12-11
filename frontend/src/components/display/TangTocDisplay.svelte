@@ -3,11 +3,17 @@
     import TitleBar from "../TitleBar.svelte";
     import ShowAnswer from "../ShowAnswer.svelte";
     import { onMount } from "svelte";
-    import { Peeker, Connection, GameMaster, StateManager, CallProcedure } from "$lib";
+    import {
+        Peeker,
+        Connection,
+        GameMaster,
+        StateManager,
+        CallProcedure,
+        AssetManager
+    } from "$lib";
     import Load from "../Load.svelte";
     import ScoreBar from "../ScoreBar.svelte";
     import type { PlayerManager } from "$lib/player";
-    import type { MediaContent } from "client";
     import BareTimer from "../BareTimer.svelte";
     import TimerBar from "../TimerBar.svelte";
 
@@ -24,28 +30,24 @@
             { time: 2, name: "herobrine", content: "sasfsf", verdict: null }
         ]
     });
-    let time = states.time;
-    export let conn: Connection;
     export let gm: GameMaster;
     export let players: PlayerManager;
+    export let assets: AssetManager;
     let videoElement: HTMLVideoElement;
     let audioElement: HTMLAudioElement;
     let imageElement: HTMLImageElement;
     let previousState = 0;
     let videoProgress = writable(1);
-    let blobs: { [key: string]: string } = {};
+    let assetURL = writable("");
 
     onMount(async () => {
         // @ts-ignore
-        states.on("preload_list", (l: any) => {
-            Object.entries(l).forEach(async (a: any) => {
-                let qn = JSON.parse(a[0]);
-                // @ts-ignore
-                let media = JSON.parse(a[1]);
-                if (media == null) return;
-                let r = await fetch(media.uri);
-                blobs[media.uri] = URL.createObjectURL(await r.blob());
-            });
+        states.on("media", async ({ uri }) => {
+            if (uri == null) {
+                $assetURL = "";
+                return;
+            }
+            $assetURL = await assets.getURL(uri);
         });
 
         states.subscribe(async (s) => {
@@ -101,27 +103,19 @@
                 <div class="box vp">
                     {#if $states.media == null}
                         <div class="media-placeholder" />
-                    {:else if $states.media_status.visible}
+                    {:else if $states.media_status.visible && $assetURL !== ""}
                         {#if $states.media.mediaType == "video"}
                             <!-- svelte-ignore a11y-media-has-caption -->
-                            <video
-                                class="mmedia mobj"
-                                bind:this={videoElement}
-                                src={blobs[$states.media.uri]}
-                            />
+                            <video class="mmedia mobj" bind:this={videoElement} src={$assetURL} />
                         {:else if $states.media.mediaType == "image"}
                             <img
                                 class="mmedia mobj"
-                                src={blobs[$states.media.uri]}
+                                src={$assetURL}
                                 alt="Question content"
                                 bind:this={imageElement}
                             />
                         {:else if $states.media.mediaType == "audio"}
-                            <audio
-                                class="mmedia mobj"
-                                src={blobs[$states.media.uri]}
-                                bind:this={audioElement}
-                            />
+                            <audio class="mmedia mobj" src={$assetURL} bind:this={audioElement} />
                         {/if}
                     {:else}
                         <div class="media-placeholder" />

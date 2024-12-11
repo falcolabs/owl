@@ -6,6 +6,7 @@
     import { readable, writable, type Writable, type Readable } from "svelte/store";
     import ScoreJudge from "../../components/panel/ScoreJudge.svelte";
     import SubmitJudger from "../../components/panel/SubmitJudger.svelte";
+    import KhoiDong from "../../components/judge/KhoiDong.svelte";
 
     let conn: Connection;
     let gm: GameMaster;
@@ -45,6 +46,9 @@
                         {states}
                         prefix={$states.available_parts[$states.current_part]}
                     />
+                {/if}
+                {#if $states.available_parts[$states.current_part] == "khoidong"}
+                    <KhoiDong {conn} {gm} {states} />
                 {/if}
             </div>
         </div>

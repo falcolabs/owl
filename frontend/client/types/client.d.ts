@@ -296,6 +296,7 @@ export class ClientHandle {
 
 export type AvailableSound = "op-introduction"
     | "op-introducecontestants"
+    | "op-introduceguest"
     | "common-startsection"
     | "common-dotdotdot"
     | "common-scoresum"

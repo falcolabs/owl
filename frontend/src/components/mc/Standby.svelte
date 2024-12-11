@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { SHOW_NAME, ORG_NAME, SUBTEXT } from "$lib";
+    import { SHOW_NAME, ORG_NAME, SUBTEXT, StateManager } from "$lib";
+    import ScoreBar from "../ScoreBar.svelte";
+    export let states: StateManager;
 </script>
 
 <div class="bg">
-    <div></div>
     <div class="titlegroup">
         <h2 class="caps">{ORG_NAME}</h2>
         <h1>
@@ -11,7 +12,7 @@
         </h1>
         <h2 class="caps subtext">{SUBTEXT}</h2>
     </div>
-    <p class="cpy">Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.</p>
+    <div class="bar"><ScoreBar {states} /></div>
 </div>
 
 <style>
@@ -22,7 +23,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         overflow: hidden;
     }
 
@@ -31,14 +32,7 @@
         flex-direction: column;
         justify-self: center;
         align-items: center;
-    }
 
-    .cpy {
-        font-size: 16px;
-        text-align: center;
-        color: #888ebf;
-        margin-bottom: 15px;
-        width: 540px;
     }
 
     .caps {
@@ -58,5 +52,11 @@
     }
     .subtext {
         margin: 1rem;
+    }
+
+    .bar {
+        position: fixed;
+        bottom: 25px;
+
     }
 </style>

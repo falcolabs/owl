@@ -4,3 +4,5 @@ black
 pillow
 tinydb
 pylightxl
+tqdm
+requests

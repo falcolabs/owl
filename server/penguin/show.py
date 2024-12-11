@@ -385,6 +385,7 @@ class Show:
         self.ticker = engine.Ticker()
         self.sid: Writable[str] = self.rpc.use_state("sid", gen_token(8))
         self.session_manager = SESSION_MAN
+        self.assets = self.rpc.use_state("engine_assets", list(config().gameAssets))
         self.timer: Writable[engine.Timer] = self.rpc.use_state(
             "timer",
             engine.Timer(),

@@ -38,7 +38,7 @@ export class GameMaster {
             obj.partName.set(packetPart.value.name);
         });
 
-        obj.states.onready = async (_) => {
+        obj.states.onready(async (_) => {
             let ad = window.sessionStorage.getItem("authData");
             if (ad !== null && ad !== "") {
                 let adt = JSON.parse(ad);
@@ -50,7 +50,7 @@ export class GameMaster {
                     })
                 );
             }
-        };
+        });
 
         obj.connection.on(Peeker.PacketType.AuthStatus, (packet) => {
             if (packet.value.success) {

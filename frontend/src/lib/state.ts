@@ -6,12 +6,12 @@ import { readable, writable, type Readable, type Unsubscriber, type Writable } f
 export class StateManager implements Readable<any> {
     raw_states!: Map<string, GameState>
     connection!: Connection
+    wstime!: WebSocket
     listeners!: Map<string, (value: GameState) => void>
     updateListeners!: ((state: { [key: string]: AcceptableValue }) => void)[]
     time!: Writable<number>;
-
+    onReadyList!: ((store: { [key: string]: AcceptableValue }) => void)[];
     public store!: any /* { [key: string]: AcceptableValue }*/
-    public onready: (store: { [key: string]: AcceptableValue }) => void = (_) => { }
 
     static async create(connection: Connection): Promise<StateManager> {
         let obj = new StateManager();
@@ -21,20 +21,20 @@ export class StateManager implements Readable<any> {
         obj.raw_states = new Map();
         obj.listeners = new Map();
         obj.updateListeners = []
-
-        let def;
-        if (obj.store.timer === undefined) {
-            def = new Peeker.Timer();
-        } else {
-            def = Peeker.Timer.from(obj.store.timer);
-        }
+        obj.wstime = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/time`);
+        obj.onReadyList = []
         obj.time = writable(0);
+        obj.wstime.onmessage = ((me) => {
+            let time = JSON.parse(me.data);
+            obj.time.set(time)
+        });
+
         connection.on(Peeker.PacketType.StateList, (packet) => {
             packet.value.forEach((state) => {
                 obj.handleState(state)
             })
             obj.store.__init = true
-            obj.onready(obj.store)
+            obj.onReadyList.forEach(cb => cb(obj.store));
             obj.updateListeners.forEach((cb) => cb(obj.store));
         })
 
@@ -53,9 +53,6 @@ export class StateManager implements Readable<any> {
             }
         });
         this.store[state.name] = JSON.parse(state.data.data);
-        if (state.name == "time") {
-            this.time.set(this.store.time)
-        }
     }
 
     isInitialized(): boolean {
@@ -64,6 +61,13 @@ export class StateManager implements Readable<any> {
 
     flush() {
         this.store = { __init: false };
+    }
+
+    onready(cb: (store: { [key: string]: AcceptableValue }) => void) {
+        this.onReadyList.push(cb);
+        if (this.store.__init) {
+            cb(this.store);
+        }
     }
 
     async updateAll() {

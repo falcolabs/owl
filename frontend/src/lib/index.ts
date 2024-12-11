@@ -17,6 +17,7 @@ export { StateManager } from "$lib/state";
 export { Push } from "$lib/push"
 export { Value } from "$lib/value";
 export { PlayerManager } from "$lib/player"
+export { AssetManager } from "$lib/assets"
 
 async function ensure(socket: WebSocket, timeout = 10000) {
     const isOpened = () => (socket.readyState === WebSocket.OPEN)
@@ -38,7 +39,6 @@ async function ensure(socket: WebSocket, timeout = 10000) {
 
 export class Connection {
     ws!: WebSocket
-    wstime!: WebSocket
     callbacks!: Map<PacketType, CBHandle<PacketType>[]>
     globalCB!: CBHandleAll[]
     public currentPart!: string
@@ -48,7 +48,6 @@ export class Connection {
         let obj = new Connection();
         Peeker.ClientHandle.set_panic_hook()
         obj.ws = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/harlem`);
-        obj.wstime = new WebSocket(`ws://${import.meta.env.VITE_WSENDPOINT}/time`);
         obj.callbacks = new Map()
         obj.globalCB = []
         obj.ws.onmessage = ((me) => {
@@ -63,25 +62,7 @@ export class Connection {
             // @ts-ignore
             obj.globalCB.forEach(async (handle) => handle(packet));
         })
-        obj.wstime.onmessage = ((me) => {
-            let packet: Packet<PacketType.State> = {
-                variant: Peeker.PacketType.State,
-                value: {
-                    name: "time",
-                    data: {
-                        data: String(me.data),
-                        dataType: Peeker.PortableType.NUMBER
-                    }
-                },
-                pack: () => me.data
 
-            }
-            if (obj.callbacks.has(Peeker.PacketType.State)) {
-                obj.callbacks.get(Peeker.PacketType.State)?.forEach((handle) => handle(packet));
-            }
-            // @ts-ignore
-            obj.globalCB.forEach(async (handle) => handle(packet));
-        })
         if (!await ensure(obj.ws)) {
             throw new Error("Unable to connect to host.")
         }

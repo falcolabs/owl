@@ -27,7 +27,9 @@
                     </div>
                     <div class="vertical">
                         {#each $states.answers as { content }}
-                            <p class="btn disabled-btn smol code">{content}</p>
+                            <p class="btn disabled-btn smol code">
+                                {content !== "" ? content : "-"}
+                            </p>
                         {/each}
                     </div>
                     <div class="vertical">

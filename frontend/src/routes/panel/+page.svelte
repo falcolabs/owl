@@ -43,7 +43,7 @@
             <div class="horizontal">
                 <div>
                     {#if $states.available_parts[$states.current_part] == "khoidong"}
-                        <KhoiDong {gm} {states} {conn} {players} />
+                        <KhoiDong {states} {conn} {players} />
                     {:else if $states.available_parts[$states.current_part] == "vcnv"}
                         <Vcnv {gm} {states} {conn} />
                     {:else if $states.available_parts[$states.current_part] == "tangtoc"}
@@ -155,6 +155,7 @@
                             sounds={[
                                 { displayName: "Nhạc MC", fileName: "op-introduction" },
                                 { displayName: "GT thí sinh", fileName: "op-introducecontestants" },
+                                { displayName: "GT đại biểu", fileName: "op-introduceguest" },
                                 { displayName: "Trao giải", fileName: "tongket-award" }
                             ]}
                         />

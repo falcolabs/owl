@@ -5,7 +5,10 @@
         GameMaster,
         PlayerManager,
         StateManager,
-        ANTICHEAT_ENABLED
+        ANTICHEAT_ENABLED,
+
+        AssetManager
+
     } from "$lib";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
@@ -25,12 +28,14 @@
     let players: PlayerManager;
     let states: StateManager;
     let sound: SoundManager;
+    let assets: AssetManager;
     let downloadText: Writable<string>;
 
     onMount(async () => {
         conn = await Connection.create();
         gm = await GameMaster.create(conn);
         states = gm.states;
+        assets = await AssetManager.create(states)
         players = gm.players;
         sound = await SoundManager.create(gm);
         downloadText = sound.downloadText;
@@ -55,7 +60,7 @@
             {:else if $states.available_parts[$states.current_part] == "vcnv"}
                 <VcnvDisplay {conn} {gm} {states} {players} />
             {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-                <TangTocDisplay {conn} {gm} {states} {players} />
+                <TangTocDisplay {gm} {states} {players} {assets} />
             {:else if $states.available_parts[$states.current_part] == "vedich"}
                 <VeDichDisplay {conn} {gm} {states} {players} />
             {:else if $states.available_parts[$states.current_part] == "tiebreaker"}
