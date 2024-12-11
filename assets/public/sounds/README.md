@@ -4,7 +4,7 @@ Put your sound files here. The show will play the sounds located in this directo
 |Part|Name (without file extension)   |Purpose   |Sample (O24)|
 |-------|----|----------|------------|
 |Mở đầu|`op-introduction`|Nhạc giới thiệu cuộc thi|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/Gi%E1%BB%9Bi_thi%E1%BB%87u_cu%E1%BB%99c_thi_O22.mp3/revision/latest?cb=20231228154537&path-prefix=vi)|
-|Mở đầu|`op-introducecontestants`|Nhạc giới thiệu thí sinh|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/6/61/Gi%E1%BB%9Bi_thi%E1%BB%87u_th%C3%AD_sinh_O9.ogg/revision/latest?cb=20240411120804&path-prefix=vi)|
+|Mở đầu|`op-introducecontestants`|Nhạc giới thiệu thí sinh (cắt ra từ 21s đầu của `tongket-award`)|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/3/33/Trao_gi%E1%BA%A3i_th%C6%B0%E1%BB%9Fng_left_O9.ogg/revision/latest?cb=20230118012119&path-prefix=vi)|
 |Chung|`common-startsection`|Nhạc bắt đầu phần của chương trình|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/7/7c/H%C3%ACnh_hi%E1%BB%87u_ph%E1%BA%A7n_thi_O21.ogg/revision/latest?cb=20231207150356&path-prefix=vi)|
 |Chung|`common-dotdotdot`|Chỗ trống|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/b/b0/%C3%94_tr%E1%BB%91ng_O9.ogg/revision/latest?cb=20210409152506&path-prefix=vi)|
 |Chung|`common-scoresum`|Nhạc nền tổng kết điểm sau mỗi vòng|[Olympia Wiki](https://static.wikia.nocookie.net/duong-len-dinh-olympia/images/a/ad/T%E1%BB%95ng_k%E1%BA%BFt_%C4%91i%E1%BB%83m_left_O9.mp3/revision/latest?cb=20210404071635&path-prefix=vi)|
