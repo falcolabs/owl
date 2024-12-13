@@ -39,13 +39,19 @@
     let assetURL = writable("");
 
     onMount(async () => {
-        // @ts-ignore
-        states.on("media", async ({ uri }) => {
-            if (uri == null) {
+        states.on("media", async (media) => {
+            if (media == undefined) {
                 $assetURL = "";
                 return;
             }
-            $assetURL = await assets.getURL(uri);
+            // @ts-ignore
+            if (media.uri == null) {
+                $assetURL = "";
+                return;
+            }
+
+            // @ts-ignore
+            $assetURL = await assets.getURL(media.uri);
         });
 
         states.subscribe(async (s) => {
@@ -161,10 +167,10 @@
                         <div>
                             <div class="answergroup">
                                 <p class="reminder">Bấm Enter để gửi</p>
-                                {#if !$states.allow_input}
-                                    <p class="reminder">Đồng hồ không chạy</p>
-                                {:else if hasMine && myans !== ""}
+                                {#if hasMine && myans !== ""}
                                     <p class="reminder">Đã nộp {myans}</p>
+                                {:else if !$states.allow_input}
+                                    <p class="reminder">Đồng hồ không chạy</p>
                                 {:else}
                                     <p class="reminder">Chưa nộp</p>
                                 {/if}

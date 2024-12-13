@@ -92,12 +92,12 @@
             <div>
                 <div class="answergroup">
                     <p class="reminder">Bấm Enter để gửi</p>
-                    {#if !$states.allow_input}
-                        <p class="reminder">Chưa đếm ngược</p>
-                    {:else if hasMine && myans !== ""}
+                    {#if hasMine && myans !== ""}
                         <p class="reminder">
                             Đã nộp {myans}
                         </p>
+                    {:else if !$states.allow_input}
+                        <p class="reminder">Chưa đếm ngược</p>
                     {:else}
                         <p class="reminder">Chưa nộp</p>
                     {/if}

@@ -41,13 +41,18 @@
     let assetURL = writable("");
 
     onMount(async () => {
-        // @ts-ignore
-        states.on("media", async ({ uri }) => {
-            if (uri == null) {
+        states.on("media", async (media) => {
+            if (media == undefined) {
                 $assetURL = "";
                 return;
             }
-            $assetURL = await assets.getURL(uri);
+            // @ts-ignore
+            if (media.uri == null) {
+                $assetURL = "";
+                return;
+            }
+            // @ts-ignore
+            $assetURL = await assets.getURL(media.uri);
         });
 
         states.subscribe(async (s) => {

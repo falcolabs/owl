@@ -32,6 +32,22 @@
         [Number(STAGE_JOINT)]: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
     });
 
+    const onKeyDown = async (ev: KeyboardEvent) => {
+        if (ev.key === " ") {
+            if ($states.qid != -1) {
+                await incrementQuestion();
+            } else {
+                if ($states.stage == STAGE_SEPERATED) {
+                    await setQuestion(
+                        $question_placement[$states.stage][$states.seperated_candidate][0]
+                    )();
+                } else {
+                    await setQuestion($question_placement[$states.stage][0])();
+                }
+            }
+        }
+    };
+
     onMount(async () => {
         let player_list = $states.engine_players;
         if (player_list === undefined || player_list.length === 0) {
@@ -197,6 +213,7 @@
     <p>Câu {$states.qid + 1}. {$states.prompt}</p>
     <p style="font-weight: bold;">{$states.key}</p>
 </div>
+<svelte:window on:keydown={onKeyDown} />
 
 <style>
     .setq {
@@ -218,7 +235,6 @@
         flex-direction: row;
         gap: 15px;
     }
-
 
     .code {
         font-family: var(--font-monospace);

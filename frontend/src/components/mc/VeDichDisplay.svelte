@@ -43,13 +43,18 @@
                 <div class="box">
                     {#if $states.qid > -1}
                         <div class="qnum">
-                            <PillTag
-                                text={`Câu ${$states.placement[$states.current_player_username].indexOf($states.qid) + 1}` +
-                                    ($states.hope_stars.includes($states.qid) ? " ☆" : "") +
-                                    " · " +
-                                    `${scoreOf[$states.qid]}` +
-                                    "đ"}
-                            />
+                            <Load
+                                until={$states.placement[$states.current_player_username] !==
+                                    undefined}
+                            >
+                                <PillTag
+                                    text={`Câu ${$states.placement[$states.current_player_username].indexOf($states.qid) + 1}` +
+                                        ($states.hope_stars.includes($states.qid) ? " ☆" : "") +
+                                        " · " +
+                                        `${scoreOf[$states.qid]}` +
+                                        "đ"}
+                                />
+                            </Load>
                         </div>
                         <p class="prompt">{$states.prompt}</p>
                     {:else}

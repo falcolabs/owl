@@ -21,6 +21,13 @@ front:
 cloc:
   - cloc $(git ls-files)
 
+back:
+  - cd server
+  - python3 main.py
+
+sync:
+  - python3 configure.py
+
 run:
   - cd engine
   - maturin develop

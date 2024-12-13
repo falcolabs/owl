@@ -1,8 +1,5 @@
 <script lang="ts">
     import { Connection, Peeker, type StateManager, CallProcedure, GameMaster } from "$lib";
-    import type { Timer, Player } from "client";
-    import { writable, readable, type Readable, type Writable } from "svelte/store";
-    import SubmitJudger from "./SubmitJudger.svelte";
     import Load from "../../../components/Load.svelte";
     import TimerControls from "./TimerControls.svelte";
     export let gm: GameMaster;
@@ -19,27 +16,27 @@
                 <h1>Game Master</h1>
                 <div class="horizontal">
                     <button
-                    class="btn"
-                    class:accent={$states.show_key}
-                    on:click={async () => {
-                        if (!$states.show_key) {
-                            await gm.sound.play("tangtoc-showanswers");
-                            console.log("1.5s delay before showing answer");
-                            setTimeout(async () => {
+                        class="btn"
+                        class:accent={$states.show_key}
+                        on:click={async () => {
+                            if (!$states.show_key) {
+                                await gm.sound.play("tangtoc-showanswers");
+                                console.log("1.5s delay before showing answer");
+                                setTimeout(async () => {
+                                    await states.setBoolean("show_key", !$states.show_key);
+                                }, 1500);
+                            } else {
                                 await states.setBoolean("show_key", !$states.show_key);
-                            }, 1500);
-                        } else {
-                            await states.setBoolean("show_key", !$states.show_key);
-                        }
-                    }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
-                >
-                <button
-                    class="btn"
-                    class:accent={$states.reveal_answer}
-                    on:click={async () =>
-                        await states.setBoolean("reveal_answer", !$states.reveal_answer)}
-                    >Hiện đáp án</button
-                >
+                            }
+                        }}>{$states.show_key ? "ĐÁ thí sinh: HIỆN" : "ĐÁ thí sinh: ẨN"}</button
+                    >
+                    <button
+                        class="btn"
+                        class:accent={$states.reveal_answer}
+                        on:click={async () =>
+                            await states.setBoolean("reveal_answer", !$states.reveal_answer)}
+                        >Hiện đáp án</button
+                    >
                 </div>
             </div>
             <TimerControls
@@ -56,7 +53,10 @@
                             await gm.sound.play("tangtoc-30secs");
                             break;
                         case 40:
+                            let status = $states.media_status;
+                            status.playbackPaused = !status.playbackPaused;
                             await gm.sound.play("tangtoc-40secs");
+                            await states.setObject("media_status", status);
                             break;
                     }
                 }}
@@ -91,7 +91,7 @@
                                     await states.setObject("media_status", status);
                                 }}
                                 >{$states.media_status.playbackPaused
-                                    ? "Khồng chạy"
+                                    ? "Không chạy"
                                     : "Đang chạy"}</button
                             >
                         {/if}
