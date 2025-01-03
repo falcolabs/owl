@@ -6,9 +6,7 @@
         PlayerManager,
         StateManager,
         ANTICHEAT_ENABLED,
-
         AssetManager
-
     } from "$lib";
     import { onMount } from "svelte";
     import Load from "../../components/Load.svelte";
@@ -31,13 +29,16 @@
         conn = await Connection.create();
         gm = await GameMaster.create(conn);
         states = gm.states;
-        assets = await AssetManager.create(states)
+        assets = await AssetManager.create(states);
         players = gm.players;
         conn.on(Peeker.PacketType.State, async (update) => {
             if (update.value.name === "current_part") {
                 gm.states.flush();
                 await gm.updateAll();
             }
+        });
+        states.onready(async (_) => {
+            await conn.send(new Peeker.Packet(Peeker.PacketType.Unknown, "IDENT mc"));
         });
     });
 
@@ -55,7 +56,7 @@
         {:else if $states.available_parts[$states.current_part] == "vcnv"}
             <VcnvDisplay {conn} {gm} {states} {players} />
         {:else if $states.available_parts[$states.current_part] == "tangtoc"}
-            <TangTocDisplay {conn} {gm} {states} {players} {assets} />
+            <TangTocDisplay {gm} {states} {players} {assets} />
         {:else if $states.available_parts[$states.current_part] == "vedich"}
             <VeDichDisplay {conn} {gm} {states} {players} />
         {:else if $states.available_parts[$states.current_part] == "tiebreaker"}

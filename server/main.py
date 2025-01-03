@@ -1,5 +1,5 @@
 # the main server logic of owl, an engine for making gameshows.
-# Copyright (C) 2024 FalcoLabs
+# Copyright (C) 2023-2025 FalcoLabs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

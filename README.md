@@ -62,7 +62,7 @@ See Hacking (above) for requirements. After that, the project may be built. Note
 Licensing & Copyright
 ---------------------
 ```
-Copyright (c) 2023-2024 FalcoLabs.
+Copyright (c) 2023-2025 FalcoLabs.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

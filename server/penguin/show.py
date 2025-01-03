@@ -1,3 +1,4 @@
+import re
 from traceback import print_stack
 from typing import Literal, final, override
 import threading
@@ -7,6 +8,7 @@ import abc
 import asyncio
 import json
 
+from . import gamelog
 from . import timekeeper
 from .session import SessionManager
 from .store import Writable
@@ -89,9 +91,11 @@ def process_authentication(
 @final
 class Show:
     async def handle_webreq(self, req: engine.RawRequest):
-        engine.log_debug(
-            engine.mccolor(f"&1> ") + f"{req.sender}: {req.content.pack()}"
-        )
+        if not isinstance(req.content, engine.Packet.Unknown):
+            engine.log_debug(
+                engine.mccolor(f"&1> ")
+                + f"{self.session_manager.getnick(req.sender)}: {req.content.pack()}"
+            )
         self.session_manager.register_session(req.handle)
 
         # Process task pool entries
@@ -107,6 +111,17 @@ class Show:
                     self.session_manager.register_session(req.handle)
                 if req.content.data == "CONNECTION HALTED":
                     self.session_manager.purge(req.handle)
+                if req.content.data == "REQUESTSTATEDUMP":
+                    await self.session_manager.broadcast("STATEDUMP")
+                if req.content.data.startswith("IDENT"):
+                    nick = " ".join(req.content.data.split()[1:])
+                    self.session_manager.setnick(req.sender, nick)
+
+                if req.content.data.startswith("LOG"):
+                    msg = req.content.data.split()
+                    ident = msg[1]
+                    message = " ".join(msg[2:])
+                    gamelog.log(ident, message)
         res_req = req.content.data
         match res_req:
             case engine.Query.Player():
@@ -139,7 +154,10 @@ class Show:
                 )
         if response is not None:
             str_content = response.pack()
-            engine.log_debug(engine.mccolor(f"&6< ") + f"{req.sender}: {str_content}")
+            engine.log_debug(
+                engine.mccolor(f"&6< ")
+                + f"{self.session_manager.getnick(req.sender)}: {str_content}"
+            )
             await req.handle.send(str_content)
 
     def play_sound(self, sound_name: "engine.AvailableSound") -> None:

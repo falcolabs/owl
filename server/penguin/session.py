@@ -1,3 +1,4 @@
+from audioop import add
 import engine
 from ._option import Option, Some, Null
 from utils.crypt import gen_token
@@ -11,10 +12,13 @@ class SessionManager:
     player_map: dict[str, str]
     #                ^ ident ^token
 
+    nickmap: dict[str, str]
+
     def __init__(self) -> None:
         self.active_sessions = {}
         self.player_map = {}
         self.active_addr = []
+        self.nickmap = {}
 
     def register_session(self, handle: engine.IOHandle) -> str:
         if handle.addr not in self.active_addr:
@@ -40,6 +44,12 @@ class SessionManager:
             if t == token:
                 return Some(ident)
         return Null()
+
+    def setnick(self, addr: str, nick: str):
+        self.nickmap[addr] = nick
+
+    def getnick(self, addr) -> str:
+        return self.nickmap.get(addr, addr)
 
     def purge(self, handle: engine.IOHandle):
         try:

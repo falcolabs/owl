@@ -45,7 +45,7 @@
                 on:click={async () => {
                     // @ts-ignore
                     await gm.timer_operation($states.timer_paused ? "start" : "pause");
-                    $states.timer_paused ? await onstart() : await onpause()
+                    $states.timer_paused ? await onstart() : await onpause();
                 }}
                 class="btn"
             >

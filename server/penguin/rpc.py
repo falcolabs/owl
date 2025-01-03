@@ -352,12 +352,12 @@ class RPCManager:
                 call = packet.data
                 for proc in self.procedures:
                     if proc.name == call.name:
-                        engine.log_debug(f"Calling procedure {call.name}")
+                        engine.log_debug(f"    |- Calling procedure {call.name}")
                         # TODO - type checking for procedure arguments.
                         try:
                             # TODO - accept async functions.
                             engine.log_debug(
-                                f"Executed {proc.name} → {self.proc_map[proc.name](show, packet, handle, addr)}"
+                                f"    |-> Executed {proc.name} → {self.proc_map[proc.name](show, packet, handle, addr)}"
                             )
                         except Exception as e:
                             engine.log_error(traceback.format_exc())
@@ -366,7 +366,7 @@ class RPCManager:
                 else:
                     if call.name.startswith(self.prefix):
                         engine.log_warning(
-                            f"Cannot find procedure with name `{call.name}` in {[p.name for p in self.procedures]}. Call ignored."
+                            f"    |-> Cannot find procedure with name `{call.name}` in {[p.name for p in self.procedures]}. Call ignored."
                         )
                     return Ok(False)
             case engine.Packet.Query():
@@ -395,7 +395,7 @@ class RPCManager:
                 #     self.timer = engine.Timer.from_json(update.data.json)
                 # TODO - type checking for gamestate updates
                 engine.log_debug(
-                    f"Changing game state: {update.name} = {update.data.json!r}"
+                    f"    |- Changing game state: {update.name} = {update.data.json!r}"
                 )
                 try:
                     # engine.log_debug(
@@ -412,7 +412,7 @@ class RPCManager:
                 except KeyError:
                     if update.name.startswith(self.prefix):
                         engine.log_warning(
-                            f"Cannot find procedure with name `{update.name}`. Call ignored."
+                            f"    |-> Cannot find procedure with name `{update.name}`. Call ignored."
                         )
                     return Ok(False)
             case _:

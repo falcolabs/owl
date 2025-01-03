@@ -181,6 +181,10 @@
                                         return;
                                     }
                                     myans = answer;
+                                    await conn.log(
+                                        gm.username,
+                                        `submitted ${$time.toFixed(4)} "${answer}"`
+                                    );
                                     await conn.send(
                                         CallProcedure.name("tangtoc::submit_answer")
                                             .string("answer", answer)
@@ -197,6 +201,12 @@
                                     type="text"
                                     placeholder="Nhập đáp án"
                                     spellcheck="false"
+                                    on:input={async () => {
+                                        await conn.log(
+                                            gm.username,
+                                            `${$time.toFixed(4)} "${answer}"`
+                                        );
+                                    }}
                                     readonly={!$states.allow_input}
                                     bind:value={answer}
                                     bind:this={inputBox}

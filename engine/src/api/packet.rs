@@ -50,7 +50,7 @@ impl Packet {
     pub fn into_packet<T: 'static>(name: String, data: T) -> Packet {
         // WARNING: HAZMAT SUIT REQUIRED - UNSAFE HELL
         unsafe {
-            return match name.as_str() {
+            match name.as_str() {
                 // "Player" if ("Player" == std::any::type_name::<T>()) => Packet::Player(
                 //     (&data as &dyn std::any::Any)
                 //         .downcast_ref::<Player>()
@@ -89,7 +89,7 @@ impl Packet {
                 },
 
                 _ => panic!("Tried to package unknown resource."),
-            };
+            }
         }
     }
 }

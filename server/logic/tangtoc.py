@@ -5,6 +5,7 @@ import penguin
 from config import config
 import typing
 from penguin import Some, Null
+from penguin import gamelog
 
 
 class PlayerAnswer(typing.TypedDict):
@@ -114,6 +115,8 @@ class TangToc(penguin.PartImplementation):
                     )
                 output = sorted(output, key=lambda x: x["time"])
                 self.answers.set(output)
+                engine.log_info(f"{name} sent answer '{answer}' at {elapsed}")
+                gamelog.log("engine", f"{name} sent answer '{answer}' at {elapsed}")
             case Null():
                 engine.log_warning(
                     f"Unidentified player {token}@{addr} tried to submit answer. Ignored."

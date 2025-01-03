@@ -58,6 +58,11 @@ export class GameMaster {
                 obj.isAuthenticated.set(true);
             }
         });
+        obj.connection.on(Peeker.PacketType.Unknown, (packet) => {
+            if (packet.value == "STATEDUMP") {
+                obj.connection.log(obj.username, `statedump ${JSON.stringify(obj.states.store)}`)
+            }
+        })
 
         await obj.updateAll();
         return obj;

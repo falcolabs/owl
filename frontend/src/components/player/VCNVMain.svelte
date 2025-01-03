@@ -19,9 +19,9 @@
     );
     states.on("puzzle_data", (_) => {
         // @ts-ignore
-        answer = undefined
-        myans = ""
-    })
+        answer = undefined;
+        myans = "";
+    });
 
     states.subscribe((s) => {
         if (s.puzzle_data == undefined) return;
@@ -108,6 +108,7 @@
                             return;
                         }
                         myans = answer;
+                        await conn.log(gm.username, `submitted ${$time.toFixed(4)} "${answer}"`);
                         await conn.send(
                             CallProcedure.name("vcnv::submit_answer")
                                 .string("answer", answer)
@@ -122,6 +123,9 @@
                         class="inp"
                         bind:value={answer}
                         bind:this={inputBox}
+                        on:input={async () => {
+                            await conn.log(gm.username, `${$time.toFixed(4)} "${answer}"`);
+                        }}
                         readonly={!$states.allow_input}
                         type="text"
                         placeholder="Nhập đáp án"
@@ -153,10 +157,6 @@
         justify-content: center;
         box-shadow: var(--shadow-s);
         font-weight: bold;
-    }
-
-    .code {
-        font-family: var(--font-monospace);
     }
 
     .top {

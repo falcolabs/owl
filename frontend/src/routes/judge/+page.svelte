@@ -28,6 +28,9 @@
                 states = gm.states;
             }
         });
+        states.onready(async (_) => {
+            await conn.send(new Peeker.Packet(Peeker.PacketType.Unknown, "IDENT judge"))
+        })
     });
 </script>
 

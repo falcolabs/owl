@@ -7,7 +7,6 @@
         StateManager,
         ANTICHEAT_ENABLED,
         AssetManager
-
     } from "$lib";
     import { writable, type Readable, type Writable } from "svelte/store";
     import { onMount } from "svelte";
@@ -40,6 +39,12 @@
                 states.flush();
                 await gm.updateAll();
             }
+        });
+
+        states.onready(async (_) => {
+            await conn.send(
+                new Peeker.Packet(Peeker.PacketType.Unknown, `IDENT player_${gm.username}`)
+            );
         });
     });
 </script>

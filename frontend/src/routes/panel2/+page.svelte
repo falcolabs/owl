@@ -33,6 +33,9 @@
                 await gm.updateAll();
             }
         });
+        states.onready(async (_) => {
+            await conn.send(new Peeker.Packet(Peeker.PacketType.Unknown, "IDENT panel"));
+        });
     });
 </script>
 
@@ -61,7 +64,8 @@
                         {gm}
                         sounds={[
                             { displayName: "Chuyển phần", fileName: "common-startsection" },
-                            { displayName: "Chỗ trống", fileName: "common-dotdotdot" }
+                            { displayName: "Chỗ trống", fileName: "common-dotdotdot" },
+                            { displayName: "Trao giải", fileName: "tongket-award" }
                         ]}
                     />
                     {#if $states.available_parts[$states.current_part] == "khoidong"}

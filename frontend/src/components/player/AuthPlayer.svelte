@@ -41,7 +41,7 @@
                         <button class="pill confspot" on:click={click}>Bắt đầu</button>
                     {/if}
                     <p class="cpy">
-                        Ⓒ 2024 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.
+                        Ⓒ 2025 {ORG_NAME}. Đây là phần mềm nguồn mở, phát hành theo giấy phép GPL3.
                     </p>
                 </div>
             </form>

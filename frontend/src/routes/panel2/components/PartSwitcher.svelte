@@ -28,6 +28,13 @@
                     await states.setBoolean("engine_freeze", !$states.engine_freeze);
                 }}>{$states.engine_freeze ? "Đóng băng" : "Trực tiếp"}</button
             >
+            <button
+                class="btn smol bfreeze"
+                class:accent={!$states.engine_freeze}
+                on:click={async () => {
+                    await conn.send(new Peeker.Packet(Peeker.PacketType.Unknown, "REQUESTSTATEDUMP"))
+                }}>Dump</button
+            >
         </div>
     </Load>
 </div>

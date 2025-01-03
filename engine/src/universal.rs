@@ -113,7 +113,7 @@ mod logic {
 /// as only Rust code handles their matching and serialization.
 struct PortableTypeVisitor;
 
-impl<'de> serde::de::Visitor<'de> for PortableTypeVisitor {
+impl serde::de::Visitor<'_> for PortableTypeVisitor {
     type Value = PortableType;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {

@@ -66,7 +66,7 @@
                         class:accent={$states.reveal_answer}
                         on:click={async () =>
                             await states.setBoolean("reveal_answer", !$states.reveal_answer)}
-                        >Hiện đáp án</button
+                        >Hiện KQ chấm</button
                     >
                 </div>
             </div>

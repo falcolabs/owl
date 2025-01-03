@@ -6,7 +6,6 @@
         PlayerManager,
         StateManager,
         ANTICHEAT_ENABLED,
-
         AssetManager
 
     } from "$lib";
@@ -45,6 +44,9 @@
                 await gm.updateAll();
             }
         });
+        states.onready(async (_) => {
+            await conn.send(new Peeker.Packet(Peeker.PacketType.Unknown, "IDENT display"))
+        })
     });
 </script>
 

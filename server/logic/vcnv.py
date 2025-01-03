@@ -2,6 +2,7 @@ from typing import final, override
 import engine
 import json
 from penguin import Some, Null
+from penguin import gamelog
 import utils.vcnv
 import penguin
 from config import config
@@ -188,6 +189,8 @@ class VCNV(penguin.PartImplementation):
                     )
                 output = sorted(output, key=lambda x: x["time"])
                 self.answers.set(output)
+                engine.log_info(f"{name} sent answer '{answer}' at {elapsed}")
+                gamelog.log("engine", f"{name} sent answer '{answer}' at {elapsed}")
             case Null():
                 engine.log_warning(
                     f"Unidentified player {token}@{addr} tried to submit answer. Ignored."
@@ -270,6 +273,7 @@ class VCNV(penguin.PartImplementation):
     def bell(self, _, call: engine.Packet.CallProcedure, handle: engine.IOHandle, _2):
         target = self.session_manager.playername(call.data.str_argno(0)).unwrap()
         # TODO - check timeMs also
+        # GAMELOG
         engine.log_info(
             f"{target} pressed bell on {datetime.time().isoformat("microseconds")}"
         )
